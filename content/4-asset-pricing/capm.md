@@ -1,5 +1,5 @@
 ---
-title: "b-Le MEDAF (CAPM)"
+title: "Le MEDAF (CAPM)"
 date: 2025-03-21
 tags: [asset-pricing, capm, markowitz, portfolio-theory]
 order: 2
@@ -296,6 +296,71 @@ Si l'on a une conviction sur la direction du marché, on ajuste $\beta_p$ :
 
 **Critique de Roll (1977).** Le vrai portefeuille de marché est inobservable — il devrait inclure l'immobilier, le capital humain, les actifs privés. Le S\&P 500 utilisé comme proxy est imparfait, ce qui rend le modèle non testable au sens strict.
 
+
+---
+
+## 8. Les tests empiriques — le CAPM face aux données
+
+### (i) Black, Jensen & Scholes (1972) — la méthode des déciles
+
+BJS sont les premiers à tester rigoureusement le CAPM sur données réelles (actions américaines 1926–1966). Tester actif par actif pose un problème : le $\beta$ individuel est estimé avec beaucoup de bruit. Ils contournent ça en regroupant les actions en **10 portefeuilles (déciles) selon leur $\beta$ estimé**. En agrégeant, on réduit le bruit d'estimation.
+
+La procédure :
+
+1. Estimer le $\beta$ de chaque action sur une première fenêtre historique via la régression $R^i_t = \alpha_i + \beta_i R^M_t + \varepsilon^i_t$
+2. Trier en 10 déciles de $\beta$ croissant, former 10 portefeuilles avec $\hat\beta_{\text{bucket}} = \sum_{i \in \text{bucket}} w_i \hat\beta_i$
+3. Observer les rendements réalisés sur la période suivante
+4. Rouler la fenêtre et recommencer
+
+<div style="text-align:center">
+<img src="images/capm/im5.png" style="max-width:75%" alt="BJS — SML empirique vs théorique" />
+</div>
+
+*Figure 5. Résultat de BJS (1972). La relation $\beta$/rendement est bien positive et linéaire, mais la droite empirique (bleue) est plus plate que la SML théorique (pointillée). L'intercept empirique $z > r_f$ : les actifs à bas $\beta$ surperforment ($\alpha > 0$), les actifs à haut $\beta$ sous-performent ($\alpha < 0$).*
+
+**Ce qu'ils trouvent.** Les betas des déciles sont proches — la différence ne suffit pas à expliquer l'écart de rendement. L'intercept empirique $z$ est significativement supérieur à $r_f$, et la pente est plus faible que la prime de risque de marché. Le CAPM standard est mis en défaut.
+
+**Interprétation.** Black (1972) avait anticipé ce résultat dans son CAPM zero-beta : si on relâche l'hypothèse d'emprunt illimité au taux sans risque, l'intercept de la SML n'est plus $r_f$ mais le rendement d'un portefeuille de $\beta$ nul — supérieur à $r_f$. Les données BJS confirment ce modèle alternatif.
+
+### (ii) Fama & MacBeth (1973) — les régressions en deux passes
+
+BJS ont lissé les données sur toute la période sans tester formellement chaque prédiction du CAPM. Fama et MacBeth proposent une procédure rigoureuse qui devient le standard de l'empirisme en finance.
+
+Pour chaque mois $t$, ils font tourner la régression cross-sectionnelle :
+
+$$R_{i,t} = \gamma_{0,t} + \gamma_{1,t}\hat{\beta}_i + \gamma_{2,t}\hat{\beta}_i^2 + \gamma_{3,t}\sigma(\varepsilon_i) + \varepsilon_{i,t}$$
+
+Cela donne une série temporelle de coefficients $\hat{\gamma}_t$ — un jeu par mois sur ~400 mois. On teste ensuite si la moyenne temporelle de chaque $\hat{\gamma}$ est significativement différente de zéro ou de la valeur prédite par le CAPM.
+
+<div style="text-align:center">
+<img src="images/capm/im6.png" style="max-width:75%" alt="Fama-MacBeth — méthode et résultats" />
+</div>
+
+*Figure 6. Méthode Fama-MacBeth (gauche) et résultats des quatre hypothèses testées (droite). H1, H3 et H4 sont confirmées — $\beta$ est bien le seul facteur de risque rémunéré et la relation est linéaire. H2 est rejetée : l'intercept est trop élevé, confirmant BJS.*
+
+**L'apport méthodologique durable.** L'astuce clé : estimer la variance des $\hat{\gamma}$ directement depuis leur série temporelle, ce qui contourne les problèmes de corrélation entre résidus qui invalideraient une régression OLS classique. La procédure Fama-MacBeth est encore le standard aujourd'hui pour tester tout modèle de pricing en coupe transversale.
+
+### (iii) Roll (1977) — le CAPM est non testable
+
+Roll ne conteste pas les résultats empiriques. Il pose une question plus fondamentale : a-t-on vraiment testé le CAPM ? Sa réponse est non — et la raison est purement logique.
+
+Le CAPM dit que le portefeuille de marché $M$ est efficient au sens moyenne-variance. Mais $M$ c'est théoriquement **tous** les actifs risqués du monde — actions, obligations, immobilier, capital humain, art, entreprises non cotées. C'est inobservable par construction.
+
+Roll montre deux théorèmes :
+
+- **Théorème 1.** La SML est vérifiée exactement *si et seulement si* le proxy utilisé pour $M$ est efficient.
+- **Théorème 2.** Si on utilise un proxy efficient, la SML est vérifiée *par construction mathématique* — peu importe que le vrai CAPM soit vrai ou faux.
+
+<div style="text-align:center">
+<img src="images/capm/im7.png" style="max-width:75%" alt="Critique de Roll (1977)" />
+</div>
+
+*Figure 7. Critique de Roll (1977). Quel que soit le résultat empirique — SML vérifiée ou violée — on ne peut rien conclure sur la validité du CAPM. Tout résultat s'explique par le choix du proxy, pas par le modèle.*
+
+Quand BJS trouvent que la SML est trop plate avec le S&P 500, ils ne prouvent pas que le CAPM est faux. Ils prouvent peut-être seulement que le S&P 500 n'est pas efficient. Ce sont deux conclusions totalement différentes. Le CAPM acquiert ainsi le statut d'une théorie **non falsifiable au sens de Popper**.
+
+> Ces trois travaux préparent directement Fama-French (1992) : si $\beta$ ne suffit pas à expliquer les rendements, et si le portefeuille de marché est inobservable, autant construire un modèle empirique multi-facteurs sans prétendre partir d'un équilibre général.
+
 ---
 
 ## Synthèse
@@ -306,4 +371,4 @@ $$\mathbb{E}[R_i] = R_f + \beta_i \cdot (\mathbb{E}[R_m] - R_f)$$
 
 L'alpha ex ante (écart entre rendement estimé et requis, **pour un horizon donné**) est le carburant de toute gestion active. L'alpha de Jensen mesure ex post si un gérant ou une stratégie a créé de la valeur au-delà de son exposition marché.
 
-> **La suite.** Années 1970 : Black, Jensen \& Scholes (1972) et Fama-MacBeth (1973) testent le modèle sur données réelles — les résultats sont mitigés. Roll (1977) pose la critique fondamentale sur l'inobservabilité du marché. Ces travaux mèneront à Fama-French (1992), qui ajoute les facteurs taille et value à l'équation de pricing.
+> **La suite.** Les tests empiriques (section 8) montrent que $\beta$ ne suffit pas. Fama-French (1992) répondra en ajoutant les facteurs taille et value à l'équation de pricing.

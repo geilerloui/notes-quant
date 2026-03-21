@@ -30,6 +30,10 @@ $$\langle X, Y \rangle_{L^2} = E(XY) = \sum_i p_i \, x_i \, y_i$$
 | Poids $1/n$ (uniforme) | Probabilité $p_i$ |
 | $\langle v, w \rangle = \sum_i v_i w_i$ | $\langle X, Y \rangle = E(XY)$ |
 | $\|v\|^2 = \sum_i v_i^2$ | $\|X\|^2 = E(X^2)$ |
+| $\langle u, v \rangle = \|u\|\|v\|\cos\theta$ | $\text{Cov}(X,Y) = \langle \tilde{X}, \tilde{Y} \rangle$ |
+| $\|u\|^2$ | $\text{Var}(X) = \|\tilde{X}\|^2$ |
+| $\cos\theta = \frac{\langle u,v \rangle}{\|u\|\|v\|}$ | $\rho(X,Y) = \frac{\text{Cov}(X,Y)}{\sqrt{\text{Var}(X)\text{Var}(Y)}}$ |
+
 
 </div>
 <div style="flex:1">

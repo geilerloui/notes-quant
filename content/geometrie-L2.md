@@ -34,7 +34,7 @@ $$\langle X, Y \rangle_{L^2} = E(XY) = \sum_i p_i \, x_i \, y_i$$
 </div>
 <div style="flex:1">
 <img src="images/geometrie-L2/im1.png" style="width:100%; max-width:100%"/>
-<p style="text-align:center; font-size:0.85em; color:#8a8784; margin-top:0.5rem; font-style:italic;">Figure 1. Le produit scalaire $\langle v, w \rangle = \|v\|\|w\|\cos\theta$ et son analogue dans $L^2$. Chaque concept géométrique de $\mathbb{R}^n$ admet une traduction naturelle en probabilités.</p>
+<p style="text-align:center; font-size:0.85em; color:#8a8784; margin-top:0.5rem; font-style:italic;">Figure 1. Le produit scalaire et son analogue dans L². Chaque concept géométrique de Rⁿ admet une traduction naturelle en probabilités.</p>
 </div>
 </div>
 

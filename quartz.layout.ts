@@ -3,8 +3,8 @@ import * as Component from "./quartz/components"
 
 const explorerConfig = {
   sortFn: (a: any, b: any) => {
-    const orderA = (a.file?.frontmatter?.order as number) ?? 999
-    const orderB = (b.file?.frontmatter?.order as number) ?? 999
+    const orderA = (a.file?.frontmatter?.order ?? 999) as number
+    const orderB = (b.file?.frontmatter?.order ?? 999) as number
     if (orderA !== orderB) return orderA - orderB
     return a.displayName.localeCompare(b.displayName)
   },

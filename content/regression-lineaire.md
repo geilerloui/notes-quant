@@ -8,17 +8,17 @@ title: Régression linéaire
 
 ### (i) Vue classique
 
-> 📌 *Image à insérer : résidus comme distances verticales*
-
 On observe $n$ couples $(x_i, y_i)$. On suppose que $Y$ est une fonction linéaire de $X$ plus un bruit :
 
 $$y_i = \alpha + \beta x_i + \varepsilon_i$$
 
 Les $\varepsilon_i$ sont les **résidus** — tout ce que le modèle ne capture pas. Géométriquement, chaque résidu est la distance verticale entre le point observé $y_i$ et la valeur prédite $\hat{y}_i = \alpha + \beta x_i$.
 
-### (ii) Vue géométrique dans $L^2$
+![Vue classique de la régression linéaire simple](images/regression-lineaire/im1.png)
 
-> 📌 *Image à insérer : projection de Y sur $L^2_X$*
+*Figure 1. Vue classique de la régression linéaire simple. Chaque résidu $\varepsilon_i$ est la distance verticale entre le point observé $y_i$ et la valeur prédite $\hat{y}_i = \alpha + \beta x_i$.*
+
+### (ii) Vue géométrique dans $L^2$
 
 On travaille dans $L^2$, muni du produit scalaire $\langle X, Y \rangle = E(XY)$. Dans cet espace, **les vecteurs sont des variables aléatoires**.
 
@@ -35,13 +35,17 @@ Ces propriétés ne sont pas des hypothèses qu'on impose : elles **découlent d
 
 Quand on restreint $E(Y|X)$ aux fonctions **linéaires**, on obtient : $E(Y|X) = \alpha + \beta X$.
 
+![Interprétation géométrique dans L²](images/regression-lineaire/im2.png)
+
+*Figure 2. Interprétation géométrique dans $L^2$. $E(Y|X)$ est la projection orthogonale de $Y$ sur $L^2_X$. Le résidu $\varepsilon = Y - E(Y|X)$ est orthogonal à tout le sous-espace $L^2_X$.*
+
 ### (iii) Vue probabiliste
 
 *À venir.*
 
-### (iv) Dérivation des estimateurs MCO
+### (iv) Dérivation des estimateurs MCO (Moindres Carrés Ordinaires)
 
-Le résidu $\varepsilon = Y - \alpha - \beta X$ doit être orthogonal au sous-espace linéaire engendré par $1$ et $X$, ce qui donne directement :
+Le résidu $\varepsilon = Y - \alpha - \beta X$ doit être orthogonal au sous-espace linéaire engendré par $1$ et $X$. MCO (Moindres Carrés Ordinaires, ou OLS en anglais) est la méthode qui trouve $\hat{\alpha}$ et $\hat{\beta}$ en minimisant $\sum(y_i - \hat{y}_i)^2$ — ce qui revient exactement à cette condition d'orthogonalité. On obtient directement :
 
 $$\boxed{\alpha = E(Y) - \beta E(X)} \qquad \boxed{\beta = \frac{\text{cov}(X,Y)}{V(X)}}$$
 
@@ -67,6 +71,12 @@ Or $E(XY) - E(X)E(Y) = \text{cov}(X,Y)$ et $E(X^2) - E(X)^2 = V(X)$, donc :
 $$\beta = \frac{\text{cov}(X,Y)}{V(X)}$$
 
 </details>
+
+### (v) Interprétation des coefficients
+
+$\beta$ se lit ainsi : **si $X$ augmente d'une unité, $Y$ augmente en moyenne de $\beta$ unités**, toutes choses égales par ailleurs.
+
+En régression multiple, cette dernière précision est cruciale. Si le modèle est $Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \varepsilon$, alors $\beta_1$ mesure l'effet *pur* de $X_1$ sur $Y$, **une fois l'effet de $X_2$ retiré**. C'est la conséquence directe de la géométrie : MCO projette $Y$ sur le sous-espace engendré par $X_1$ et $X_2$ conjointement. Si $X_1$ et $X_2$ sont orthogonaux dans $L^2$ — c'est-à-dire $\text{cov}(X_1, X_2) = 0$ — alors $\beta_1$ et $\beta_2$ sont exactement les coefficients qu'on obtiendrait en régressant $Y$ sur chacun séparément. L'orthogonalité annule toute interférence entre les variables.
 
 ---
 
@@ -102,13 +112,21 @@ L'intuition : on ne peut pas faire mieux que MCO sans soit introduire du biais, 
 
 ### (iii) Multicolinéarité
 
-> 📌 *Image à insérer : projection ambiguë quand $X_1$ et $X_2$ sont colinéaires*
-
 **Le problème.** Si une colonne de $X$ est combinaison linéaire des autres — par exemple $X_3 = X_1 + X_2$ — alors $X^\top X$ n'est pas inversible et la formule MCO ne marche plus. C'est la **multicolinéarité parfaite**.
 
 Même sans être parfaite, la multicolinéarité cause des problèmes. Si $X_1$ et $X_2$ pointent presque dans la même direction dans $L^2$, projeter $Y$ dessus devient ambigu — une infinité de combinaisons $(\beta_1, \beta_2)$ donnent à peu près la même projection. **Le modèle sait prédire, mais il ne sait plus comment répartir les coefficients.** Conséquence : les variances de $\hat{\beta}_1$ et $\hat{\beta}_2$ explosent.
 
+**Diagnostic — le VIF.** Le *Variance Inflation Factor* mesure à quel point la variance de $\hat{\beta}_j$ est gonflée par la colinéarité :
+
+$$\text{VIF}_j = \frac{1}{1 - R^2_j}$$
+
+où $R^2_j$ est le $R^2$ de la régression de $X_j$ sur tous les autres prédicteurs. Si $X_j$ est parfaitement expliqué par les autres, $R^2_j \to 1$ et $\text{VIF}_j \to \infty$. Un $\text{VIF}_j > 10$ est un signal d'alarme.
+
 **Remèdes.** Ridge et Lasso introduisent une pénalité qui stabilise les coefficients au prix d'un léger biais — c'est le compromis biais-variance. On en parlera dans un chapitre dédié.
+
+![Multicolinéarité](images/regression-lineaire/im3.png)
+
+*Figure 3. Multicolinéarité : quand $X_1$ et $X_2$ pointent dans la même direction, projeter $Y$ dessus devient ambigu — les coefficients $\beta_1$ et $\beta_2$ ne sont plus identifiables.*
 
 ---
 
@@ -143,8 +161,6 @@ Trois choses à lire dans $\hat{\beta} \sim \mathcal{N}(\beta,\ \sigma^2/S_{XX})
 
 ### (ii) Le $R^2$
 
-> 📌 *Image à insérer : Pythagore dans $L^2$, les 3 cas, les 3 pièges*
-
 On centre tout en retirant $E(Y)$. La décomposition $Y = \hat{Y} + \varepsilon$ donne dans $L^2$, par Pythagore :
 
 $$\underbrace{\|Y - E(Y)\|^2}_{\text{SCT}} = \underbrace{\|\hat{Y} - E(Y)\|^2}_{\text{SCE}} + \underbrace{\|\varepsilon\|^2}_{\text{SCR}}$$
@@ -157,11 +173,23 @@ $$R^2 = \frac{\text{SCE}}{\text{SCT}} = \frac{\|\hat{Y} - E(Y)\|^2}{\|Y - E(Y)\|
 
 où $\theta$ est l'angle entre $Y - E(Y)$ et le sous-espace $L^2_X$. Géométriquement : $R^2 = 1$ signifie que $Y$ est dans $L^2_X$ ($\varepsilon = 0$), $R^2 = 0$ signifie que $Y \perp L^2_X$ ($X$ n'explique rien).
 
+![Pythagore dans L² centré](images/regression-lineaire/im4.png)
+
+*Figure 4. Pythagore dans $L^2$ centré. La décomposition $SCT = SCE + SCR$ est le théorème de Pythagore appliqué au triangle $E(Y)$, $\hat{Y}$, $Y$. $R^2 = \cos^2\theta$.*
+
 **Ce que $R^2$ ne dit pas — les 3 pièges :**
 
 - **$R^2$ élevé $\neq$ bon modèle** — ajouter n'importe quelle variable gonfle $R^2$ mécaniquement, car un espace plus grand capture toujours mieux $Y$. Le $R^2$ ajusté pénalise cet agrandissement.
 - **$R^2$ élevé $\neq$ causalité** — $X$ et $Y$ peuvent être corrélés sans lien causal.
 - **$R^2$ faible $\neq$ inutile** — en économie, $R^2 = 0.3$ peut être excellent selon le domaine.
+
+**$R^2$ ajusté.** Ajouter une variable au modèle agrandit mécaniquement le sous-espace $L^2_X$ — un espace plus grand capture toujours un peu mieux $Y$, même si la variable ajoutée est du bruit pur. Le $R^2$ augmente donc toujours quand on ajoute un prédicteur, même inutile. Le $R^2$ ajusté corrige ça en pénalisant le nombre de paramètres :
+
+$$\bar{R}^2 = 1 - \frac{n-1}{n-p-1}(1 - R^2)$$
+
+où $p$ est le nombre de prédicteurs. Si une variable n'apporte rien, la pénalité l'emporte et $\bar{R}^2$ diminue.
+
+> 📌 *À compléter : lien géométrique avec l'agrandissement du sous-espace $L^2_X$*
 
 ### (iii) Test de Student sur $\hat{\beta}$
 

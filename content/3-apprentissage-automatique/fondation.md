@@ -1,5 +1,5 @@
 ---
-title: Fondations du Machine Learning
+title: Fondations
 ---
 
 # Fondations du Machine Learning

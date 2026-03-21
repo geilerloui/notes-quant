@@ -20,6 +20,9 @@ Et de la même façon, le produit scalaire $\langle v, w \rangle = \sum_i v_i w_
 
 $$\langle X, Y \rangle_{L^2} = E(XY) = \sum_i p_i \, x_i \, y_i$$
 
+<div style="display:flex; gap:2rem; align-items:center; margin: 1.5rem 0;">
+<div style="flex:1">
+
 | Géométrie dans $\mathbb{R}^n$ | Probabilités dans $L^2$ |
 |---|---|
 | Vecteur $v$ | Variable aléatoire $X$ |
@@ -29,7 +32,11 @@ $$\langle X, Y \rangle_{L^2} = E(XY) = \sum_i p_i \, x_i \, y_i$$
 | $\|v\|^2 = \sum_i v_i^2$ | $\|X\|^2 = E(X^2)$ |
 | $\cos \theta = \frac{\langle v,w \rangle}{\|v\|\|w\|}$ | $\rho = \frac{E(XY)}{\|X\|\|Y\|}$ |
 
-![Dictionnaire](images/geometrie-L2/im1.png)
+</div>
+<div style="flex:1">
+<img src="images/geometrie-L2/im1.png" style="width:100%; max-width:100%"/>
+</div>
+</div>
 
 ## L'espace $L^2$
 

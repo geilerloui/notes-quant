@@ -78,6 +78,12 @@ $\beta$ se lit ainsi : **si $X$ augmente d'une unité, $Y$ augmente en moyenne d
 
 En régression multiple, cette dernière précision est cruciale. Si le modèle est $Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \varepsilon$, alors $\beta_1$ mesure l'effet *pur* de $X_1$ sur $Y$, **une fois l'effet de $X_2$ retiré**. C'est la conséquence directe de la géométrie : MCO projette $Y$ sur le sous-espace engendré par $X_1$ et $X_2$ conjointement. Si $X_1$ et $X_2$ sont orthogonaux dans $L^2$ — c'est-à-dire $\text{cov}(X_1, X_2) = 0$ — alors $\beta_1$ et $\beta_2$ sont exactement les coefficients qu'on obtiendrait en régressant $Y$ sur chacun séparément. L'orthogonalité annule toute interférence entre les variables.
 
+Dans le cas particulier où $(Y, X_1, \ldots, X_p)$ suit une **loi normale multivariée**, les coefficients $\beta_j$ ont une interprétation probabiliste précise. On peut montrer que :
+
+$$\beta_j = \rho_{Y X_j | X_{-j}} \cdot \frac{\sigma_Y}{\sigma_{X_j}}$$
+
+où $\rho_{Y X_j | X_{-j}}$ est la **corrélation partielle** entre $Y$ et $X_j$ conditionnellement à tous les autres prédicteurs $X_{-j}$. La corrélation partielle mesure exactement ce qui reste de la relation entre $Y$ et $X_j$ une fois qu'on a retiré l'effet linéaire de toutes les autres variables. C'est le fondement probabiliste de l'interprétation *ceteris paribus* — $\beta_j$ ne capture que la relation directe entre $Y$ et $X_j$, purgée de toute interférence.
+
 ---
 
 ## 2. Diagnostic

@@ -3,10 +3,13 @@ import * as Component from "./quartz/components"
 
 const explorerConfig = {
   sortFn: (a: any, b: any) => {
-    const orderA = (a.file?.frontmatter?.order ?? 999) as number
-    const orderB = (b.file?.frontmatter?.order ?? 999) as number
+    const orderA = (a.data?.order ?? 999) as number
+    const orderB = (b.data?.order ?? 999) as number
     if (orderA !== orderB) return orderA - orderB
-    return a.displayName.localeCompare(b.displayName)
+    return a.displayName.localeCompare(b.displayName, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    })
   },
 }
 

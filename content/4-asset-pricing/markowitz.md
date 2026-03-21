@@ -1,3 +1,6 @@
+---
+title: Markowitz
+---
 # Théorie moderne du portefeuille — Markowitz
 
 > **Prérequis :** probabilités de base, espérance, variance, covariance.

@@ -1,5 +1,5 @@
 ---
-title: "Le CAPM"
+title: "Le MEDAF (CAPM)"
 date: 2025-03-21
 tags: [asset-pricing, capm, markowitz, portfolio-theory]
 order: 2

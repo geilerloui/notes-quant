@@ -1,5 +1,5 @@
 ---
-title: "Le CAPM — Capital Asset Pricing Model"
+title: "Le CAPM"
 date: 2025-03-21
 tags: [asset-pricing, capm, markowitz, portfolio-theory]
 ---

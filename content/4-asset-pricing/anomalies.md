@@ -1,5 +1,5 @@
 ---
-title: "Anomalies"
+title: "c-Anomalies"
 tags: [asset-pricing, portfolio-theory]
 order: 3
 ---

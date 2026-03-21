@@ -1,5 +1,6 @@
 ---
 title: Séries temporelles
+order: 2
 ---
 
 Une série temporelle est une suite de variables aléatoires $\{X_t\}_{t=1}^T$ indexées par le temps. La différence fondamentale avec le cadre i.i.d. classique : en statistiques classiques, on tire $n$ observations indépendantes dans la **même** distribution $N(\mu, \sigma^2)$. En série temporelle, à chaque instant on tire dans une distribution dont les **paramètres dépendent du passé** — $N(\mu_t, \sigma_t^2)$ où $\mu_t$ et $\sigma_t^2$ évoluent selon $X_{t-1}, X_{t-2}, \ldots$

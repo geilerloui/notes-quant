@@ -1,5 +1,6 @@
 ---
 title: Régression linéaire
+order: 1
 ---
 
 # Régression linéaire

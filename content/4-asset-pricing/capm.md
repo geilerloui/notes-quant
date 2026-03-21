@@ -2,6 +2,7 @@
 title: "Le CAPM"
 date: 2025-03-21
 tags: [asset-pricing, capm, markowitz, portfolio-theory]
+order: 2
 ---
 
 Le CAPM (*Capital Asset Pricing Model*), ou MEDAF en français (*Modèle d'Évaluation des Actifs Financiers*), est le premier modèle à donner un **prix au risque d'un actif individuel**. Développé par Treynor (1961), Sharpe (1964), Lintner (1965) et Mossin (1966), il repose sur les travaux d'optimisation de Markowitz (1952) et de Tobin (1958).

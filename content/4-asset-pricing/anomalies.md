@@ -1,3 +1,9 @@
+---
+title: "Anomalies"
+tags: [asset-pricing, portfolio-theory]
+order: 3
+---
+
 # Les années 1980 — La chasse aux anomalies
 
 ## Contexte

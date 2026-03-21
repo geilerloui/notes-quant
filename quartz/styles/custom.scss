@@ -1,3 +1,68 @@
 @use "./base.scss";
 
-// put your custom CSS here!
+// Google Fonts
+@import url("https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap");
+
+// ── Variables ──────────────────────────────────────────────
+$accent: #c0392b;
+$bg: #f7f5f0;
+$bg-code: #f0ede8;
+
+// ── Background ─────────────────────────────────────────────
+body {
+  background-color: $bg;
+  font-family: "Lora", serif;
+}
+
+// ── UI elements (nav, sidebar, meta…) ──────────────────────
+:root {
+  --font-ui: "DM Sans", sans-serif;
+}
+
+nav,
+.sidebar,
+.toc,
+.search,
+.graph,
+.backlinks,
+.explorer,
+.page-header,
+footer {
+  font-family: var(--font-ui);
+}
+
+// ── Headings ───────────────────────────────────────────────
+h1 {
+  font-family: "Lora", serif;
+  font-weight: 600;
+}
+
+h2 {
+  font-family: "Lora", serif;
+  border-left: 3px solid $accent;
+  padding-left: 0.6em;
+}
+
+// ── Code blocks ────────────────────────────────────────────
+pre,
+pre[class*="language-"] {
+  background-color: $bg-code !important;
+}
+
+// ── Display math (KaTeX) ───────────────────────────────────
+.katex-display {
+  border-left: 3px solid $accent;
+  background-color: $bg-code;
+  padding: 0.6em 1em;
+  margin: 1em 0;
+  overflow-x: auto;
+}
+
+// ── Accent colour override ─────────────────────────────────
+:root {
+  --color-accent: #{$accent};
+}
+
+a {
+  color: $accent;
+}

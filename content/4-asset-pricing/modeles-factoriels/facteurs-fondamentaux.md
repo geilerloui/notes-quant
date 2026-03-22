@@ -269,7 +269,7 @@ Tout le papier revient à trouver le meilleur moyen d'estimer les bénéfices fu
 
 La formule parle de bénéfices futurs $E$ mais ne dit pas comment les mesurer aujourd'hui. L'argument central : le compte de résultat est une cascade, et chaque étage rajoute des décisions comptables qui bruitent le signal.
 
-![Cascade du compte de résultat — chaque étage rajoute du bruit comptable.](images/novy-marx/novy_cascade_compte_resultat.png)
+![Cascade du compte de résultat — chaque étage rajoute du bruit comptable.](images/facteurs-fondamentaux/novy_cascade_compte_resultat.png)
 
 *Figure 1. La cascade du compte de résultat. Plus on descend, plus on accumule de décisions comptables discrétionnaires.*
 
@@ -298,7 +298,7 @@ Il moyenne ensuite les coefficients sur toutes les périodes. La t-stat teste si
 
 > **Ce que cette régression fait concrètement.** Il n'y a pas de portefeuille ici — c'est une régression sur les actions individuelles. On prend toutes les actions du marché américain (plusieurs milliers), on régresse leurs rendements mensuels sur leurs caractéristiques fondamentales, et on regarde quelles caractéristiques ont un $\hat{\beta}$ significativement différent de zéro. C'est un test statistique pur pour identifier quelles variables prédisent les rendements en coupe transversale.
 
-![Table 1 — Régressions Fama-McBeth. 7 spécifications différentes, une par colonne.](images/novy-marx/novy_fama_mcbeth.png)
+![Table 1 — Régressions Fama-McBeth. 7 spécifications différentes, une par colonne.](images/facteurs-fondamentaux/novy_fama_mcbeth.png)
 
 *Figure 2. Fama-McBeth regression. Encadrés rouges : une seule mesure testée seule. Encadrés bleus : GP/A testé conjointement avec une autre mesure.*
 
@@ -334,7 +334,7 @@ $$r_{i,t} - r_f = \alpha_i + \beta_i^{MKT} \cdot MKT_t + \beta_i^{SMB} \cdot SMB
 >
 > Le coefficient sur HML indique à quel point un portefeuille ressemble à des value stocks (positif) ou à des growth stocks (négatif).
 
-![Table 2 — Portefeuilles triés par GP/A (Panel A) et par B/M (Panel B).](images/novy-marx/novy_linear_regression.png)
+![Table 2 — Portefeuilles triés par GP/A (Panel A) et par B/M (Panel B).](images/facteurs-fondamentaux/novy_linear_regression.png)
 
 *Figure 3. Portefeuilles triés par profitabilité (Panel A) et par B/M (Panel B). Les rendements augmentent dans les deux cas de Low à High. Mais les coefficients HML vont dans des directions opposées.*
 
@@ -345,13 +345,13 @@ Les rendements augmentent de Low GP/A ($0.31\%$ par mois) à High GP/A ($0.62\%$
 
 Les entreprises très profitables se comportent comme des growth stocks, à l'opposé des value stocks qui ont $\beta^{HML} = +0.51$. C'est une observation visuelle qui donne l'intuition. Pour le vérifier formellement, il construit la matrice de données suivante :
 
-![Matrice de données : n actions × d caractéristiques fondamentales.](images/novy-marx/novy_matrice_donnees.png)
+![Matrice de données : n actions × d caractéristiques fondamentales.](images/facteurs-fondamentaux/novy_matrice_donnees.png)
 
 *Figure 4. Structure des données utilisées pour calculer la table de corrélation. Chaque ligne est une action, chaque colonne une caractéristique fondamentale. La colonne B/M est en rouge car sa corrélation avec GP/A est négative.*
 
 À partir de cette matrice il calcule la corrélation de Pearson entre chaque paire de colonnes.
 
-![Figure 18 — Table de corrélation entre les caractéristiques fondamentales.](images/novy-marx/novy_correlation.png)
+![Figure 18 — Table de corrélation entre les caractéristiques fondamentales.](images/facteurs-fondamentaux/novy_correlation.png)
 
 *Figure 5. Table de corrélation (Figure 18 du papier). La ligne GP/A est encadrée en rouge. Le chiffre clé : corrélation GP/A vs B/M $= -0.18$, $t = -17.2$.*
 
@@ -390,7 +390,7 @@ $$\text{Sharpe seul} = \frac{0.5\%}{3\%} = 0.17 \qquad \text{Sharpe mixte} = \fr
 
 Le Sharpe double.
 
-![Figure 17 — Performance du portefeuille mixte de 1963 à 2010.](images/novy-marx/novy_hedging.png)
+![Figure 17 — Performance du portefeuille mixte de 1963 à 2010.](images/facteurs-fondamentaux/novy_hedging.png)
 
 *Figure 6. Sharpe ratio annualisé glissant de 1963 à 2010. Le mix 50/50 (trait plein) est systématiquement plus stable que la stratégie value seule (pointillés) et la stratégie profitabilité seule (tirets). La stratégie value s'effondre en 2000 pendant la bulle tech — la profitabilité compense.*
 

@@ -6,16 +6,11 @@
 
 Le CAPM prédit une chose simple : plus le bêta d'un actif est élevé, plus son rendement espéré est élevé. FF testent ça sur 30 ans de données (1963–1990) et trouvent une relation plate — le bêta n'est pas rémunéré dans les données.
 
-<div style="display: flex; gap: 1.5rem; margin: 1.5rem 0;">
-  <div style="flex: 1; text-align: center;">
-    <img src="../../images/facteurs-fondamentaux/beta-capm-prediction.svg" alt="CAPM prediction" style="max-width: 100%;"/>
-  </div>
-  <div style="flex: 1; text-align: center;">
-    <img src="../../images/facteurs-fondamentaux/beta-actual-data.svg" alt="Actual data" style="max-width: 100%;"/>
-  </div>
-</div>
+![CAPM prediction](images/facteurs-fondamentaux/beta-capm-prediction.svg)
 
-*Figure 1. Chaque point = un décile d'actions trié par bêta (1963–1990). À gauche : la prédiction du CAPM. À droite : les données réelles — pente non significativement différente de zéro.*
+![Actual data](images/facteurs-fondamentaux/beta-actual-data.svg)
+
+*Figure 1. Chaque point = un décile d'actions trié par bêta (1963–1990). En haut : la prédiction du CAPM. En bas : les données réelles — pente non significativement différente de zéro.*
 
 FF s'appuient alors sur la littérature des anomalies des années 1980 — une pléthore de papiers avait documenté que certaines caractéristiques des entreprises (taille, B/M, momentum...) prédisaient les rendements mieux que le bêta, sans que personne ne sache vraiment pourquoi. FF prennent les deux anomalies les plus robustes et les formalisent en un modèle cohérent.
 
@@ -25,7 +20,7 @@ FF s'appuient alors sur la littérature des anomalies des années 1980 — une p
 
 ### (i) Rappel comptable — le bilan et les notations
 
-![Balance sheet](../../images/facteurs-fondamentaux/imZ.png)
+![Balance sheet](images/facteurs-fondamentaux/imZ.png)
 
 *Figure 2. Balance sheet — rappel comptable des notations utilisées.*
 
@@ -76,7 +71,7 @@ Les value stocks surperforment les growth stocks sur le long terme. C'est le *va
 
 En ML, une feature est une observation passive — l'âge, le salaire. Elle existe dans le monde, tu la mesures. FF **construisent** leurs facteurs. SMB et HML sont des portefeuilles long-short — des stratégies actives qui génèrent un rendement chaque mois. Ce rendement mensuel, c'est le facteur.
 
-![Long-short portfolio](../../images/facteurs-fondamentaux/long-short-portfolio.svg)
+![Long-short portfolio](images/facteurs-fondamentaux/long-short-portfolio.svg)
 
 *Figure 3. Construction du facteur SMB comme portefeuille long-short.*
 
@@ -86,7 +81,7 @@ Le short **annule** l'exposition au marché : si le marché monte de 2%, les lon
 
 Chaque juillet, FF trient toutes les actions selon deux critères indépendants : médiane $ME$ → Small/Big, et 30ᵉ/70ᵉ percentiles $B/M$ → Growth/Neutral/Value. L'intersection donne 6 portefeuilles.
 
-![Grille 2x3](../../images/facteurs-fondamentaux/grid-2x3.svg)
+![Grille 2x3](images/facteurs-fondamentaux/grid-2x3.svg)
 
 *Figure 4. Les 6 portefeuilles issus du double tri taille × B/M.*
 
@@ -102,7 +97,7 @@ $$HML = \frac{1}{2}(R_{SV} + R_{BV}) - \frac{1}{2}(R_{SG} + R_{BG})$$
 
 ### (v) La timeline — rebalancement annuel
 
-![Timeline rebalancement](../../images/facteurs-fondamentaux/timeline-rebalancing.svg)
+![Timeline rebalancement](images/facteurs-fondamentaux/timeline-rebalancing.svg)
 
 *Figure 5. Rebalancement annuel en juillet — les compositions sont fixes 12 mois.*
 
@@ -143,7 +138,7 @@ Ce qui change entre les 25 régressions : uniquement $\mathbf{R}_i$. La matrice 
 
 ### (i) Panel A — rendements moyens
 
-![Panel A Summary Statistics](../../images/facteurs-fondamentaux/imX.png)
+![Panel A Summary Statistics](images/facteurs-fondamentaux/imX.png)
 
 *Figure 6. Panel A — moyenne et écart-type des rendements mensuels des 25 portefeuilles.*
 
@@ -153,7 +148,7 @@ Le fait que les rendements bougent selon ces deux axes indépendants est exactem
 
 ### (ii) Panel B — coefficients de régression
 
-![Panel B Regression Results](../../images/facteurs-fondamentaux/imY.png)
+![Panel B Regression Results](images/facteurs-fondamentaux/imY.png)
 
 *Figure 7. Panel B — coefficients $a$, $b$, $s$, $h$ et leurs t-stats pour les 25 portefeuilles.*
 

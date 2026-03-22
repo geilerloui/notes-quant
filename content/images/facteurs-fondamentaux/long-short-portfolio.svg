@@ -1,0 +1,30 @@
+<svg width="680" height="160" viewBox="0 0 680 160" xmlns="http://www.w3.org/2000/svg" font-family="Georgia, serif">
+  <rect width="680" height="160" fill="#f7f5f0"/>
+
+  <!-- LONG box -->
+  <rect x="20" y="20" width="210" height="80" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1.5"/>
+  <text x="125" y="50" font-size="14" fill="#085041" text-anchor="middle" font-weight="bold">Position LONG</text>
+  <text x="125" y="70" font-size="12" fill="#085041" text-anchor="middle">Achète les small caps</text>
+  <text x="125" y="88" font-size="11" fill="#0F6E56" text-anchor="middle" font-style="italic">Tu gagnes si elles montent</text>
+
+  <!-- Minus sign -->
+  <text x="270" y="66" font-size="28" fill="#444" text-anchor="middle" font-weight="bold">−</text>
+
+  <!-- SHORT box -->
+  <rect x="300" y="20" width="210" height="80" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="1.5"/>
+  <text x="405" y="50" font-size="14" fill="#712B13" text-anchor="middle" font-weight="bold">Position SHORT</text>
+  <text x="405" y="70" font-size="12" fill="#712B13" text-anchor="middle">Vend à découvert les big caps</text>
+  <text x="405" y="88" font-size="11" fill="#993C1D" text-anchor="middle" font-style="italic">Tu gagnes si elles baissent</text>
+
+  <!-- Equals sign -->
+  <text x="550" y="66" font-size="28" fill="#444" text-anchor="middle" font-weight="bold">=</text>
+
+  <!-- Result box -->
+  <rect x="570" y="20" width="100" height="80" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="1.5"/>
+  <text x="620" y="48" font-size="12" fill="#444441" text-anchor="middle" font-weight="bold">SMB</text>
+  <text x="620" y="66" font-size="11" fill="#5F5E5A" text-anchor="middle">R_small</text>
+  <text x="620" y="80" font-size="11" fill="#5F5E5A" text-anchor="middle">− R_big</text>
+
+  <!-- Caption -->
+  <text x="340" y="140" font-size="11" fill="#888" text-anchor="middle">Répété chaque mois → série temporelle du facteur SMB</text>
+</svg>

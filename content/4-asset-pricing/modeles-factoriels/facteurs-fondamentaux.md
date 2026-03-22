@@ -397,3 +397,254 @@ Le Sharpe double.
 > **Pourquoi ces mispricing existent-ils ?** Lakonishok et al. (1994) montrent que le marché sur-paie systématiquement les growth stocks (médiatisées, excitantes) et sous-paie les value stocks (ennuyeuses, mal-aimées). Novy Marx ajoute : le marché rate aussi le signal GP/A — il ne voit pas que les entreprises très profitables vont continuer à générer des bénéfices élevés. La stratégie exploite ces deux inefficiences comportementales simultanément, avec un risque réduit grâce à leur anticorrélation naturelle.
 
 La stratégie concrète : **acheter des value stocks profitables, vendre des growth stocks peu profitables**.
+
+
+
+# Fama-French 5 Facteurs
+
+---
+
+## 1. Le point de départ — les limites du FF3
+
+Le GRS test du FF3 rejette l'hypothèse que les 25 alphas sont simultanément nuls. FF reconnaissent eux-mêmes que leur modèle est incomplet. Deux anomalies persistent :
+
+- Les entreprises très profitables surperforment, indépendamment de leur $B/M$ — c'est ce que Novy-Marx (2013) a formalisé avec $GP/A$.
+- Les entreprises qui investissent peu surperforment celles qui investissent beaucoup.
+
+Ces deux anomalies ne sont pas des accidents dans les données. Elles ont une justification théorique directe dans le modèle de valorisation de base. C'est ce que FF (2015) exploitent pour construire deux nouveaux facteurs.
+
+---
+
+## 2. Le fondement théorique — le DDM réécrit
+
+FF partent de la même identité que Novy-Marx. En substituant le clean surplus $D_t = E_t - dB_t$ dans la formule de valorisation :
+
+$$M_t = \sum_{\tau=1}^{\infty} \frac{\mathbb{E}(E_{t+\tau} - dB_{t+\tau})}{(1+r)^\tau}$$
+
+On divise des deux côtés par $B_t$ :
+
+$$\frac{M_t}{B_t} = \frac{\sum_{\tau=1}^{\infty} \mathbb{E}(E_{t+\tau} - dB_{t+\tau}) / (1+r)^\tau}{B_t}$$
+
+Cette équation est une identité comptable — elle est vraie par construction. Elle relie le ratio market-to-book observé aujourd'hui aux bénéfices futurs attendus et au taux de rendement requis $r$. C'est de cette identité que découlent les trois effets empiriques du FF5.
+
+**Effet profitabilité.** Fixe $M_t/B_t$. Si $E_{t+\tau}$ augmente, le numérateur augmente. Pour que l'égalité tienne, $(1+r)^\tau$ doit augmenter aussi — donc $r \uparrow$. Les actions d'entreprises très profitables ont empiriquement des rendements moyens plus élevés.
+
+**Effet investissement.** $dB_{t+\tau}$ est soustrait dans le numérateur. Si l'investissement augmente, le numérateur diminue. Pour compenser, $r$ doit baisser — donc $r \downarrow$. Les entreprises qui investissent agressivement ont des rendements plus faibles.
+
+**Effet valeur.** Si $B_t$ est grand relativement à $M_t$, autrement dit $B/M \uparrow$, le dénominateur est petit. Pour que l'égalité tienne, $r \uparrow$. C'est le value premium du FF3, vu sous le même angle.
+
+> **Ce que veut dire $r$ ici.** $r$ n'est pas le rendement de l'entreprise — c'est le taux de rendement requis par les investisseurs sur cette action. Une entreprise très profitable est perçue comme plus attractive, les investisseurs l'achètent, et son rendement moyen observé historiquement est plus élevé. C'est une relation empirique capturée par le facteur, pas une causalité directe.
+
+---
+
+## 3. Les deux nouvelles variables explicatives
+
+**(i) Rappel comptable**
+
+On reprend les notations du bilan introduites pour le FF3. L'identité fondamentale reste :
+
+$$A_t = K_0 + D_t \quad \Longrightarrow \quad K_0 = A_t - D_t$$
+
+où $K_0$ sont les capitaux propres comptables (book equity), $A_t$ les actifs totaux et $D_t$ les dettes totales.
+
+**(ii) La profitabilité opérationnelle : $OP$**
+
+FF mesurent la profitabilité par le ratio suivant :
+
+$$OP = \frac{\text{Revenues} - \text{COGS} - \text{SG\&A} - \text{Interest}}{\text{Book equity}}$$
+
+C'est une mesure proche du $GP/A$ de Novy-Marx, mais normalisée par les capitaux propres comptables plutôt que par les actifs totaux, et avec des charges supplémentaires soustraites. L'intuition reste la même : plus ce ratio est élevé, plus l'entreprise génère de valeur à partir de ses ressources.
+
+**(iii) L'investissement : $INV$**
+
+FF mesurent l'investissement par la croissance des actifs totaux d'une année à l'autre :
+
+$$INV = \frac{A_t - A_{t-1}}{A_{t-1}}$$
+
+Ce ratio capture l'agressivité de l'investissement. Une entreprise qui double ses actifs en un an ($INV$ élevé) dilue mécaniquement le numérateur du DDM — les cash flows futurs sont répartis sur une base d'actifs plus grande. Le marché anticipe un rendement plus faible.
+
+> **Attention au look-ahead.** $INV$ est calculé à la fin de chaque exercice fiscal, avec un décalage de six mois avant d'être utilisé dans les portefeuilles. Ce décalage garantit que l'information comptable est publiquement disponible au moment du tri.
+
+---
+
+## 4. La construction des facteurs — le triple tri
+
+**(i) De la grille 2×3 au triple tri indépendant**
+
+Dans le FF3, les portefeuilles sont construits par un double tri : taille × $B/M$. Pour le FF5, FF veulent isoler l'effet de $OP$ et de $INV$ indépendamment de la taille. La solution : un triple tri indépendant.
+
+Chaque juillet, FF trient toutes les actions selon trois critères **indépendants** :
+
+- **Taille** : médiane $ME$ NYSE → Small / Big
+- **$B/M$** : 30e/70e percentiles NYSE → Low / Neutral / High
+- **$OP$ ou $INV$** : 30e/70e percentiles NYSE → Weak / Neutral / Robust (pour $OP$) ou Conservative / Neutral / Aggressive (pour $INV$)
+
+L'intersection donne $2 \times 3 \times 3 = 18$ portefeuilles pour chaque dimension supplémentaire.
+
+> **Pourquoi des tris indépendants ?** Si on triait séquentiellement — d'abord par taille, puis par $OP$ à l'intérieur de chaque groupe de taille — les portefeuilles résultants auraient des tailles très inégales. Les tris indépendants garantissent que chaque critère est appliqué sur l'ensemble du marché, sans que la coupure $OP$ ne soit conditionnée par la coupure taille. C'est la même logique qui rendait SMB et HML quasi-orthogonaux dans le FF3 : en moyennant sur les autres dimensions, on purge chaque facteur des effets croisés.
+
+**(ii) La formule de RMW**
+
+RMW (Robust Minus Weak) est construit à partir des 6 portefeuilles issus du tri taille × $OP$ :
+
+$$RMW = \frac{1}{2}(R_{SR} + R_{BR}) - \frac{1}{2}(R_{SW} + R_{BW})$$
+
+où $SR$ = Small Robust, $BR$ = Big Robust, $SW$ = Small Weak, $BW$ = Big Weak. On moyenne sur Small et Big pour que RMW capture uniquement l'effet profitabilité, purgé de l'effet taille.
+
+**(iii) La formule de CMA**
+
+CMA (Conservative Minus Aggressive) est construit à partir des 6 portefeuilles issus du tri taille × $INV$ :
+
+$$CMA = \frac{1}{2}(R_{SC} + R_{BC}) - \frac{1}{2}(R_{SA} + R_{BA})$$
+
+où $SC$ = Small Conservative, $BC$ = Big Conservative, $SA$ = Small Aggressive, $BA$ = Big Aggressive.
+
+**(iv) Le rebalancement**
+
+Les 18 portefeuilles sont rebalancés chaque juillet, avec les données comptables de l'exercice fiscal se terminant en décembre de l'année précédente. Le décalage de six mois garantit l'absence de look-ahead bias — exactement comme dans le FF3.
+
+---
+
+## 5. Le modèle FF5
+
+$$R_i - R_f = \alpha_i + \beta_i(R_m - R_f) + s_i \cdot SMB + h_i \cdot HML + r_i \cdot RMW + c_i \cdot CMA + \varepsilon_i$$
+
+| Coefficient | Signe positif | Signe négatif |
+|-------------|---------------|---------------|
+| $\beta_i$ | Exposition au risque de marché | — |
+| $s_i$ | Se comporte comme une small cap | Se comporte comme une large cap |
+| $h_i$ | Covarie avec les value stocks | Covarie avec les growth stocks |
+| $r_i$ | Covarie avec les entreprises robustes | Covarie avec les entreprises fragiles |
+| $c_i$ | Covarie avec les firmes conservatrices | Covarie avec les firmes agressives |
+| $\alpha_i$ | Surperformance non expliquée | Sous-performance non expliquée |
+
+---
+
+## 6. La Table 1 — validation empirique des patterns univariés
+
+**(i) Ce que prédit le DDM**
+
+Rappelons l'identité :
+
+$$\frac{M_t}{B_t} = \frac{\sum_{\tau=1}^{\infty} \mathbb{E}(E_{t+\tau} - dB_{t+\tau}) / (1+r)^\tau}{B_t}$$
+
+En fixant $M_t/B_t$, les trois prédictions sont :
+
+$$B/M \uparrow \;\Rightarrow\; r \uparrow \qquad OP \uparrow \;\Rightarrow\; r \uparrow \qquad INV \uparrow \;\Rightarrow\; r \downarrow$$
+
+**(ii) Ce que montrent les données — les microcaps**
+
+La Table 1 présente les rendements moyens mensuels des portefeuilles triés par taille × $B/M$ (Panel A), taille × $OP$ (Panel B), et taille × $INV$ (Panel C). Pour les microcaps (ligne Small), les patterns sont nets.
+
+![Table 1 — rendements moyens des portefeuilles univariés](images/facteurs-fondamentaux/ff5_table1.png)
+
+*Figure 8. Table 1 — rendements moyens mensuels des portefeuilles taille × B/M (Panel A), taille × OP (Panel B), taille × INV (Panel C). En bleu : patterns conformes à la théorie DDM. En rouge : anomalies pour les megacaps.*
+
+**Panel A — $B/M \uparrow \Rightarrow r \uparrow$**
+
+| | Low | 2 | 3 | 4 | High |
+|--|-----|---|---|---|------|
+| Small | 0.26 | 0.81 | 0.85 | 1.01 | 1.15 |
+| Big | 0.46 | 0.51 | 0.48 | 0.56 | 0.62 |
+
+Le rendement mensuel moyen passe de $0.26\%$ à $1.15\%$ quand $B/M$ augmente de gauche à droite pour les microcaps. C'est exactement ce que prédit le DDM : les value stocks ($B/M$ élevé) ont un $r$ plus élevé. Pour les megacaps, la progression existe mais est très atténuée.
+
+**Panel B — $OP \uparrow \Rightarrow r \uparrow$**
+
+| | Weak | 2 | 3 | 4 | Robust |
+|--|------|---|---|---|--------|
+| Small | 0.56 | 0.94 | 0.90 | 0.95 | 0.88 |
+| Big | 0.39 | 0.33 | 0.43 | 0.47 | 0.57 |
+
+La progression est moins monotone mais la direction générale est confirmée : les entreprises robustes surperforment les entreprises fragiles parmi les microcaps.
+
+**Panel C — $INV \uparrow \Rightarrow r \downarrow$**
+
+| | Conservative | 2 | 3 | 4 | Aggressive |
+|--|-------------|---|---|---|------------|
+| Small | 1.01 | 0.98 | 0.99 | 0.89 | 0.35 |
+| Big | 0.71 | 0.52 | 0.49 | 0.48 | 0.42 |
+
+Le rendement chute de $1.01\%$ à $0.35\%$ quand l'investissement devient agressif parmi les microcaps. C'est la prédiction DDM la plus nette empiriquement — la décroissance est presque monotone.
+
+**(iii) Pourquoi ça casse pour les megacaps**
+
+Pour les grandes capitalisations, les patterns s'affaiblissent ou disparaissent. Les megacaps sont couvertes par des centaines d'analystes — toute l'information sur leur profitabilité et leur investissement est déjà incorporée dans les prix. Les inefficiences que les facteurs cherchent à capturer n'ont pas le temps de se former.
+
+**(iv) Le problème de pollution**
+
+La Table 1 trie selon un seul critère à la fois. Mais $B/M$, $OP$ et $INV$ sont corrélés entre eux : une value stock ($B/M$ élevé) a tendance à être peu profitable et à peu investir. Un tri univarié sur $B/M$ capture donc aussi indirectement les effets $OP$ et $INV$, sans qu'on puisse les démêler.
+
+> C'est précisément pourquoi le triple tri indépendant est nécessaire — il isole l'effet net de chaque variable en contrôlant pour les deux autres. La Table 1 montre que les effets existent. La Table 4 montrera que chacun est indépendant.
+
+---
+
+## 7. La Table 2 — HML est redondant
+
+**(i) La redondance empirique**
+
+Le test GRS mesure si un modèle laisse des alphas significatifs sur les portefeuilles tests. FF montrent qu'en ajoutant RMW et CMA au modèle $\{R_m - R_f,\ SMB,\ HML\}$, le GRS baisse — le modèle s'améliore. Mais l'observation centrale est différente : **ajouter HML à un modèle qui contient déjà RMW et CMA n'améliore pas significativement le GRS dans aucun des panels testés**.
+
+![Table 2 — test GRS selon les combinaisons de facteurs](images/facteurs-fondamentaux/ff5_table2.png)
+
+*Figure 9. Table 2 — statistique GRS et mesures d'adéquation pour différentes combinaisons de facteurs, sur les trois panels de portefeuilles tests. Les combinaisons encadrées en rouge montrent que RMW CMA sans HML fait aussi bien que le modèle complet.*
+
+HML n'apporte pas d'information indépendante une fois que RMW et CMA sont présents.
+
+**(ii) L'intuition économique**
+
+Pourquoi HML est-il capturé par RMW et CMA ? Parce que les trois variables mesurent des facettes liées de la même réalité économique. Une value stock ($B/M$ élevé) est typiquement une entreprise dont le marché anticipe peu de croissance — elle investit peu ($INV$ faible, donc $CMA$ positif) et sa profitabilité est faible ($OP$ faible, donc $RMW$ négatif). HML capture indirectement ce que RMW et CMA capturent directement et séparément.
+
+> **Nuance importante.** HML reste utile à la marge — le GRS baisse quand on l'ajoute, même en présence de RMW et CMA. Mais il n'est pas un facteur indépendant au sens où il capturerait un risque que les quatre autres ne capturent pas. En pratique, beaucoup de travaux empiriques utilisent le modèle à quatre facteurs $\{R_m - R_f,\ SMB,\ RMW,\ CMA\}$ sans HML.
+
+---
+
+## 8. La Table 3 — régression des facteurs les uns sur les autres
+
+**(i) La question**
+
+Si HML est redondant, ça veut dire qu'il est expliqué par les autres facteurs. On peut le vérifier directement en régressant chaque facteur sur les quatre autres :
+
+$$HML_t = \alpha + \beta^{MKT}(R_{m,t} - R_{f,t}) + \beta^{SMB} \cdot SMB_t + \beta^{RMW} \cdot RMW_t + \beta^{CMA} \cdot CMA_t + \varepsilon_t$$
+
+Et symétriquement pour SMB, RMW, CMA, et le marché.
+
+![Table 3 — régressions croisées des facteurs](images/facteurs-fondamentaux/ff5_table3.png)
+
+*Figure 10. Table 3 — chaque ligne régresse un facteur sur les quatre autres. La ligne HML est encadrée en bleu : $R^2 = 0.51$, $\beta^{CMA} = 1.04$ ($t = 23.03$).*
+
+**(ii) Les résultats pour HML**
+
+| | $\beta^{RMW}$ | $t$ | $\beta^{CMA}$ | $t$ | $R^2$ |
+|--|--------------|-----|--------------|-----|-------|
+| HML | 0.23 | 5.36 | 1.04 | 23.03 | 0.51 |
+
+Un $R^2$ de $0.51$ signifie que RMW et CMA expliquent plus de la moitié de la variance de HML. Le coefficient sur CMA est $1.04$ avec $t = 23.03$ — extrêmement significatif. Le coefficient sur RMW est positif : les value stocks ont tendance à être peu profitables, ce qui est cohérent avec l'intuition économique.
+
+**(iii) Les résultats pour les autres facteurs**
+
+Les $R^2$ des autres régressions sont bien plus faibles. SMB, RMW et CMA ne sont pas expliqués par les autres facteurs — ils capturent chacun une dimension indépendante du risque. C'est HML seul qui est redondant.
+
+---
+
+## 9. La Table 4 — le résultat du triple tri
+
+**(i) La question**
+
+La Table 1 montrait des effets univariés potentiellement pollués par les corrélations entre $B/M$, $OP$ et $INV$. La Table 4 répond à la vraie question : une fois qu'on contrôle simultanément pour les trois variables, les effets persistent-ils ?
+
+![Table 4 — rendements des portefeuilles du triple tri](images/facteurs-fondamentaux/ff5_table4.png)
+
+*Figure 11. Table 4 — rendements moyens des portefeuilles issus du triple tri taille × B/M × OP et taille × B/M × INV. Chaque cellule contrôle simultanément pour les trois dimensions.*
+
+**(ii) Ce que montre le triple tri**
+
+Les effets persistent après contrôle. Dans chaque cellule $B/M$ fixé, les rendements augmentent avec $OP$ et diminuent avec $INV$ — exactement comme prédit par le DDM. Et inversement, dans chaque cellule $OP$ fixée, les rendements augmentent avec $B/M$.
+
+Ce résultat est la preuve que les trois variables capturent des dimensions **indépendantes** du rendement attendu. Ce n'est pas le même phénomène mesuré trois fois.
+
+**(iii) La conclusion de FF**
+
+Le FF5 améliore le FF3 sur deux fronts : il absorbe les anomalies de profitabilité et d'investissement que le FF3 laissait inexpliquées, et il fournit une justification théorique unifiée via le DDM. Le prix à payer est la complexité — cinq facteurs au lieu de trois, et une construction par triple tri plus délicate à répliquer.
+
+> **Ce que le FF5 ne résout pas.** Le GRS rejette encore le FF5 — il reste des alphas significatifs, notamment sur les portefeuilles de petites capitalisations et les portefeuilles extrêmes. Le modèle est meilleur que le FF3, pas parfait. Le momentum (WML) en particulier reste une anomalie non capturée, ce qui motivera des extensions ultérieures.

@@ -223,3 +223,177 @@ FF ajoutent deux facteurs supplémentaires : **RMW** (Robust Minus Weak — les 
 Ken French met à disposition gratuitement toutes les données sur son site à Dartmouth. Le fichier "Fama/French 3 Factors" contient quatre colonnes : `Mkt-RF`, `SMB`, `HML`, et `RF`, disponibles depuis 1926 en fréquence mensuelle ou quotidienne.
 
 [mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html](https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html)
+
+
+
+# Novy Marx
+## (i) Le point de départ : une anomalie dans les données
+
+Fama et French ont montré dans les années 90 que les value stocks (ratio $B/M$ élevé) surperforment le marché — c'est le facteur HML. Novy Marx observe quelque chose en plus dans les données : des entreprises très profitables surperforment aussi, indépendamment de leur $B/M$. Ce n'est pas expliqué par Fama-French. Sa question : quelle mesure de profitabilité capture le mieux cette prime ?
+
+> **Rappel — le ratio $B/M$.** $B$ c'est le book value, c'est-à-dire les capitaux propres comptables (actifs $-$ dettes). $M$ c'est la valeur de marché (prix de l'action $\times$ nombre d'actions). Un $B/M$ élevé veut dire que le marché valorise peu l'entreprise par rapport à ce qu'elle vaut sur le papier — c'est une value stock, considérée comme "bon marché". Un $B/M$ faible veut dire que le marché valorise beaucoup l'entreprise au-delà de sa valeur comptable — c'est une growth stock, considérée comme "chère".
+
+---
+
+## (ii) La justification théorique
+
+Il part de la formule de valorisation de base — une action vaut ses dividendes futurs actualisés :
+
+$$S_t = \sum_{\tau=1}^{\infty} \frac{D_{t+\tau}}{(1+r)^\tau}$$
+
+Problème : les dividendes sont un mauvais signal. Beaucoup d'entreprises n'en versent pas (Amazon pendant 20 ans), et ils peuvent être manipulés indépendamment de la performance réelle. Il réécrit la formule avec l'identité comptable du **clean surplus** :
+
+$$B_t = B_{t-1} + E_t - D_t$$
+
+Ce qui dit : capitaux propres comptables cette année $=$ capitaux propres l'an dernier $+$ résultat net $-$ dividendes versés. On isole $D_t$ :
+
+$$D_t = E_t - (B_t - B_{t-1}) = E_t - dB_t$$
+
+On substitue dans la formule de prix :
+
+$$S_t = \sum_{\tau=1}^{\infty} \frac{\mathbb{E}_t[E_{t+\tau} - dB_{t+\tau}]}{(1+r)^\tau}$$
+
+Cette formule dit : **le prix d'une action aujourd'hui dépend des bénéfices futurs attendus**. Donc si tu trouves un bon prédicteur des bénéfices futurs $E$, tu identifies les actions sous-évaluées.
+
+> **Ce que veut dire l'espérance.** On est en $t$, on ne connaît pas les bénéfices futurs. $\mathbb{E}_t[\cdot]$ c'est "mon estimation aujourd'hui de ce que ça sera demain", basée sur toute l'information disponible maintenant.
+
+> **Attention à la notation $D_t$.** Dans le clean surplus, $D_t$ désigne les dividendes versés. Dans un bilan comptable, $D$ désigne souvent les dettes. Ce sont deux usages différents de la même lettre — ici on est dans la logique du clean surplus donc $D_t =$ dividendes partout dans cette section.
+
+**Exemple numérique.** Supposons une action qui cote 10 dollars sur le marché. Tu estimes ses bénéfices futurs et tu appliques la formule — tu obtiens une valeur fondamentale de 13 dollars. Le marché sous-évalue cette action : il ne voit pas encore que ses bénéfices futurs justifient un prix de 13 dollars. Elle surperformera quand le marché corrigera son erreur. À l'inverse, une valeur fondamentale de 8 dollars pour une action cotée à 10 dollars signifie qu'elle est surévaluée.
+
+Tout le papier revient à trouver le meilleur moyen d'estimer les bénéfices futurs aujourd'hui pour repérer ces écarts.
+
+---
+
+## (iii) Le choix du proxy : pourquoi GP/A ?
+
+La formule parle de bénéfices futurs $E$ mais ne dit pas comment les mesurer aujourd'hui. L'argument central : le compte de résultat est une cascade, et chaque étage rajoute des décisions comptables qui bruitent le signal.
+
+![Cascade du compte de résultat — chaque étage rajoute du bruit comptable.](images/novy-marx/novy_cascade_compte_resultat.png)
+
+*Figure 1. La cascade du compte de résultat. Plus on descend, plus on accumule de décisions comptables discrétionnaires.*
+
+Le bénéfice net accumule amortissements, provisions, impôts différés — deux boîtes identiques économiquement peuvent avoir des résultats nets très différents selon leurs choix comptables. Le FCF varie selon les décisions d'investissement — une boîte qui construit une usine a un FCF négatif sans être moins profitable. La marge brute (Sales $-$ COGS) est le signal le plus proche de la réalité économique brute.
+
+Il définit donc :
+
+$$\text{GP/A} = \frac{\text{Sales} - \text{COGS}}{\text{Assets}}$$
+
+> **Les trois candidats en données concrètes.** Pour chaque action $i$, on calcule :
+> - $\text{IB/A}$ = résultat net / actifs totaux
+> - $\text{FCF/A}$ = (résultat net + amortissements $-$ variation BFR $-$ capex) / actifs totaux
+> - $\text{GP/A}$ = (Sales $-$ COGS) / actifs totaux
+>
+> On divise toujours par les actifs totaux pour normaliser et comparer des entreprises de tailles différentes. Une grande boîte a forcément une grosse marge brute en valeur absolue — diviser par les actifs retire cet effet de taille.
+
+---
+
+## (iv) La preuve empirique — Table 1 (Fama-McBeth)
+
+Il estime chaque mois la régression suivante sur toutes les actions du marché américain :
+
+$$r_{i,t} = \alpha + \beta_1 \cdot \text{GP/A}_i + \beta_2 \cdot \text{IB/A}_i + \beta_3 \cdot \text{FCF/A}_i + \beta_4 \cdot \log(B/M)_i + \beta_5 \cdot \log(ME)_i + \varepsilon_{i,t}$$
+
+Il moyenne ensuite les coefficients sur toutes les périodes. La t-stat teste si la moyenne de $\hat{\beta}$ est significativement différente de zéro — au-dessus de 2 c'est significatif. Les coefficients dans la table sont multipliés par $10^2$.
+
+> **Ce que cette régression fait concrètement.** Il n'y a pas de portefeuille ici — c'est une régression sur les actions individuelles. On prend toutes les actions du marché américain (plusieurs milliers), on régresse leurs rendements mensuels sur leurs caractéristiques fondamentales, et on regarde quelles caractéristiques ont un $\hat{\beta}$ significativement différent de zéro. C'est un test statistique pur pour identifier quelles variables prédisent les rendements en coupe transversale.
+
+![Table 1 — Régressions Fama-McBeth. 7 spécifications différentes, une par colonne.](images/novy-marx/novy_fama_mcbeth.png)
+
+*Figure 2. Fama-McBeth regression. Encadrés rouges : une seule mesure testée seule. Encadrés bleus : GP/A testé conjointement avec une autre mesure.*
+
+La table présente **7 régressions différentes**, une par colonne.
+
+**Encadrés rouges — une seule mesure à la fois :**
+- Colonne (1) : GP/A seul $\rightarrow$ $t = 5.49$. Très significatif.
+- Colonne (2) : bénéfice net seul $\rightarrow$ $t = 0.84$. Non significatif.
+- Colonne (3) : FCF seul $\rightarrow$ $t = 2.28$. Significatif.
+
+Le FCF seul est effectivement significatif — il prédit aussi les rendements en isolation. Mais ce n'est pas ça que Novy Marx veut montrer. Il veut savoir lequel est le meilleur signal.
+
+**Encadrés bleus — deux mesures ensemble :**
+- Colonne (4) : GP/A + bénéfice net $\rightarrow$ GP/A reste à $t = 5.22$, bénéfice net tombe à $t = 0.31$.
+- Colonne (5) : GP/A + FCF $\rightarrow$ GP/A reste à $t = 4.63$, FCF tombe à $t = 1.64$.
+
+Résultat clé : quand GP/A est dans la régression, les autres mesures perdent leur pouvoir prédictif. GP/A **absorbe** leur information — le FCF semblait marcher seul uniquement parce qu'il était corrélé avec GP/A.
+
+> **Sur $r_{1,0}$ et $r_{12,2}$.** Ce sont des variables de contrôle pour le momentum. $r_{1,0}$ c'est le rendement du mois précédent, son coefficient négatif ($-5.57$, $t = -13.8$) capte l'effet de retournement à court terme. $r_{12,2}$ c'est le rendement sur les 12 derniers mois hors le dernier mois, son coefficient positif ($0.76$, $t = 3.87$) capte le momentum classique. Novy Marx les inclut pour s'assurer que l'effet GP/A n'est pas du momentum déguisé.
+
+---
+
+## (v) La découverte bonus — Table 2 et corrélations
+
+Ici Novy Marx change d'approche : il **crée de vrais portefeuilles**. Il trie toutes les actions en 5 groupes par GP/A. Les 20% les moins profitables vont dans le portefeuille "Low", les 20% les plus profitables dans "High". Il calcule le rendement moyen de chaque groupe puis régresse ces rendements sur les trois facteurs Fama-French :
+
+$$r_{i,t} - r_f = \alpha_i + \beta_i^{MKT} \cdot MKT_t + \beta_i^{SMB} \cdot SMB_t + \beta_i^{HML} \cdot HML_t + \varepsilon_{i,t}$$
+
+> **Ce que sont MKT, SMB et HML.** Ce sont les trois facteurs de Fama-French, eux-mêmes construits comme des portefeuilles long/short :
+> - $MKT$ = rendement du marché $-$ taux sans risque.
+> - $SMB$ (Small Minus Big) = rendement des petites caps $-$ rendement des grandes caps.
+> - $HML$ (High Minus Low) = rendement des value stocks (B/M élevé) $-$ rendement des growth stocks (B/M faible).
+>
+> Le coefficient sur HML indique à quel point un portefeuille ressemble à des value stocks (positif) ou à des growth stocks (négatif).
+
+![Table 2 — Portefeuilles triés par GP/A (Panel A) et par B/M (Panel B).](images/novy-marx/novy_linear_regression.png)
+
+*Figure 3. Portefeuilles triés par profitabilité (Panel A) et par B/M (Panel B). Les rendements augmentent dans les deux cas de Low à High. Mais les coefficients HML vont dans des directions opposées.*
+
+Les rendements augmentent de Low GP/A ($0.31\%$ par mois) à High GP/A ($0.62\%$). Mais le résultat surprenant c'est le coefficient sur HML :
+
+- Portefeuille Low GP/A : $\beta^{HML} = +0.15$
+- Portefeuille High GP/A : $\beta^{HML} = -0.29$
+
+Les entreprises très profitables se comportent comme des growth stocks, à l'opposé des value stocks qui ont $\beta^{HML} = +0.51$. C'est une observation visuelle qui donne l'intuition. Pour le vérifier formellement, il construit la matrice de données suivante :
+
+![Matrice de données : n actions × d caractéristiques fondamentales.](images/novy-marx/novy_matrice_donnees.png)
+
+*Figure 4. Structure des données utilisées pour calculer la table de corrélation. Chaque ligne est une action, chaque colonne une caractéristique fondamentale. La colonne B/M est en rouge car sa corrélation avec GP/A est négative.*
+
+À partir de cette matrice il calcule la corrélation de Pearson entre chaque paire de colonnes.
+
+![Figure 18 — Table de corrélation entre les caractéristiques fondamentales.](images/novy-marx/novy_correlation.png)
+
+*Figure 5. Table de corrélation (Figure 18 du papier). La ligne GP/A est encadrée en rouge. Le chiffre clé : corrélation GP/A vs B/M $= -0.18$, $t = -17.2$.*
+
+Chiffres clés sur la ligne GP/A :
+- GP/A vs IB/A : $+0.45$ — corrélation positive, logique, les deux mesurent la profitabilité.
+- GP/A vs FCF/A : $+0.31$ — idem.
+- GP/A vs B/M : $\mathbf{-0.18}$, $t = -17.2$ — les actions avec GP/A élevé ont systématiquement un B/M faible.
+
+> **Ce que cette corrélation prouve.** La stratégie value achète les actions avec B/M élevé. La stratégie GP/A achète les actions avec GP/A élevé. Puisque GP/A et B/M sont négativement corrélés, les deux stratégies misent sur des entreprises opposées. Quand la stratégie value performe bien, la stratégie GP/A performe moins bien. D'où une corrélation négative entre leurs rendements : $\rho \approx -0.5$ dans les données.
+
+---
+
+## (vi) La conclusion : le portefeuille mixte
+
+Novy Marx construit le portefeuille final : $50\%$ long sur le facteur GP/A (portefeuille High $-$ Low GP/A) et $50\%$ long sur le facteur value (portefeuille High $-$ Low B/M). Comme les deux sont anticorrélés, la variance du portefeuille combiné est plus faible.
+
+Le rendement attendu :
+
+$$\mathbb{E}[R_p] = 0.5 \times \mathbb{E}[R^1] + 0.5 \times \mathbb{E}[R^2] = 0.5\%$$
+
+Inchangé — c'est la moyenne des deux. La variance :
+
+$$\mathbb{V}[R_p] = x_1^2 \sigma_1^2 + x_2^2 \sigma_2^2 + 2 x_1 x_2 \cdot \text{cov}(R^1, R^2)$$
+
+Avec $\sigma_1 = \sigma_2 = 3\%$ et $\text{cov} = \rho \cdot \sigma_1 \cdot \sigma_2 = -0.5 \times 0.03 \times 0.03 = -0.00045$ :
+
+$$\mathbb{V}[R_p] = 0.25 \times 0.0009 + 0.25 \times 0.0009 + 2 \times 0.25 \times (-0.00045)$$
+
+$$= 0.000225 + 0.000225 - 0.000225 = 0.000225$$
+
+$$\sigma_p = \sqrt{0.000225} = 1.5\%$$
+
+La volatilité est divisée par deux pour le même rendement. Le Sharpe ratio :
+
+$$\text{Sharpe seul} = \frac{0.5\%}{3\%} = 0.17 \qquad \text{Sharpe mixte} = \frac{0.5\%}{1.5\%} = 0.33$$
+
+Le Sharpe double.
+
+![Figure 17 — Performance du portefeuille mixte de 1963 à 2010.](images/novy-marx/novy_hedging.png)
+
+*Figure 6. Sharpe ratio annualisé glissant de 1963 à 2010. Le mix 50/50 (trait plein) est systématiquement plus stable que la stratégie value seule (pointillés) et la stratégie profitabilité seule (tirets). La stratégie value s'effondre en 2000 pendant la bulle tech — la profitabilité compense.*
+
+> **Pourquoi ces mispricing existent-ils ?** Lakonishok et al. (1994) montrent que le marché sur-paie systématiquement les growth stocks (médiatisées, excitantes) et sous-paie les value stocks (ennuyeuses, mal-aimées). Novy Marx ajoute : le marché rate aussi le signal GP/A — il ne voit pas que les entreprises très profitables vont continuer à générer des bénéfices élevés. La stratégie exploite ces deux inefficiences comportementales simultanément, avec un risque réduit grâce à leur anticorrélation naturelle.
+
+La stratégie concrète : **acheter des value stocks profitables, vendre des growth stocks peu profitables**.

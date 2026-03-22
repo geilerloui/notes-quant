@@ -6,10 +6,9 @@
 
 Le CAPM prédit une chose simple : plus le bêta d'un actif est élevé, plus son rendement espéré est élevé. FF testent ça sur 30 ans de données (1963–1990) et trouvent une relation plate — le bêta n'est pas rémunéré dans les données.
 
-<table style="border: none; border-collapse: collapse;"><tr>
-<td style="border: none; padding: 0;"><img src="images/facteurs-fondamentaux/beta-capm-prediction.svg"/></td>
-<td style="border: none; padding: 0;"><img src="images/facteurs-fondamentaux/beta-actual-data.svg"/></td>
-</tr></table>
+| | |
+|:---:|:---:|
+| ![CAPM prediction](images/facteurs-fondamentaux/beta-capm-prediction.svg) | ![Actual data](images/facteurs-fondamentaux/beta-actual-data.svg) |
 
 *Figure 1. Chaque point = un décile d'actions trié par bêta (1963–1990). En haut : la prédiction du CAPM. En bas : les données réelles — pente non significativement différente de zéro.*
 
@@ -19,7 +18,7 @@ FF s'appuient alors sur la littérature des anomalies des années 1980 — une p
 
 ## 2. Les deux variables explicatives
 
-### (i) Rappel comptable — le bilan et les notations
+**(i) Rappel comptable — le bilan et les notations**
 
 ![Balance sheet](images/facteurs-fondamentaux/imZ.png)
 
@@ -41,7 +40,7 @@ $K_0$ c'est ce qui appartient comptablement aux actionnaires — la valeur des a
 
 > **Attention à l'ambiguïté française.** En comptabilité, "passif" désigne tout le côté droit du bilan (dettes + capitaux propres). Quand FF disent Book Value = Actif − Passif, ils veulent dire Actif − **dettes uniquement**, ce qui donne bien les capitaux propres $K_0$.
 
-### (ii) La taille : $ME_t = S_t \times \theta_t$
+**(ii) La taille : $ME_t = S_t \times \theta_t$**
 
 $$ME_t = S_t \times \theta_t$$
 
@@ -49,7 +48,7 @@ C'est la capitalisation boursière — ce que le marché pense que les fonds pro
 
 La coupure Small/Big se fait à la **médiane de $ME$ calculée sur les actions NYSE uniquement**. Si on utilisait tout le marché incluant AMEX et NASDAQ remplis de micro-caps, la médiane tomberait trop bas et la quasi-totalité des actions se retrouverait en "Big" — sans sens économique.
 
-### (iii) Le ratio Book-to-Market : $B/M = K_0 / ME_t$
+**(iii) Le ratio Book-to-Market : $B/M = K_0 / ME_t$**
 
 $$B/M = \frac{K_0}{ME_t} = \frac{A_t - D_t}{S_t \times \theta_t}$$
 
@@ -68,7 +67,7 @@ Les value stocks surperforment les growth stocks sur le long terme. C'est le *va
 
 ## 3. La construction des facteurs
 
-### (i) Un facteur = un portefeuille long-short
+**(i) Un facteur = un portefeuille long-short**
 
 En ML, une feature est une observation passive — l'âge, le salaire. Elle existe dans le monde, tu la mesures. FF **construisent** leurs facteurs. SMB et HML sont des portefeuilles long-short — des stratégies actives qui génèrent un rendement chaque mois. Ce rendement mensuel, c'est le facteur.
 
@@ -78,7 +77,7 @@ En ML, une feature est une observation passive — l'âge, le salaire. Elle exis
 
 Le short **annule** l'exposition au marché : si le marché monte de 2%, les longs montent de 2% et les shorts perdent 2% — les deux s'annulent. Ce qui reste dans le rendement du portefeuille, c'est **uniquement** la différence entre les deux groupes, purifiée du mouvement de marché.
 
-### (ii) La grille 2×3 — le double tri
+**(ii) La grille 2×3 — le double tri**
 
 Chaque juillet, FF trient toutes les actions selon deux critères indépendants : médiane $ME$ → Small/Big, et 30ᵉ/70ᵉ percentiles $B/M$ → Growth/Neutral/Value. L'intersection donne 6 portefeuilles.
 
@@ -86,17 +85,17 @@ Chaque juillet, FF trient toutes les actions selon deux critères indépendants 
 
 *Figure 4. Les 6 portefeuilles issus du double tri taille × B/M.*
 
-### (iii) Les formules de SMB et HML
+**(iii) Les formules de SMB et HML**
 
 $$SMB = \frac{1}{3}(R_{SV} + R_{SN} + R_{SG}) - \frac{1}{3}(R_{BV} + R_{BN} + R_{BG})$$
 
 $$HML = \frac{1}{2}(R_{SV} + R_{BV}) - \frac{1}{2}(R_{SG} + R_{BG})$$
 
-### (iv) Orthogonalité des facteurs
+**(iv) Orthogonalité des facteurs**
 
 > 📌 SMB et HML sont quasi-orthogonaux (corrélation < 0.15 en pratique) grâce au double tri. En moyennant SMB sur les 3 lignes B/M, l'effet valeur se compense des deux côtés et disparaît — il reste uniquement de la taille pure. Symétriquement, HML moyenné sur Small et Big fait disparaître l'effet taille. Sans ce double tri, les deux facteurs seraient corrélés (les small caps sont naturellement plus souvent des value stocks) et la régression ne pourrait pas les distinguer l'un de l'autre — problème de multicolinéarité.
 
-### (v) La timeline — rebalancement annuel
+**(v) La timeline — rebalancement annuel**
 
 ![Timeline rebalancement](images/facteurs-fondamentaux/timeline-rebalancing.svg)
 
@@ -108,11 +107,11 @@ SMB et HML changent chaque mois — non pas parce que la composition des portefe
 
 ## 4. Le modèle et la régression
 
-### (i) L'équation
+**(i) L'équation**
 
 $$R_i - R_f = \alpha_i + \beta_i(R_m - R_f) + s_i \cdot SMB + h_i \cdot HML + \varepsilon_i$$
 
-### (ii) Interprétation des coefficients
+**(ii) Interprétation des coefficients**
 
 | Coefficient | Valeur | Interprétation |
 |-------------|--------|----------------|
@@ -123,7 +122,7 @@ $$R_i - R_f = \alpha_i + \beta_i(R_m - R_f) + s_i \cdot SMB + h_i \cdot HML + \v
 | $h_i < 0$ | | Se comporte comme une growth stock |
 | $\alpha_i$ | idéalement 0 | Surperformance non expliquée par les 3 facteurs |
 
-### (iii) Structure matricielle — 25 régressions
+**(iii) Structure matricielle — 25 régressions**
 
 Pour le portefeuille $i$, la régression s'écrit :
 
@@ -137,7 +136,7 @@ Ce qui change entre les 25 régressions : uniquement $\mathbf{R}_i$. La matrice 
 
 ## 5. Les résultats empiriques
 
-### (i) Panel A — rendements moyens
+**(i) Panel A — rendements moyens**
 
 ![Panel A Summary Statistics](images/facteurs-fondamentaux/imX.png)
 
@@ -147,7 +146,7 @@ Les rendements augmentent dans deux directions : de gauche à droite (Growth →
 
 Le fait que les rendements bougent selon ces deux axes indépendants est exactement ce qui motive l'existence des deux facteurs.
 
-### (ii) Panel B — coefficients de régression
+**(ii) Panel B — coefficients de régression**
 
 ![Panel B Regression Results](images/facteurs-fondamentaux/imY.png)
 
@@ -161,7 +160,7 @@ Le fait que les rendements bougent selon ces deux axes indépendants est exactem
 
 **Panel a (alphas) :** le test ultime. 23 alphas sur 25 ne sont pas significatifs ($|t| < 1.96$). Deux exceptions : Small Growth ($\alpha = -0.45$, $t = -4.19$) et Big Growth ($\alpha = +0.20$, $t = 3.14$).
 
-### (iii) Le F-test de Gibbons (GRS)
+**(iii) Le F-test de Gibbons (GRS)**
 
 Le GRS teste si les 25 alphas sont **simultanément** tous nuls :
 
@@ -173,7 +172,7 @@ Il rejette — FF3 n'explique donc pas parfaitement tous les rendements. Ce rés
 
 ## 6. Interprétation et débat
 
-### (i) "The anomalies largely disappear"
+**(i) "The anomalies largely disappear"**
 
 Dans le CAPM, une stratégie "acheter des small caps" génère un alpha positif — le modèle ne comprend pas ce rendement, c'est une anomalie. Dans FF3, cette même stratégie a juste un $s_i$ élevé. L'alpha tombe à zéro parce que le modèle reconnaît que l'investisseur porte du risque taille et le rémunère.
 
@@ -181,7 +180,7 @@ Dans le CAPM, une stratégie "acheter des small caps" génère un alpha positif 
 
 Le bêta était un *proxy* — il captait indirectement les effets taille et valeur parce que les actions à bêta élevé ont tendance à être des small caps et des value stocks. Quand FF contrôlent pour SMB et HML, le bêta perd tout pouvoir explicatif résiduel.
 
-### (ii) Risque ou mispricing ?
+**(ii) Risque ou mispricing ?**
 
 <details>
 <summary>Interprétation risque (Fama)</summary>
@@ -201,19 +200,19 @@ Les investisseurs surpayent les growth stocks (belles histoires de croissance) e
 
 ## 7. Applications pratiques
 
-### (i) Évaluer un gérant
+**(i) Évaluer un gérant**
 
 Un gérant fait +14%/an contre +10% pour le marché. Régression FF3 : $s = +0.62$, $h = +0.41$, $\alpha = +0.08\%$/mois ($t = 0.9$, non significatif). Les +4% s'expliquent presque entièrement par du biais small cap et value — réplicable passivement avec un ETF pour quasiment zéro frais. Pas de vrai talent.
 
-### (ii) Factor investing
+**(ii) Factor investing**
 
 Si tu crois que les primes sont persistantes, tu construis un portefeuille qui les capture explicitement par un tri systématique annuel. C'est ce que font les ETF smart beta et Dimensional Fund Advisors — pas de stock picking, juste du factor tilting discipliné.
 
-### (iii) Risk attribution
+**(iii) Risk attribution**
 
 $s$ élevé signifie que tu souffriras lors des crises de liquidité (2008, mars 2020) où les small caps chutent brutalement. FF3 te dit exactement d'où vient le risque de ton portefeuille — tu peux hedger ou assumer en connaissance de cause.
 
-### (iv) La suite — FF5 (2015)
+**(iv) La suite — FF5 (2015)**
 
 FF ajoutent deux facteurs supplémentaires : **RMW** (Robust Minus Weak — les entreprises très profitables surperforment) et **CMA** (Conservative Minus Aggressive — les entreprises qui investissent peu surperforment). Ces deux facteurs absorbent notamment les imperfections résiduelles de Small Growth et Big Growth identifiées dans FF3.
 

@@ -6,9 +6,10 @@
 
 Le CAPM prédit une chose simple : plus le bêta d'un actif est élevé, plus son rendement espéré est élevé. FF testent ça sur 30 ans de données (1963–1990) et trouvent une relation plate — le bêta n'est pas rémunéré dans les données.
 
-| | |
-|:---:|:---:|
-| ![CAPM prediction](images/facteurs-fondamentaux/beta-capm-prediction.svg) | ![Actual data](images/facteurs-fondamentaux/beta-actual-data.svg) |
+<table style="border: none; border-collapse: collapse;"><tr>
+<td style="border: none; padding: 0;"><img src="images/facteurs-fondamentaux/beta-capm-prediction.svg"/></td>
+<td style="border: none; padding: 0;"><img src="images/facteurs-fondamentaux/beta-actual-data.svg"/></td>
+</tr></table>
 
 *Figure 1. Chaque point = un décile d'actions trié par bêta (1963–1990). En haut : la prédiction du CAPM. En bas : les données réelles — pente non significativement différente de zéro.*
 

@@ -1036,3 +1036,376 @@ Le modèle FF5 constitue une amélioration substantielle sur le FF3 pour **NAM, 
 3. **Le facteur value (HML) n'est plus redondant** à l'international, contrairement à la conclusion de FF (2015). C'est en revanche le facteur **investissement (CMA)** dont le rôle apparaît fragile selon les régions.
 
 Le problème principal du modèle — déjà identifié dans FF (2015) — persiste : les **petites entreprises non-profitables qui investissent beaucoup** génèrent des rendements que le modèle sous-estime systématiquement.
+
+# Factor investing — Low-risk anomaly et volatilité
+
+Ce chapitre couvre quatre papiers fondateurs sur la *low-risk anomaly* et la gestion dynamique de la volatilité, présentés dans leur ordre chronologique et logique.
+
+| Papier | Contribution clé |
+|---|---|
+| Frazzini & Pedersen (2014) | Documenter l'anomalie, construire BAB |
+| Asness, Frazzini, Gormsen & Pedersen (2020) | Décomposer BAB en BAC + BAV |
+| Moreira & Muir (2017) | Volatility-Managed Portfolios (in-sample) |
+| Cederburg, O'Doherty, Wang & Yan (2020) | Test OOS des VMP |
+
+---
+
+## 01 — Betting Against Beta (BAB)
+
+*Frazzini & Pedersen — Journal of Financial Economics, 2014*
+
+### (i) L'anomalie de départ
+
+Le CAPM prédit une relation positive et linéaire entre $\beta$ et rendement espéré — la *Security Market Line* (SML). Black, Jensen & Scholes (1972) sont les premiers à tester cette prédiction sur données réelles et observent que la droite empirique est systématiquement **plus plate** que la SML théorique.
+
+$$\text{Prédit par le CAPM :} \quad E[r_i] = r_f + \beta_i (E[r_m] - r_f)$$
+
+En pratique : les titres à faible $\beta$ génèrent un $\alpha > 0$ (sous-évalués par le CAPM) et les titres à fort $\beta$ génèrent un $\alpha < 0$ (surévalués).
+
+![Flat Security Market Line — Black, Jensen & Scholes (1972)](images/factor-low-risk/volatility_flat_sml.png)
+
+*Figure 1. Flat security market line. La droite empirique (bleue) est plus plate que la SML théorique (pointillée). Les titres à faible $\beta$ surperforment le modèle ($\alpha > 0$) et les titres à fort $\beta$ sous-performent ($\alpha < 0$).*
+
+L'idée centrale de BAB : acheter les titres à faible $\beta$ (sous-évalués) et shorter les titres à fort $\beta$ (surévalués), en neutralisant l'exposition nette au marché via un scaling des deux jambes.
+
+### (ii) Théorie — contraintes d'effet de levier
+
+Pourquoi cette anomalie persiste-t-elle ? Certains investisseurs institutionnels (fonds de pension, assureurs) sont **contraints en effet de levier** — leur règlement leur interdit d'emprunter pour leverager un portefeuille diversifié. Pour atteindre leur cible de rendement, ils n'ont qu'une seule option : surpondérer directement les actifs à fort $\beta$.
+
+> **Exemple concret — Jean (fonds de pension) vs Léo (trader).** Le marché va faire +10%. Jean veut faire +20% pour battre ses concurrents. *Option A (interdite)* : acheter des actions sûres ($\beta = 1$) avec un levier ×2, soit $2 \times 10\% = 20\%$. Mais son règlement interdit d'emprunter. *Option B (sa seule solution)* : acheter des actions à forte corrélation avec le marché ($\beta = 2$). Si le marché fait +10%, ces actions font naturellement +20%.
+
+Comme tous les investisseurs contraints se ruent sur les actions à haute corrélation, leur prix monte — et leur rendement futur baisse. Si Léo peut utiliser du levier, il achète les actions à faible corrélation (délaissées), les leverage, et encaisse l'alpha que Jean a abandonné. La prédiction testable : le spread entre titres à faible et fort $\beta$ doit être positif et corrélé avec le niveau de *margin debt* dans l'économie.
+
+### (iii) Univers d'actifs
+
+Le papier teste la stratégie sur sept classes d'actifs : indices actions (Australia, Germany, Japan, UK, US…), obligations souveraines internationales, US Treasury bonds (différentes maturités), corporate bonds (IG & HY), credit indices (CDS), paires de devises, et commodities. Dans chaque classe, le $\beta$ est calculé par rapport au portefeuille de marché spécifique à cette classe.
+
+### (iv) Décomposition du bêta
+
+Le bêta est une identité algébrique qui se décompose en deux dimensions :
+
+$$\beta_i = \frac{\text{Cov}(r_i, r_m)}{\text{Var}(r_m)} = \frac{\rho_{im} \cdot \sigma_i \cdot \sigma_m}{\sigma_m^2} = \rho_{im} \cdot \frac{\sigma_i}{\sigma_m}$$
+
+En notation estimée :
+
+$$\hat{\beta}_i = \underbrace{\hat{\rho}_{im}}_{\text{BAC}} \cdot \underbrace{\dfrac{\hat{\sigma}_i}{\hat{\sigma}_m}}_{\text{BAV}}$$
+
+où $\hat{\rho}_{im}$ = corrélation du titre $i$ avec le marché (le titre bouge-t-il en même temps que le marché ?) et $\hat{\sigma}_i / \hat{\sigma}_m$ = volatilité relative (le titre bouge-t-il plus fort en amplitude que le marché ?). Ces deux dimensions seront exploitées séparément par BAC et BAV (section 02).
+
+![Décomposition du bêta en deux dimensions](images/factor-low-risk/volatility_beta_decomposition.png)
+
+*Figure 2. Décomposition $\hat{\beta}_i = \hat{\rho}_{im} \times (\hat{\sigma}_i / \hat{\sigma}_m)$. La dimension corrélation sera exploitée par BAC (contraintes d'effet de levier) et la dimension volatilité relative par BAV (lottery demand).*
+
+### (v) Estimation du bêta en deux étapes
+
+Le bêta est estimé en deux étapes avec des fenêtres différentes, justifiées par le fait que les corrélations varient plus lentement que les volatilités :
+
+**Étape 1 — bêta time-series :**
+
+$$\hat{\beta}_i^{ts} = \hat{\rho} \cdot \frac{\hat{\sigma}_i}{\hat{\sigma}_m}$$
+
+- $\hat{\rho}_{im}$ estimé sur **5 ans** de returns agrégés sur 3 jours ($r_{i,t}^{3d} = \sum_{k=0}^{2} \ln(1 + r_{i,t+k})$) pour corriger le *nonsynchronous trading*
+- $\hat{\sigma}_i$ estimé sur **1 an** de returns quotidiens
+- Minimum requis : 6 mois pour $\hat{\sigma}$, 3 ans pour $\hat{\rho}$
+
+**Étape 2 — shrinkage vers la moyenne cross-sectionnelle :**
+
+$$\hat{\beta}_i = w_i \hat{\beta}_i^{TS} + (1 - w_i) \hat{\beta}^{XS}$$
+
+avec $w_i = 0.6$ et $\hat{\beta}^{XS} = 1$ fixes pour tous les actifs et toutes les périodes. Sans shrinkage, un titre estimé à $\beta = 0.2$ serait leveragé d'un facteur 5 — trop sensible au bruit d'estimation. Avec shrinkage : $0.6 \times 0.2 + 0.4 \times 1 = 0.52$, soit un levier de ≈1.9×. Le shrinkage ne change pas le classement des titres mais réduit l'amplitude du scaling.
+
+### (vi) Construction du facteur BAB
+
+Sans scaling, acheter P1 (low-$\beta$) et shorter P10 (high-$\beta$) crée un $\beta$ net positif : si le marché monte de 10%, P1 monte de 6.4% et P10 monte de 17% — la jambe short explose. Le facteur BAB divise chaque jambe par son $\beta$ pour ramener les deux à $\beta = 1$, rendant le portefeuille market-neutral :
+
+$$r_{BAB,t+1} = \frac{1}{\hat{\beta}^L}\left(r^L_{t+1} - r^f\right) - \frac{1}{\hat{\beta}^H}\left(r^H_{t+1} - r^f\right)$$
+
+où $\hat{\beta}^L$ = bêta du portefeuille low-$\beta$, $\hat{\beta}^H$ = bêta du portefeuille high-$\beta$. Le $\beta$ net = $1 - 1 = 0$ → market-neutral.
+
+**Exemple chiffré avec les données de la table :**
+
+| Jambe | $\beta$ ex ante | Scaling | CAPM $\alpha$ | Contribution |
+|---|---|---|---|---|
+| Longue (P1, low-$\beta$) | 0.64 | $\times$ 1.56 | +0.52 %/mois | ≈ +0.81% |
+| Courte (P10, high-$\beta$) | 1.70 | $\times$ 0.59 | −0.10 %/mois | ≈ +0.06% |
+
+Le −0.10% de P10 n'est pas un coût d'emprunt : c'est l'observation que les titres à fort $\beta$ rapportent 0.10%/mois de moins que ce que le CAPM prédit. En shortant P10, cette sous-performance devient un gain. Contribution totale ≈ 0.87%/mois, proche des 0.73% observés (le calcul exact porte sur tous les déciles pondérés).
+
+### (vii) Résultats empiriques — actions US (Table 3, 1926–2012)
+
+Les titres sont triés en 10 déciles de $\beta$. La colonne BAB est le rendement du portefeuille long/short décrit ci-dessus, issu de la régression :
+
+$$r_{BAB,t} = \alpha_{BAB} + \beta_{BAB}(r_{mt} - r_{ft}) + \epsilon_t$$
+
+| Mesure | P1 (low) | P2 | P3 | P4 | P5 | P6 | P7 | P8 | P9 | P10 (high) | BAB |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Excess return | 0.91 | 0.98 | 1.00 | 1.03 | 1.05 | 1.10 | 1.05 | 1.08 | 1.06 | 0.97 | **0.70** |
+| *(t-stat)* | *(6.37)* | *(5.73)* | *(5.16)* | *(4.88)* | *(4.49)* | *(4.37)* | *(3.84)* | *(3.74)* | *(3.27)* | *(2.55)* | *(7.12)* |
+| CAPM alpha | **0.52** | **0.48** | **0.42** | **0.39** | **0.34** | **0.34** | 0.22 | 0.21 | 0.10 | −0.10 | **0.73** |
+| *(t-stat)* | *(6.30)* | *(5.99)* | *(4.91)* | *(4.43)* | *(3.51)* | *(3.20)* | *(1.94)* | *(1.72)* | *(0.67)* | *(−0.48)* | *(7.44)* |
+| 3-factor alpha | **0.40** | **0.35** | **0.26** | **0.21** | **0.13** | 0.11 | −0.03 | −0.06 | **−0.22** | **−0.49** | **0.73** |
+| *(t-stat)* | *(6.25)* | *(5.95)* | *(4.76)* | *(4.13)* | *(2.49)* | *(1.94)* | *(−0.59)* | *(−1.02)* | *(−2.81)* | *(−3.68)* | *(7.39)* |
+| Beta (ex ante) | 0.64 | 0.79 | 0.88 | 0.97 | 1.05 | 1.12 | 1.21 | 1.31 | 1.44 | 1.70 | **0.00** |
+| Volatility (%) | 15.70 | 18.70 | 21.11 | 23.10 | 25.56 | 27.58 | 29.81 | 31.58 | 35.52 | 41.68 | 10.75 |
+| Sharpe ratio | **0.70** | 0.63 | 0.57 | 0.54 | 0.49 | 0.48 | 0.42 | 0.41 | 0.36 | **0.28** | **0.78** |
+
+**Lecture de la colonne BAB :**
+
+- **Alpha de 0.73% (/mois)** : part du rendement non expliquée par le marché. Environ 8.7%/an d'excès de rendement pur.
+- **t-stat de 7.44** : l'un des t-stats les plus élevés de la littérature empirique. La probabilité que ce résultat soit dû au hasard est quasi nulle.
+- **Beta de 0.00** : selon le CAPM, un portefeuille à $\beta = 0$ devrait avoir $\alpha = 0$ (il ne rapporte que $r_f$). Avoir $\alpha = 0.73\%$ prouve que le CAPM est incapable d'expliquer ces rendements — c'est une **anomalie pure**. L'alpha reste stable à 0.73% quel que soit le modèle de contrôle (CAPM, 3 facteurs, 4 facteurs).
+- **Sharpe ratio de 0.78** : supérieur à tous les déciles (0.70 pour P1, 0.28 pour P10). La stratégie BAB est mathématiquement plus efficiente que détenir un décile seul.
+- **Flat SML** : les excess returns sont quasi-plats de P1 à P10 (0.91 à 0.97) — le marché ne rémunère pas le $\beta$ supplémentaire.
+- **Volatilité BAB faible (10.75%)** : la neutralité au marché élimine le risque commun aux deux jambes.
+
+Résultats répliqués dans 18 des 19 pays MSCI développés testés.
+
+---
+
+## 02 — Betting Against Correlation (BAC), Betting Against Volatility (BAV) & SMAX
+
+*Asness, Frazzini, Gormsen & Pedersen — Journal of Financial Economics, 2020*
+
+**Données** : 58 415 stocks dans 24 pays (MSCI World Developed), janvier 1926 – décembre 2015.
+
+Le BAB est validé. Mais d'où vient l'anomalie exactement ? Le bêta est le produit de deux dimensions : $\hat{\beta}_i = \hat{\rho}_{im} \cdot (\hat{\sigma}_i / \hat{\sigma}_m)$. Le BAB les mélange. Les auteurs veulent les isoler.
+
+### (i) Le problème : ρ et σᵢ sont corrélés
+
+Empiriquement, $\hat{\rho}_{im}$ et $\hat{\sigma}_i$ sont positivement corrélés dans le cross-section (corrélation ≈ 0.33 en moyenne) : un titre qui bouge fort en absolu a tendance à aussi beaucoup bouger avec le marché. Trier sur $\rho$ seul capture donc aussi un effet $\sigma_i$ — impossible de savoir quelle dimension drive l'alpha. D'où deux facteurs séparés.
+
+$$BAB \rightarrow BAC \text{ (isole } \hat{\rho}_{im}) + BAV \text{ (isole } \hat{\sigma}_i/\hat{\sigma}_m)$$
+
+![Schéma BAB décomposé en BAC + BAV](images/factor-low-risk/volatility_bab_decomp_schema.png)
+
+*Figure 3. BAB est décomposé en deux facteurs orthogonaux. BAC isole l'effet corrélation (moteur : contraintes d'effet de levier) et BAV isole l'effet volatilité relative (moteur : lottery demand).*
+
+### (ii) Table II — justification empirique du double-tri (US, 1930–2015)
+
+Les 25 portefeuilles issus du double-tri confirment que les deux dimensions contribuent indépendamment au $\beta$ et aux alphas.
+
+**Panel A — Bêtas** : tri d'abord par $\hat{\sigma}_i$ (5 quintiles = colonnes), puis par $\hat{\rho}_{im}$ à l'intérieur (5 quintiles = lignes). Les t-stats ne sont reportés que pour les spreads LS (standard dans le papier) :
+
+| | Vol Q1 | Vol Q2 | Vol Q3 | Vol Q4 | Vol Q5 | LS (corr) |
+|---|---|---|---|---|---|---|
+| Corr Q1 (faible) | 0.5 | 0.6 | 0.7 | 0.8 | 0.9 | **0.4** *(24.9)* |
+| Corr Q2 | 0.7 | 0.9 | 1.0 | 1.1 | 1.2 | **0.5** *(26.2)* |
+| Corr Q3 | 0.7 | 1.0 | 1.2 | 1.3 | 1.4 | **0.7** |
+| Corr Q4 | 0.8 | 1.0 | 1.2 | 1.3 | 1.6 | **0.8** |
+| Corr Q5 (haute) | 0.8 | 1.0 | 1.1 | 1.3 | 1.6 | **0.8** |
+| **LS (vol)** | **0.4** *(8.3)* | **0.5** *(12.6)* | **0.5** *(15.3)* | **0.5** *(17.0)* | **0.7** *(21.1)* | |
+
+**Panel B — CAPM alphas (%/mois)** :
+
+| | Vol Q1 | Vol Q2 | Vol Q3 | Vol Q4 | Vol Q5 | LS (corr) |
+|---|---|---|---|---|---|---|
+| Corr Q1 (faible) | **0.4** *(5.6)* | **0.3** *(3.9)* | **0.2** *(3.2)* | **0.1** *(2.1)* | **0.1** *(2.3)* | **−0.3** *(−3.6)* |
+| Corr Q2 | **0.3** *(3.3)* | **0.2** *(2.1)* | 0.1 *(1.6)* | 0.1 *(0.7)* | −0.1 *(−0.7)* | **−0.3** *(−3.0)* |
+| Corr Q3 | **0.4** *(4.1)* | **0.3** *(2.8)* | 0.1 *(0.6)* | 0.0 *(−0.2)* | **−0.2** *(−2.3)* | **−0.6** *(−4.4)* |
+| Corr Q4 | **0.4** *(3.3)* | **0.3** *(2.3)* | 0.0 *(0.3)* | −0.1 *(−1.0)* | **−0.3** *(−2.2)* | **−0.7** *(−4.2)* |
+| Corr Q5 (haute) | **0.3** *(1.4)* | 0.1 *(0.2)* | 0.1 *(0.4)* | **−0.3** *(−1.7)* | **−0.5** *(−2.7)* | **−0.8** *(−3.3)* |
+| **LS (vol)** | −0.1 *(−0.5)* | −0.2 *(−1.0)* | −0.2 *(−0.8)* | **−0.4** *(−2.2)* | **−0.6** *(−3.0)* | |
+
+![Table II — CAPM alphas des 25 portefeuilles double-tri](images/factor-low-risk/volatility_table2_doubletri.png)
+
+*Figure 4. Visualisation de la Table II Panel B. Chaque cellule représente l'alpha CAPM du portefeuille correspondant. La colonne LS (spread corr) est négative partout — les titres à haute corrélation sous-performent même à volatilité constante. La ligne LS (spread vol) est également négative dans les quintiles de haute volatilité.*
+
+**Lecture clé** : regarde la colonne Vol Q3 (volatilité identique pour tous les titres de cette colonne). L'alpha va de +0.2 (Corr Q1) à −0.2 (Corr Q5). Même à $\sigma_i$ constant, l'anomalie de corrélation existe et est significative. C'est la preuve empirique que BAC capture quelque chose d'indépendant de la volatilité.
+
+### (iii) Construction de BAC
+
+BAC exploite uniquement la dimension $\hat{\rho}_{im}$, en contrôlant la volatilité via le double-tri.
+
+**Procédure au début de chaque mois :**
+
+1. **Tri par $\hat{\sigma}_i$** : tous les stocks → 5 quintiles de volatilité réalisée (1 an de returns quotidiens).
+2. **Tri par $\hat{\rho}_{im}$ à l'intérieur** : dans chaque quintile de vol $q$, rank par corrélation (5 ans, returns 3 jours) → portefeuille low-corr ou high-corr.
+3. **Pondération par rang** (*rank weighting*) : les poids sont proportionnels à l'écart au rang médian — plus la corrélation s'écarte de la médiane, plus le poids est élevé.
+4. **Scaling $\beta = 1$** : les deux portefeuilles sont (de)leveragés pour avoir $\beta = 1$ à la formation, comme dans BAB.
+5. **Agrégation** : BAC = moyenne equal-weighted des 5 facteurs BAC(q).
+
+**Poids — rank weighting :**
+
+$$w_H^q = k^q (z^q - \bar{z}^q)^+ \qquad w_L^q = k^q (z^q - \bar{z}^q)^-$$
+
+où $z^q$ est le vecteur des rangs de corrélation dans le quintile $q$, $\bar{z}^q$ le rang moyen, et $k^q = 2 / \mathbf{1}^\prime |z^q - \bar{z}^q|$ normalise pour que les poids somment à 1. La notation $(x)^+$ désigne la partie positive d'un vecteur (valeurs négatives remplacées par 0) et $(x)^-$ la partie négative.
+
+**Rendement BAC dans le quintile $q$ :**
+
+$$r_{t+1}^{BAC(q)} = \frac{1}{\beta_t^{L,q}}\left(r_{t+1}^{L,q} - r^f\right) - \frac{1}{\beta_t^{H,q}}\left(r_{t+1}^{H,q} - r^f\right)$$
+
+où $r_{t+1}^{L,q}$ = rendement du portefeuille low-corr dans le quintile $q$ (pondéré par $w_L^q$), $r_{t+1}^{H,q}$ = rendement du portefeuille high-corr (pondéré par $w_H^q$).
+
+**Facteur BAC final :**
+
+$$r_{t+1}^{BAC} = \frac{1}{5} \sum_{q=1}^{5} r_{t+1}^{BAC(q)}$$
+
+### (iv) Construction de BAV
+
+BAV est construit **exactement comme BAC, avec les rôles de corrélation et volatilité inversés** : tri d'abord par corrélation (5 quintiles = colonnes), puis tri par volatilité à l'intérieur de chaque quintile de corrélation.
+
+**Rendement BAV dans le quintile $q$ (où $q$ est un quintile de *corrélation*) :**
+
+$$r_{t+1}^{BAV(q)} = \frac{1}{\beta_t^{L,q}}\left(r_{t+1}^{L,q} - r^f\right) - \frac{1}{\beta_t^{H,q}}\left(r_{t+1}^{H,q} - r^f\right)$$
+
+Ici $L$ = portefeuille **low-vol** (pondéré par rang de vol), $H$ = portefeuille **high-vol**, à corrélation constante — contrairement à BAC où $L$ = low-corr.
+
+**Facteur BAV final :**
+
+$$r_{t+1}^{BAV} = \frac{1}{5} \sum_{q=1}^{5} r_{t+1}^{BAV(q)}$$
+
+<details>
+<summary>Récapitulatif — différence entre BAC et BAV</summary>
+
+| | BAC | BAV |
+|---|---|---|
+| Tri primaire (colonnes) | Volatilité $\hat{\sigma}_i$ | Corrélation $\hat{\rho}_{im}$ |
+| Tri secondaire (long/short) | Corrélation $\hat{\rho}_{im}$ | Volatilité $\hat{\sigma}_i$ |
+| Dimension isolée | $\hat{\rho}_{im}$ | $\hat{\sigma}_i / \hat{\sigma}_m$ |
+| Théorie testée | Contraintes d'effet de levier | Lottery demand |
+| Scaling | $\beta = 1$ pour chaque jambe | Idem |
+| Agrégation | $\frac{1}{5}\sum_q BAC(q)$ | $\frac{1}{5}\sum_q BAV(q)$ |
+
+</details>
+
+### (v) Décomposition formelle : BAB = f(BAC, BAV)
+
+Les auteurs vérifient que BAC et BAV expliquent entièrement BAB via la régression :
+
+$$BAB_t = a_0 + a_1 \, BAC_t + a_2 \, BAV_t + \varepsilon_t$$
+
+| Échantillon | $a_1$ (BAC) | $a_2$ (BAV) | $R^2$ | $a_0$ |
+|---|---|---|---|---|
+| US (1963–2015) | **0.71** | **0.51** | **85%** | ≈ 0 |
+| Global | **0.84** | **0.49** | **96%** | ≈ 0 |
+
+**Conclusion clé** : $R^2 = 96\%$ et les intercepts sont statistiquement nuls. Cela signifie que le BAB n'a **aucune existence propre** en dehors de BAC et BAV. C'est une coquille vide : enlevez l'effet "levier" (BAC) et l'effet "loto" (BAV), il ne reste plus rien.
+
+### (vi) Résultats de BAC — Table IV (US, 1963–2015)
+
+| Quintile vol | Q1 | Q2 | Q3 | Q4 | Q5 | BAC total |
+|---|---|---|---|---|---|---|
+| 5-factor alpha (%/mois) | **0.39** | **0.63** | **0.57** | **0.68** | **1.25** | **0.70** |
+| *(t-stat)* | *(3.56)* | *(5.50)* | *(4.26)* | *(4.08)* | *(4.96)* | *(5.45)* |
+| Sharpe ratio (ann.) | 0.60 | 0.90 | 0.87 | 0.81 | 0.80 | **0.93** |
+| SMB loading | 0.62 | 0.61 | 0.58 | 0.58 | 0.61 | **0.60** |
+
+Alpha de 0.70%/mois (t-stat 5.45), robuste au modèle 5 facteurs de Fama-French. SR annualisé = 0.93. Le loading élevé sur SMB (0.60) reflète que les titres à faible corrélation tendent à être plus petits.
+
+### (vii) Lottery demand — intuition de BAV
+
+> **Action "Bon Père de Famille" vs Action "Ticket de Loto".** L'Action Bon Père de Famille (utilities, basse vol) gagne 0.5% par mois régulièrement. L'Action Loto (biotech, crypto) ne gagne rien 11 mois sur 12, mais peut faire +500% en un mois. Les investisseurs surpaient l'Action Loto par biais psychologique. En moyenne, ces actions ont un rendement misérable car on paie "l'espoir". En vendant les actions volatiles (short BAV) et en achetant les ennuyeuses (long BAV), on encaisse une prime de régularité.
+
+**Pourquoi ça marche aussi sur les large caps** : un titre ne devient "loto" que temporairement, quand sa volatilité explose — annonce de résultats, tweet du patron. Même Tesla ou Meta ont des phases "loto" où les retailers achètent en masse, poussant le prix au-delà de sa valeur fondamentale.
+
+### (viii) BAV — facteurs comportementaux : LMAX, SMAX, IVOL
+
+BAV est implémenté via trois facteurs comportementaux :
+
+**LMAX** (*Low MAX factor*, Bali et al. 2016) : long les stocks avec le plus faible MAX (moyenne des 5 meilleurs returns quotidiens du mois), short les stocks avec le plus haut MAX. Construit via intersection de 6 portefeuilles triés sur taille et MAX.
+
+**SMAX** (*Scaled MAX factor*) : LMAX scalé par la volatilité du stock, ce qui isole l'effet momentum de l'effet volatilité :
+
+$$\text{SMAX}_{i,t} = \frac{\bar{r}^{\,\text{top-5}}_{i,\,t-1}}{\hat{\sigma}_{i,\,t-1}}$$
+
+**IVOL** (*Idiosyncratic Volatility factor*, Ang, Hodrick, Xing & Zhang 2006) : volatilité résiduelle de la régression Fama-French des returns quotidiens du mois :
+
+$$R_{i,t}^{ex} = \alpha_i + \beta_{1i} R_{m,t}^{ex} + \beta_{2i} \, \text{SMB}_t + \beta_{3i} \, \text{HML}_t + \varepsilon_{i,t}$$
+
+Le résidu $\varepsilon_{i,t}$ est la volatilité idiosyncratique. Long low-IVOL, short high-IVOL. Aux US : facteurs Fama-French (1993) ; hors US : facteurs Asness & Frazzini (2013).
+
+### (ix) Résultats et conclusion pratique
+
+- BAC (dimension $\rho$) est corrélé avec la *margin debt* → valide les contraintes d'effet de levier
+- SMAX et IVOL (dimension $\sigma_i$) sont corrélés avec le sentiment des investisseurs → valide la *lottery demand*
+- Les deux effets coexistent de manière indépendante
+
+<details>
+<summary>Implications pour un gestionnaire de fonds</summary>
+
+| Situation | Avant (BAB seul) | Avec BAC + BAV séparés |
+|---|---|---|
+| Vouloir du rendement | Acheter des actions risquées ($\beta$ élevé) | Acheter des actions ennuyeuses avec du levier |
+| Chercher de l'alpha | Chercher le prochain Google | Vendre les titres "loto" surpayés |
+| Contrôle des facteurs | BAB très exposé SMB (small caps) | BAC très exposé SMB, BAV moins — contrôle plus précis |
+
+</details>
+
+---
+
+## 03 — Volatility-Managed Portfolios (VMP)
+
+*Moreira & Muir — Journal of Finance, 2017*
+
+### (i) Idée centrale
+
+Peut-on améliorer **n'importe quel facteur existant** (market, SMB, HML, MOM…) en gérant dynamiquement son exposition selon sa volatilité récente ? Intuition : quand la volatilité est basse, le ratio rendement/risque est favorable → on leverage. Quand la volatilité est haute, on réduit l'exposition.
+
+$$f_t^{*} = \underbrace{\frac{c}{\hat{\sigma}_{t-1}^{2}}}_{S_t} \cdot f_t$$
+
+où $S_t = c / \hat{\sigma}_{t-1}^2$ est le scalaire de gestion, $c$ est une constante choisie pour que $\text{Var}(f_t^*) = \text{Var}(f_t)$ (variance normalisée), et $\hat{\sigma}_{t-1}^2$ est la variance estimée sur les ≈22 jours de trading du mois précédent.
+
+![Comportement du scalaire Sₜ dans le temps](images/factor-low-risk/volatility_vmp_scalaire.png)
+
+*Figure 5. Comportement du scalaire $S_t = c / \hat{\sigma}_{t-1}^2$. Quand la volatilité est basse (zone verte), $S_t > 1$ et le facteur est leveragé. Quand la volatilité est haute (zone rouge), $S_t < 1$ et l'exposition est réduite.*
+
+### (ii) Résultat in-sample
+
+Moreira & Muir montrent que $f_t^*$ améliore le Sharpe Ratio de nombreux facteurs in-sample via la régression :
+
+$$f_t^{*} = \alpha + \beta \, f_t + \varepsilon_t$$
+
+Si $\alpha > 0$, alors $f_t^*$ *expands the mean-variance frontier*. La question centrale est :
+
+$$SR[f_t^{*}, f_t] > SR[f_t] \; ?$$
+
+---
+
+## 04 — Performance des VMP out-of-sample
+
+*Cederburg, O'Doherty, Wang & Yan — Journal of Financial Economics, 2020*
+
+### (i) Le biais ex-post de Moreira & Muir
+
+Le résultat impressionnant de Moreira & Muir (2017) repose sur une faille : la constante $c$ est estimée sur toute la période d'étude. Cela signifie qu'on utilise des données futures pour construire la stratégie. Un investisseur réel ne connaît pas $c$ ex-ante. Le résultat in-sample est donc potentiellement trompeur.
+
+### (ii) Procédure out-of-sample
+
+Cederburg et al. estiment tous les paramètres uniquement sur les données passées via une rolling window de 120 mois :
+
+![Procédure rolling window OOS](images/factor-low-risk/volatility_oos_rolling.png)
+
+*Figure 6. Procédure out-of-sample à fenêtre roulante. Les 120 premiers mois servent à estimer $\hat{c}$, $\hat{\alpha}$, $\hat{\beta}$. Ces paramètres sont figés avant de calculer $f_{t+1}^*$. La fenêtre glisse d'un mois à chaque itération.*
+
+1. Sur les 120 premiers mois : estimer $f_t^*$ → obtenir $\hat{c}$
+2. Régression $f_t^* = \hat{\alpha} + \hat{\beta} f_t + \varepsilon_t$ → obtenir $[\hat{c}, \hat{\alpha}, \hat{\beta}]$
+3. Figer les paramètres — on ne regarde plus jamais les données futures
+4. Pour $t+1$ : calculer $f_{t+1}^*$ avec les paramètres figés
+5. La fenêtre glisse d'un mois → série OOS $\{\hat{f}_{r=1}, \ldots, \hat{f}_{r=T-120}\}$
+
+Test final :
+
+$$SR[f_t^*, f_t] > SR[f_t] \; ?$$
+
+### (iii) Résultat — la nuance OOS
+
+| | In-sample (Moreira & Muir 2017) | Out-of-sample (Cederburg et al. 2020) |
+|---|---|---|
+| SR amélioré ? | Oui, nettement, pour la majorité des facteurs | **Résultat nuancé** — pas systématique |
+| Biais | $c$ calculé ex-post sur toute la période | Estimé uniquement sur données passées |
+| Conclusion | Impressionnant mais optimiste | Amélioration réelle mais plus modeste et variable |
+
+Le message central : les VMP ne sont pas une martingale. L'amélioration du SR in-sample est robuste, mais out-of-sample les résultats dépendent du facteur, de la période, et du choix de la fenêtre d'estimation. C'est pourquoi le test OOS est devenu un **standard de rigueur incontournable** dans cette littérature — et la raison pour laquelle tout papier sur le timing de volatilité doit passer par cette procédure.
+
+---
+
+## Synthèse
+
+Ces quatre papiers forment une progression logique et critique.
+
+| Papier | Message central | Résultat clé |
+|---|---|---|
+| Frazzini & Pedersen (2014) | Anomalie low-risk inexplicable par le CAPM | $\alpha_{BAB} = 0.73\%$/mois, t-stat 7.44, $\beta = 0.00$ |
+| Asness et al. (2020) | BAB est une coquille vide — deux sources distinctes | $BAB = 0.71 \cdot BAC + 0.51 \cdot BAV$, $R^2 = 85\%$ |
+| Moreira & Muir (2017) | La gestion dynamique de vol améliore le SR | $\alpha > 0$ in-sample pour la majorité des facteurs |
+| Cederburg et al. (2020) | Biais ex-post de Moreira & Muir | OOS : résultat réel mais plus modeste et variable |

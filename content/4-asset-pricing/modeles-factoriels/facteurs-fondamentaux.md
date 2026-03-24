@@ -839,3 +839,200 @@ Le professeur soulève quatre critiques majeures :
 ---
 
 > **Résumé.** Value et momentum sont négativement corrélées parce qu'elles réagissent en sens opposé aux chocs de liquidité de financement. Combiner les deux en 50/50 fait passer le Sharpe de ~0.35 à **0.86** en faisant s'effondrer le risque grâce à la covariance négative.
+
+
+# Tests internationaux du modèle à cinq facteurs
+
+> Fama, E.F. & French, K.R. (2017). *International tests of a five-factor asset pricing model*. **Journal of Financial Economics**, 123(3), 441–463.
+
+---
+
+## 1. Motivation et positionnement
+
+Le papier **FF (2015)** propose un modèle à cinq facteurs testé exclusivement sur le marché actions américain. La question naturelle est : *est-ce que ce modèle fonctionne hors des US ?* Ce papier constitue un **out-of-sample test** sur quatre régions :
+
+- **NAM** — North America (US + Canada)
+- **Europe**
+- **Japan**
+- **AP** — Asia Pacific
+
+Deux références justifient pourquoi on ne peut pas simplement extrapoler les résultats US :
+
+- **Fama & French (2008)** — *Dissecting Anomalies* : les résultats en finance sont souvent *sample-specific* ; toute étude hors des US doit citer ce papier.
+- **FF (2012)** — première étude internationale sur size, value et momentum, qui motive la structure en quatre régions retenue ici.
+
+---
+
+## 2. Choix méthodologiques
+
+### (i) Mesure des rendements en dollars
+
+Les auteurs adoptent la perspective d'un investisseur américain et **mesurent tous les rendements en dollars**. Ce choix introduit mécaniquement un *dollar factor* dans les données : convertir les rendements locaux en dollars revient à multiplier l'indice par le taux de change, si bien que les résultats peuvent être en partie *driven* par l'appréciation ou la dépréciation du dollar sur la période.
+
+### (ii) Facteurs locaux vs facteurs globaux
+
+Le papier teste deux architectures :
+
+- **Facteurs globaux** : un seul SMB global, un seul RMW global, etc., construits sur l'ensemble des marchés.
+- **Facteurs locaux** : des facteurs propres à chaque région (SMB_EUR, RMW_JAP, etc.).
+
+La conclusion est sans ambiguïté : **l'intégration des marchés financiers n'est pas assez avancée** pour que les facteurs globaux fonctionnent. Ce sont les facteurs locaux qu'il faut utiliser.
+
+---
+
+## 3. Le modèle et l'objectif des tests
+
+Le modèle testé est une régression time-series pour chaque actif $i$ :
+
+$$
+R_{i,t} - R_{f,t} = \alpha_i + \beta_1 \, \text{MKT}_t + \beta_2 \, \text{SMB}_t + \beta_3 \, \text{HML}_t + \beta_4 \, \text{RMW}_t + \beta_5 \, \text{CMA}_t + \varepsilon_{i,t}
+$$
+
+L'objectif est de tester si $\alpha_i = 0$. Si le modèle décrit correctement la cross-section des rendements espérés, tous les alphas doivent être nuls — tout ce qui est systématique est capté par les cinq facteurs. Un alpha significativement différent de zéro signale un **mispricing systématique** que le modèle ne parvient pas à expliquer.
+
+### Le test GRS
+
+Le **test GRS (Gibbons, Ross & Shanken, 1989)** teste conjointement la nullité de tous les alphas sur les $N = 25$ portefeuilles tests :
+
+$$
+H_0 : \alpha_1 = \alpha_2 = \cdots = \alpha_{25} = 0
+$$
+$$
+H_1 : \exists \, i \text{ tel que } \alpha_i \neq 0 \quad \Rightarrow \quad \text{mispricing systématique}
+$$
+
+Si $p(\text{GRS}) = 0.00$, on rejette $H_0$ : le modèle ne capte pas toute la cross-section. Mais rejeter le GRS ne signifie pas que le modèle est inutile — la question pertinente est de savoir *de combien* les alphas s'écartent de zéro, et si le FF5 fait mieux que le FF3.
+
+---
+
+## 4. Résultats
+
+### (i) Table 1 — Primes de risque moyennes par région
+
+**Panel A** reporte les moyennes des facteurs sur chaque marché.
+
+<div style="display: flex; flex-direction: column; gap: 0.5rem;">
+
+![Table 1 Panel A — Sample averages des facteurs par région](images/facteurs-fondamentaux/ff5_international_table1_panel_a.png)
+
+*Figure 1. Table 1, Panel A. Moyennes des primes de risque (annualisées, en %) et t-statistiques pour les quatre régions.*
+
+</div>
+
+Résultats saillants :
+
+- **NAM** : le facteur de marché est significatif (t-stat ≈ 2.63), mais le **size premium (SMB) est faible** (t-stat ≈ 1.05) — pas d'effet taille robuste.
+- **Japan** : **seul HML est significatif** — ni la profitabilité (RMW) ni l'investissement (CMA) ne semblent pricer les actions japonaises. Le Japon est un cas à part dans toute la littérature internationale.
+
+**Panel B** décompose HML en *small stocks* vs *big stocks*.
+
+<div style="display: flex; flex-direction: column; gap: 0.5rem;">
+
+![Table 1 Panel B — Décomposition HML small vs big](images/facteurs-fondamentaux/ff5_international_table1_panel_b.png)
+
+*Figure 2. Table 1, Panel B. Décomposition de la prime value selon la taille des entreprises.*
+
+</div>
+
+Contrairement à l'intuition habituelle (les anomalies seraient concentrées dans les petites capitalisations), le point estimate de HML est principalement **driven par les big stocks** pour toutes les régions sauf le Japon.
+
+**Panel C** donne les matrices de corrélation des facteurs *entre régions*.
+
+<div style="display: flex; flex-direction: column; gap: 0.5rem;">
+
+![Table 1 Panel C — Corrélations des facteurs entre régions](images/facteurs-fondamentaux/ff5_international_table1_panel_c.png)
+
+*Figure 3. Table 1, Panel C. Matrices de corrélation des facteurs entre les quatre régions.*
+
+</div>
+
+Résultat notable : **la corrélation de RMW entre régions est quasi nulle**. Implication pratique : implémenter une stratégie *long-profitable* indépendamment dans chaque marché produit un portefeuille global dont les composantes sont quasi-orthogonales — c'est une opportunité de diversification quasi gratuite.
+
+---
+
+### (ii) Table 2 — Portefeuilles double-triés
+
+**Panel A** réplique les sorts de FF (2015) sur les données internationales.
+
+<div style="display: flex; flex-direction: column; gap: 0.5rem;">
+
+![Table 2 Panel A — Portefeuilles double-triés](images/facteurs-fondamentaux/ff5_international_table2_panel_a.png)
+
+*Figure 4. Table 2, Panel A. Rendements moyens des portefeuilles triés sur Size × B/M, Size × OP et Size × Inv pour chaque région.*
+
+</div>
+
+Les rendements moyens augmentent bien lorsqu'on passe des groupes 3–5 (big) vers les groupes 1–2 (small), confirmant un effet taille. Ils augmentent également avec le B/M et la profitabilité. **Mais ce schéma ne tient pas pour tous les groupes** — notamment les groupes 1–2 en Europe — et le **Japon présente des patterns très faibles** pour la profitabilité et l'investissement.
+
+Le problème identifié dans FF (2015) persiste à l'international : les **small stocks non-profitables qui investissent beaucoup** génèrent des rendements anormalement bas que le modèle ne parvient pas à expliquer.
+
+---
+
+### (iii) Table 3 — Régressions des facteurs (test de redondance)
+
+<div style="display: flex; flex-direction: column; gap: 0.5rem;">
+
+![Table 3 — Factor regressions](images/facteurs-fondamentaux/ff5_international_table3.png)
+
+*Figure 5. Table 3. Régressions de chaque facteur sur les quatre autres, par région. L'intercept teste la redondance.*
+
+</div>
+
+Dans **FF (2015)**, la régression de HML sur les quatre autres facteurs donnait un intercept significatif → conclusion : **HML est redondant** une fois qu'on contrôle RMW et CMA.
+
+Le résultat est différent à l'international. Pour certains marchés, l'intercept de HML est négatif (par exemple $-0.28$) et non significatif → **HML n'est plus redondant**. En revanche, c'est désormais le facteur **CMA (investissement) qui est *on shaky ground*** — son rôle marginal est remis en question selon les régions. Les patterns diffèrent sensiblement d'un marché à l'autre.
+
+---
+
+### (iv) Table 4 — Test GRS : FF3 vs FF5
+
+<div style="display: flex; flex-direction: column; gap: 0.5rem;">
+
+![Table 4 — GRS statistics](images/facteurs-fondamentaux/ff5_international_table4.png)
+
+*Figure 6. Table 4. Statistiques GRS et p-values pour le modèle FF3 et le modèle FF5, sur différents ensembles de portefeuilles tests, par région.*
+
+</div>
+
+Pour NAM, sur les 25 portefeuilles $\text{Size} \times \text{B/M}$ :
+
+| Modèle | GRS | p-value |
+|--------|-----|---------|
+| FF3    | 2.85 | 0.00   |
+| FF5    | 2.34 | ≈ 0.00 |
+
+Le FF5 **améliore systématiquement le GRS** par rapport au FF3, mais le test reste rejeté. L'interprétation correcte n'est pas que le modèle est mauvais — avec 25 actifs tests, on rejette presque toujours le GRS. La question pertinente est l'**amélioration économique** : les alphas résiduels sont-ils plus petits et moins systématiques avec le FF5 ? La réponse est oui pour NAM, Europe et AP. Pour le Japon, le gain est plus limité.
+
+---
+
+### (v) Table 5 — À compléter
+
+<div style="display: flex; flex-direction: column; gap: 0.5rem;">
+
+![Table 5 — partie 1](images/facteurs-fondamentaux/ff5_international_table5.png)
+
+*Figure 7. Table 5, partie 1.*
+
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 0.5rem;">
+
+![Table 5 — partie 2](images/facteurs-fondamentaux/ff5_international_table5_part2.png)
+
+*Figure 8. Table 5, partie 2.*
+
+</div>
+
+---
+
+## 5. Conclusions
+
+Le modèle FF5 constitue une amélioration substantielle sur le FF3 pour **NAM, Europe et Asia Pacific** — il capte les patterns de B/M, profitabilité et investissement dans les rendements moyens. Trois points importants à retenir :
+
+1. **Les facteurs globaux ne fonctionnent pas** — l'intégration des marchés financiers est insuffisante pour un modèle unifié. Il faut des facteurs locaux par région.
+
+2. **Le Japon est un cas à part** : seul HML est robustement pricé ; la profitabilité et l'investissement n'ont pas de pouvoir explicatif significatif sur les rendements japonais.
+
+3. **Le facteur value (HML) n'est plus redondant** à l'international, contrairement à la conclusion de FF (2015). C'est en revanche le facteur **investissement (CMA)** dont le rôle apparaît fragile selon les régions.
+
+Le problème principal du modèle — déjà identifié dans FF (2015) — persiste : les **petites entreprises non-profitables qui investissent beaucoup** génèrent des rendements que le modèle sous-estime systématiquement.

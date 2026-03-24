@@ -648,3 +648,194 @@ Ce résultat est la preuve que les trois variables capturent des dimensions **in
 Le FF5 améliore le FF3 sur deux fronts : il absorbe les anomalies de profitabilité et d'investissement que le FF3 laissait inexpliquées, et il fournit une justification théorique unifiée via le DDM. Le prix à payer est la complexité — cinq facteurs au lieu de trois, et une construction par triple tri plus délicate à répliquer.
 
 > **Ce que le FF5 ne résout pas.** Le GRS rejette encore le FF5 — il reste des alphas significatifs, notamment sur les portefeuilles de petites capitalisations et les portefeuilles extrêmes. Le modèle est meilleur que le FF3, pas parfait. Le momentum (WML) en particulier reste une anomalie non capturée, ce qui motivera des extensions ultérieures.
+
+---
+
+## Asness, Moskowitz & Pedersen (2013) — Value and Momentum Everywhere
+
+Le papier étudie deux stratégies d'investissement sur **8 classes d'actifs** simultanément : la stratégie **value** (acheter des actifs sous-évalués) et la stratégie **momentum** (acheter des actifs qui ont bien performé récemment).
+
+La découverte centrale : ces deux stratégies sont **négativement corrélées**. Les auteurs exploitent cette propriété pour construire un meilleur portefeuille. Le fonds **AQR** applique cette stratégie en conditions réelles.
+
+> Tables à regarder en priorité : **I, II, IV**.
+
+---
+
+### (i) Le concept clé : pourquoi la corrélation négative est précieuse
+
+Le rendement d'un portefeuille combinant deux stratégies $A$ et $B$ :
+
+$$R_p = a \cdot R_A + (1-a) \cdot R_B$$
+
+La variance (= le risque) de ce portefeuille :
+
+$$\text{Var}(R_p) = a^2 \sigma^2_A + (1-a)^2 \sigma^2_B + 2a(1-a)\underbrace{\text{Cov}(A,B)}_{\text{clé}}$$
+
+Le terme de covariance est déterminant :
+
+- Si $A$ et $B$ sont **positivement corrélés** → covariance positive → la diversification ne sert à rien.
+- Si $A$ et $B$ sont **négativement corrélés** → covariance négative → le risque **baisse**, même avec seulement 2 actifs.
+
+C'est exactement le cas ici : combiner value et momentum **réduit le risque sans sacrifier le rendement espéré**.
+
+---
+
+### (ii) Les données utilisées
+
+Le papier couvre 8 classes d'actifs : actions US, UK, Europe et Japon (grandes capitalisations uniquement), futures sur 18 indices actions mondiaux, devises, obligations gouvernementales, et matières premières.
+
+Les small stocks sont exclus car trop illiquides pour implémenter ces stratégies en pratique. Les auteurs construisent au total **48 portefeuilles tests** : 3 groupes × 2 stratégies × 8 classes d'actifs.
+
+> ⚠️ **Limite importante.** Risque de *cherry picking* sur le choix des 8 classes d'actifs — voir section (vii).
+
+---
+
+### (iii) Construction des portefeuilles
+
+Pour chaque classe d'actifs, tous les actifs sont triés en 3 groupes égaux. **P1** regroupe les "perdants", **P2** le milieu, **P3** les "gagnants". Deux portefeuilles zero-cost sont construits :
+
+- **P3 − P1** : long P3, short P1 — le spread brut.
+- **Factor** : même logique mais chaque actif est pondéré par son rang (*rank-weighted*) — version plus lisse.
+
+**Pour les actions — Value.** Ratio book-to-market : valeur comptable laggée de 6 mois divisée par le prix de marché actuel. Ratio élevé → sous-évalué → on achète. Ratio faible → surévalué → on vend.
+
+**Pour les actions — Momentum.** Performance cumulée de $t-12$ à $t-2$ (le dernier mois est exclu pour éviter le *mean reversion* de court terme). On achète les winners, on vend les losers.
+
+**Pour les devises et matières premières — Value.** Pas de ratio B/M possible. Les auteurs utilisent le rendement sur 5 ans inversé. Si un actif vaut 50 à $t = -5$ ans et 20 aujourd'hui :
+
+$$\text{rendement}_{5\text{ans}} = \frac{20 - 50}{50} = -60\% \implies \text{proxy value} = +60\%$$
+
+On trie tous les actifs ainsi, on achète les plus "bon marché", on vend les plus "chers".
+
+---
+
+### (iv) Résultats — Table I
+
+![Table I — Performance des portefeuilles value et momentum](images/facteurs-fondamentaux/value_momentum_table1.png)
+
+*Figure 1. Performance des portefeuilles value, momentum et 50/50 sur les actions US (01/1972–07/2011). Rendements annualisés en excès du T-bill.*
+
+![Résumé Table I](images/facteurs-fondamentaux/value_momentum_cards_table1.png)
+
+Le **4.6 %** et le **t-stat de 3.98** (colonnes P3−P1) et le **5.8 %** avec **t-stat 5.40** (colonne Factor) correspondent au portefeuille 50/50.
+
+L'observation cruciale : le t-stat du 50/50 (5.40) est **bien plus élevé** que celui de chaque stratégie prise séparément (1.66 et 2.84), alors que le rendement de 5.8 % est juste la moyenne des deux. L'explication :
+
+$$t\text{-stat} = \frac{\mathbb{E}[R_p]}{\sigma(R_p)} \qquad \text{avec} \qquad \sigma^2(R_p) = \frac{1}{4}\sigma^2_V + \frac{1}{4}\sigma^2_M + \frac{1}{2}\underbrace{\text{Cov}(V,M)}_{<\, 0}$$
+
+La covariance négative **soustrait** du risque total : l'écart-type s'effondre de ~15 % à 6.8 %, le t-stat monte mécaniquement, et le Sharpe ratio passe de ~0.35 pour chaque stratégie seule à **0.86 pour le 50/50**. C'est l'argument central du papier.
+
+---
+
+### (v) Structure des corrélations — Table II
+
+#### Pourquoi $0.68$ et pas $1$ sur la diagonale ?
+
+Dans une matrice de corrélation classique, la diagonale est toujours égale à 1 car on compare un actif à lui-même. Ici, ce n'est pas le cas. Chaque cellule compare la **série de rendement moyenne** d'une stratégie agrégée sur plusieurs marchés. Le chiffre $0.68$ pour "Stock Value" est la corrélation entre la stratégie value aux USA et la moyenne des stratégies value au UK, en Europe et au Japon.
+
+**Interprétation business.** Cela prouve que la value est un facteur **mondial** ("Everywhere"). Si le chiffre était proche de 0, cela voudrait dire que la value est un phénomène purement local.
+
+![Table II — Matrice de corrélations](images/facteurs-fondamentaux/value_momentum_table2.png)
+
+*Figure 2. Matrice de corrélations des rendements moyens entre stratégies value et momentum, toutes classes d'actifs confondues. \* = statistiquement significatif.*
+
+#### La structure en block matrix
+
+La matrice révèle une organisation très symétrique en trois blocs :
+
+- **Bloc haut-gauche positif ($0.68$).** Toutes les stratégies value bougent ensemble à travers le monde → la value est un phénomène global.
+- **Bloc bas-droit positif ($0.65$).** Toutes les stratégies momentum bougent ensemble → même logique.
+- **Bloc haut-droit négatif ($-0.53$).** Value et momentum vont systématiquement dans des directions opposées — c'est le cœur du papier.
+
+> Cette structure en blocs suggère l'existence d'un **facteur commun unique** qui drive les deux familles dans des directions opposées, d'où l'idée naturelle d'utiliser une **PCA**.
+
+---
+
+### (vi) Analyse en composantes principales (PCA)
+
+La PCA sur les 48 stratégies confirme que le **PC1** explique environ $0.4$ de la variance pour les stocks US et UK.
+
+- **Chargements (*loadings*).** Le PC1 charge **positivement sur le momentum** et **négativement sur la value**.
+- **Identification du facteur.** Les auteurs identifient ce facteur sous-jacent unique comme étant la **liquidité de financement** (*funding liquidity*).
+- **Logique économique.** Le momentum est une stratégie qui nécessite du levier et beaucoup de transactions. En cas de choc de liquidité (quand le crédit se resserre), le momentum est massivement liquidé, tandis que la value (actifs délaissés) réagit différemment.
+
+---
+
+### (vii) Les facteurs macro n'expliquent rien — Table III
+
+![Table III — Régression sur facteurs macro](images/facteurs-fondamentaux/value_momentum_table3.png)
+
+*Figure 3. Régression des rendements value et momentum sur des facteurs macroéconomiques (PIB, term spread, inflation…). Les t-stats sont proches de 0 dans l'ensemble.*
+
+Les t-stats proches de 0 et les $R^2$ très faibles confirment que les facteurs macro n'expliquent ni le value premium ni le momentum premium. Ce résultat n'est pas une surprise — c'est connu dans la littérature depuis longtemps.
+
+---
+
+### (viii) La vraie explication : la liquidité de financement — Table IV
+
+La **funding liquidity** n'est pas la liquidité de marché (bid-ask spread). C'est la facilité avec laquelle les investisseurs peuvent emprunter pour financer leurs positions. Elle est mesurée via le **TED spread** (LIBOR − T-bills) et d'autres proxies de stress sur les marchés de financement.
+
+Le TED spread est très autocorrélé : si le spread est élevé aujourd'hui, il le sera probablement demain. Pour extraire les chocs purs, les auteurs modélisent un AR(2) :
+
+$$R^{TED}_t = \alpha + \gamma_1 R^{TED}_{t-1} + \gamma_2 R^{TED}_{t-2} + \varepsilon_t$$
+
+Le résidu $\varepsilon_t$ est le **choc de liquidité pur**, débarrassé de toute autocorrélation.
+
+![TED spread historique](images/facteurs-fondamentaux/value_momentum_ted_spread.png)
+
+*Figure 4. TED spread de 1990 à 2011. Le spread est quasi-plat pendant des années, puis explose lors des crises (LTCM 1998, crise financière 2008) avant de redescendre lentement — comportement typique d'un processus autocorrélé.*
+
+Ils font ensuite une PCA sur l'ensemble des mesures de liquidité (TED spread, LIBOR spread, etc.) et gardent le premier composant principal comme proxy unique — la PCA élimine le bruit et retient ce qui est **commun** à toutes ces séries.
+
+![Table IV — Régression sur la liquidité de financement](images/facteurs-fondamentaux/value_momentum_table4.png)
+
+*Figure 5. Régression des rendements value et momentum sur les mesures de liquidité de financement. La value est négativement corrélée aux chocs, le momentum positivement.*
+
+**Résultats clés.**
+
+- La value est **négativement** corrélée aux chocs de liquidité : quand le crédit se resserre, la value souffre.
+- Le momentum est **positivement** corrélé aux mêmes chocs.
+- Le PC de funding liquidity est le driver commun des deux stratégies dans des directions opposées, aussi bien au niveau US que global.
+
+![Figure 1 — Chocs de liquidité historiques](images/facteurs-fondamentaux/value_momentum_figure1.png)
+
+*Figure 6. Épisodes historiques de stress de liquidité de financement et leur impact sur les stratégies value et momentum.*
+
+---
+
+### (ix) Le nouveau modèle de pricing — Figure 6
+
+Pour tester leur modèle, les auteurs utilisent les 48 stratégies comme actifs tests. Pour chaque stratégie, les régresseurs sont le facteur marché et toutes les autres stratégies sauf celle testée.
+
+Sur chaque graphe, l'axe X est le **rendement prédit** par le modèle et l'axe Y est le **rendement réel observé**. Si le modèle était parfait, tous les points seraient sur la diagonale.
+
+![Figure 2 — Tests de pricing cross-sectionnel](images/facteurs-fondamentaux/value_momentum_figure2.png)
+
+*Figure 7. Rendements réels vs rendements prédits pour les 48 portefeuilles value et momentum, sous quatre modèles : CAPM, Fama-French 4 facteurs, Fama-French 6 facteurs, et AMP 3 facteurs.*
+
+| Modèle | $R^2$ | Alpha moyen |
+|---|---|---|
+| CAPM | 0.45 | Élevé |
+| Fama-French 4 facteurs | 0.55 | Significatif |
+| Fama-French 6 facteurs | 0.60 | Significatif |
+| **AMP 3 facteurs** | **0.71** | **Plus faible** |
+
+Le modèle AMP atteint $R^2 = 0.71$ — meilleur fit parmi les quatre. Cependant, tous les modèles ont un **GRS F-stat significatif** ($p = 0$) : aucun ne capture parfaitement tous les rendements, les alphas restent non nuls. Le message des auteurs est que leur modèle est le moins mauvais, mais qu'aucun modèle ne clôt complètement le débat.
+
+---
+
+### (x) Limites du papier
+
+Le professeur soulève quatre critiques majeures :
+
+1. **Réplication impossible.** Il n'a pas réussi à reproduire exactement les résultats des auteurs, ce qui pose une question de fiabilité des données originales.
+
+2. **Risque de *cherry picking*.** Il est possible que les auteurs aient sélectionné les 8 classes d'actifs qui fonctionnaient le mieux pour obtenir une matrice de corrélation aussi "propre". Beaucoup de papiers en sciences sociales ne se répliquent pas sur un échantillon plus large.
+
+3. **Saut interprétatif sur le PC1.** Le lien entre le facteur mathématique PC1 et la *funding liquidity* n'est pas explicitement démontré dans une table de données — c'est une interprétation théorique des auteurs.
+
+4. **Biais de capitalisation.** L'exclusion des *small stocks* limite la portée des résultats aux grandes capitalisations uniquement, ignorant une partie du marché où la liquidité est pourtant cruciale.
+
+---
+
+> **Résumé.** Value et momentum sont négativement corrélées parce qu'elles réagissent en sens opposé aux chocs de liquidité de financement. Combiner les deux en 50/50 fait passer le Sharpe de ~0.35 à **0.86** en faisant s'effondrer le risque grâce à la covariance négative.

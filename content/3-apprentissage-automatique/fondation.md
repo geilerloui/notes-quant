@@ -89,51 +89,7 @@ Trop simple, le modèle sous-fit (*underfitting*, fort biais). Trop complexe, il
 
 ---
 
-## 4. La régularisation
-
-### (i) Principe
-
-Plutôt que choisir entre modèle simple et modèle complexe, on prend un modèle flexible et on **pénalise la complexité** via un hyperparamètre $\lambda$. On part de la loss OLS :
-
-$$\mathcal{L}(\theta) = \frac{1}{m}\sum_{i=1}^m \left(h_\theta(x^{(i)}) - y^{(i)}\right)^2$$
-
-### (ii) Ridge — pénalité L2
-
-$$\mathcal{L}_{\text{Ridge}}(\theta) = \frac{1}{m}\sum_{i=1}^m \left(h_\theta(x^{(i)}) - y^{(i)}\right)^2 + \lambda \sum_{j=1}^p \theta_j^2$$
-
-En dérivant et annulant :
-
-$$\hat{\theta}_{\text{Ridge}} = (X^TX + \lambda I)^{-1}X^Ty$$
-
-### (iii) Lasso — pénalité L1
-
-$$\mathcal{L}_{\text{Lasso}}(\theta) = \frac{1}{m}\sum_{i=1}^m \left(h_\theta(x^{(i)}) - y^{(i)}\right)^2 + \lambda \sum_{j=1}^p |\theta_j|$$
-
-L'effet de $\lambda$ dans les deux cas :
-- $\lambda \to 0$ : on retrouve OLS (faible biais, forte variance).
-- $\lambda \to \infty$ : tous les $\theta_j \to 0$, le modèle prédit une constante (fort biais, variance nulle).
-- $\lambda$ intermédiaire : on contracte les coefficients, introduisant un peu de biais pour réduire la variance.
-
-### (iv) Différence géométrique
-
-La solution régularisée est le premier point de contact entre les ellipses de la loss OLS et la contrainte. La différence entre Ridge et Lasso est géométrique :
-
-<div style="text-align: center;">
-
-![Figure 2. Géométrie Ridge vs Lasso. À gauche, la contrainte sphérique de Ridge provoque une tangence hors des axes : les coefficients sont contractés mais non nuls. À droite, la contrainte losange de Lasso provoque une tangence sur un coin : certains coefficients sont exactement nuls.](images/fondation/im2.png)
-
-</div>
-
-Figure 2. Géométrie Ridge vs Lasso. À gauche, la contrainte sphérique de Ridge provoque une tangence hors des axes : les coefficients sont contractés mais non nuls. À droite, la contrainte losange de Lasso provoque une tangence sur un coin : certains coefficients sont exactement nuls.
-
-- **Ridge** : tangence rarement sur un axe → $\theta_j \neq 0$, coefficients contractés vers zéro.
-- **Lasso** : coins sur les axes → $\theta_j = 0$ exactement. **Lasso fait de la sélection de variables automatique.**
-
-Ridge est préférable quand beaucoup de features contribuent un peu. Lasso quand seules quelques features comptent vraiment.
-
----
-
-## 5. Au-delà du trade-off classique : le double descent
+## 4. Au-delà du trade-off classique : le double descent
 
 La courbe en U est le cadre classique. Belkin et al. (2019) montrent qu'elle est incomplète. Si on continue à augmenter la complexité au-delà du **seuil d'interpolation** — le point où le modèle fit parfaitement les données d'entraînement (erreur train $= 0$) — l'erreur de test explose puis **redescend** :
 
@@ -151,7 +107,7 @@ C'est une **régularisation implicite** — par opposition au $\lambda$ explicit
 
 ---
 
-## 6. La limite du cadre : interpolation vs extrapolation
+## 5. La limite du cadre : interpolation vs extrapolation
 
 Tout ce qu'on a construit repose sur une hypothèse implicite fondamentale : les données de test sont tirées de la **même distribution** que les données d'entraînement — l'hypothèse i.i.d. (*independent and identically distributed*).
 
@@ -176,7 +132,7 @@ Le terme générique pour ce phénomène est le **distribution shift**. C'est un
 
 ---
 
-## 7. Évaluer la généralisation : le sampling
+## 6. Évaluer la généralisation : le sampling
 
 ### (i) Train / Validation / Test
 
@@ -233,7 +189,6 @@ Dans tous ces cas le modèle semble excellent en CV et s'effondre en production.
 | EPE = biais² + variance + $\sigma^2$ | Décompose l'erreur de prédiction en trois termes |
 | Biais | Erreur structurelle du modèle — indépendante de la taille des données |
 | Variance | Sensibilité aux fluctuations des données d'entraînement |
-| Ridge / Lasso | Contrôlent le trade-off via $\lambda$ — contraction vs sélection |
 | Double descent | Au-delà du seuil d'interpolation, régularisation implicite par le minimum norm |
 | Hypothèse i.i.d. | Condition de validité du cadre — extrapolation et distribution shift l'invalident |
 | Train / Val / Test + CV | Infrastructure pour estimer honnêtement la généralisation |

@@ -129,7 +129,7 @@ $$\text{VIF}_j = \frac{1}{1 - R^2_j}$$
 
 où $R^2_j$ est le $R^2$ de la régression de $X_j$ sur tous les autres prédicteurs. Si $X_j$ est parfaitement expliqué par les autres, $R^2_j \to 1$ et $\text{VIF}_j \to \infty$. Un $\text{VIF}_j > 10$ est un signal d'alarme.
 
-**Remèdes.** Ridge et Lasso introduisent une pénalité qui stabilise les coefficients au prix d'un léger biais — c'est le compromis biais-variance. On en parlera dans un chapitre dédié.
+**Remèdes.** Ridge et Lasso introduisent une pénalité qui stabilise les coefficients au prix d'un léger biais — c'est le compromis biais-variance. Voir section 5.
 
 ![Multicolinéarité](images/regression-lineaire/im3.png)
 
@@ -248,3 +248,47 @@ $$\hat{y}^* \pm 1.96 \cdot \hat{\sigma}\sqrt{1 + \frac{1}{n} + \frac{(x^* - \bar
 La seule différence entre les deux formules est le $+1$ sous la racine dans l'IP. Ce $1$ représente la variance du bruit $\varepsilon^*$ — irréductible peu importe la taille de l'échantillon. Même avec $n \to \infty$, on estimerait $\alpha + \beta x^*$ parfaitement, mais une observation individuelle resterait dispersée autour de cette moyenne. **On ne peut pas prédire le bruit.**
 
 Les deux intervalles s'élargissent aussi quand $x^*$ s'éloigne de $\bar{x}$ — on extrapole loin des données, l'estimation devient moins fiable.
+
+---
+
+## 5. Régularisation
+
+### (i) Principe
+
+La multicolinéarité fait exploser la variance de $\hat{\beta}$ — les coefficients sont instables. Plutôt que choisir entre modèle simple et modèle complexe, on prend un modèle flexible et on **pénalise la complexité** via un hyperparamètre $\lambda$. On part de la loss OLS :
+
+$$\mathcal{L}(\theta) = \frac{1}{m}\sum_{i=1}^m \left(h_\theta(x^{(i)}) - y^{(i)}\right)^2$$
+
+### (ii) Ridge — pénalité L2
+
+$$\mathcal{L}_{\text{Ridge}}(\theta) = \frac{1}{m}\sum_{i=1}^m \left(h_\theta(x^{(i)}) - y^{(i)}\right)^2 + \lambda \sum_{j=1}^p \theta_j^2$$
+
+En dérivant et annulant :
+
+$$\hat{\theta}_{\text{Ridge}} = (X^TX + \lambda I)^{-1}X^Ty$$
+
+### (iii) Lasso — pénalité L1
+
+$$\mathcal{L}_{\text{Lasso}}(\theta) = \frac{1}{m}\sum_{i=1}^m \left(h_\theta(x^{(i)}) - y^{(i)}\right)^2 + \lambda \sum_{j=1}^p |\theta_j|$$
+
+L'effet de $\lambda$ dans les deux cas :
+- $\lambda \to 0$ : on retrouve OLS (faible biais, forte variance).
+- $\lambda \to \infty$ : tous les $\theta_j \to 0$, le modèle prédit une constante (fort biais, variance nulle).
+- $\lambda$ intermédiaire : on contracte les coefficients, introduisant un peu de biais pour réduire la variance.
+
+### (iv) Différence géométrique
+
+La solution régularisée est le premier point de contact entre les ellipses de la loss OLS et la contrainte. La différence entre Ridge et Lasso est géométrique :
+
+<div style="text-align: center;">
+
+![Figure 5. Géométrie Ridge vs Lasso. À gauche, la contrainte sphérique de Ridge provoque une tangence hors des axes : les coefficients sont contractés mais non nuls. À droite, la contrainte losange de Lasso provoque une tangence sur un coin : certains coefficients sont exactement nuls.](images/regression-lineaire/im5.png)
+
+</div>
+
+*Figure 5. Géométrie Ridge vs Lasso. À gauche, la contrainte sphérique de Ridge provoque une tangence hors des axes : les coefficients sont contractés mais non nuls. À droite, la contrainte losange de Lasso provoque une tangence sur un coin : certains coefficients sont exactement nuls.*
+
+- **Ridge** : tangence rarement sur un axe → $\theta_j \neq 0$, coefficients contractés vers zéro.
+- **Lasso** : coins sur les axes → $\theta_j = 0$ exactement. **Lasso fait de la sélection de variables automatique.**
+
+Ridge est préférable quand beaucoup de features contribuent un peu. Lasso quand seules quelques features comptent vraiment.

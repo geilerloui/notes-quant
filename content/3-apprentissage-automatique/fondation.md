@@ -48,7 +48,9 @@ $$\boxed{\text{EPE} = \underbrace{\mathbb{E}\left[(f(x) - \hat{f}(x))^2\right]}_
 
 ## 3. Évaluer la généralisation : le sampling
 
-L'EPE est une espérance théorique — en pratique, on ne peut pas la calculer directement. Comment l'estimer ? C'est précisément le rôle du sampling : découper les données pour estimer honnêtement $\mathbb{E}[(Y - \hat{f}(x))^2]$ sur des observations que le modèle n'a pas vues.
+L'EPE est défini comme une espérance sur **toutes les paires $(x, y)$ possibles** de la vraie distribution, et sur **tous les datasets d'entraînement possibles**. En pratique, on n'a ni la vraie distribution ni une infinité de datasets — on a un seul jeu de données fini. On ne peut donc jamais calculer l'EPE directement.
+
+Le sampling est la réponse à ce problème : on réserve une partie des données que le modèle ne verra pas pendant l'entraînement, puis on mesure l'erreur dessus. Cette moyenne empirique $\frac{1}{n_{\text{test}}}\sum(y_i - \hat{f}(x_i))^2$ est un estimateur de $\mathbb{E}[(Y - \hat{f}(x))^2]$ — c'est l'EPE estimé sur des données nouvelles, ce qu'on cherche à minimiser.
 
 ### (i) Train / Validation / Test
 

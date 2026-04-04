@@ -44,6 +44,12 @@ Le terme croisé est nul car $\varepsilon$ est indépendant de $\hat{f}$ et $\ma
 
 $$\boxed{\text{EPE} = \underbrace{\mathbb{E}\left[(f(x) - \hat{f}(x))^2\right]}_{\text{erreur réductible}} + \underbrace{\sigma^2}_{\text{irréductible}}}$$
 
+**Remarque — double espérance.** $\hat{f}$ dépend du dataset d'entraînement $\mathcal{D}$, qui est lui-même aléatoire. L'espérance porte donc sur deux sources d'aléa distinctes : les nouvelles paires $(x, y)$ tirées de la vraie distribution, *et* le tirage de $\mathcal{D}$. En notation complète :
+
+$$\text{EPE} = \mathbb{E}_{\mathcal{D}}\!\left[\,\mathbb{E}_{(x,\, y)}\!\left[(y - \hat{f}_{\mathcal{D}}(x))^2\right]\right]$$
+
+On écrit souvent $\mathbb{E}[\cdot]$ en omettant les indices pour alléger, mais cette structure double est cruciale pour comprendre pourquoi le sampling (§3) est nécessaire.
+
 ---
 
 ## 3. Évaluer la généralisation : le sampling

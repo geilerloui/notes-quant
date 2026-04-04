@@ -126,6 +126,21 @@ Considérons un portefeuille équipondéré de $N$ actions (poids $1/N$). En dé
 
 $$\text{Var}(R_p) = \frac{1}{N} \cdot \overline{\text{Var}} + \left(1 - \frac{1}{N}\right) \cdot \overline{\text{Cov}}$$
 
+<details>
+<summary>D'où vient cette formule ? (dérivation depuis Markowitz)</summary>
+
+C'est la formule de Markowitz $\text{Var}(R_p) = \sum_i \sum_j w_i w_j \sigma_{ij}$ avec $w_i = 1/N$ pour tout $i$ :
+
+$$\text{Var}(R_p) = \frac{1}{N^2} \sum_i \sum_j \sigma_{ij} = \frac{1}{N^2}\left[\sum_i \sigma_{ii} + \sum_{i \neq j} \sigma_{ij}\right] = \frac{1}{N^2}\left[N\,\overline{\text{Var}} + N(N-1)\,\overline{\text{Cov}}\right]$$
+
+$$= \frac{1}{N}\,\overline{\text{Var}} + \frac{N-1}{N}\,\overline{\text{Cov}} = \frac{1}{N}\,\overline{\text{Var}} + \left(1 - \frac{1}{N}\right)\overline{\text{Cov}}$$
+
+où $\overline{\text{Var}} = \frac{1}{N}\sum_i \sigma_i^2$ est la variance moyenne et $\overline{\text{Cov}} = \frac{1}{N(N-1)}\sum_{i \neq j} \sigma_{ij}$ est la covariance moyenne.
+
+**Lien avec la décomposition systématique/idiosyncratique.** Sous le Single Index Model, $\text{Cov}(R_i, R_j) = \beta_i \beta_j \sigma_m^2$ (les résidus $\varepsilon_i$ sont indépendants). Donc $\overline{\text{Cov}} = \bar\beta^2 \sigma_m^2$ — c'est exactement le risque systématique. Le plancher atteint quand $N \to \infty$ n'est pas un artefact : c'est la covariance commune à tous les actifs via le marché.
+
+</details>
+
 Quand $N \to \infty$ :
 - Le terme $\frac{1}{N} \cdot \overline{\text{Var}} \to 0$ — le risque idiosyncratique disparaît car les $\varepsilon_i$ indépendants s'annulent mutuellement.
 - Le terme $\left(1 - \frac{1}{N}\right) \cdot \overline{\text{Cov}} \to \overline{\text{Cov}}$ — les covariances convergent vers leur moyenne, c'est le plancher systématique.

@@ -66,15 +66,19 @@ Quand le dataset est petit, sacrifier 20% en validation est coûteux. La **k-fol
 
 <div style="text-align: center;">
 
-![Figure 1. K-fold cross-validation (k=5). À chaque fold, un bloc différent sert de validation (orange) et les quatre autres servent d'entraînement (vert). Chaque observation passe exactement une fois en validation. Le score CV est la moyenne des k erreurs.](images/fondation/im4.png)
+![K-fold cross-validation, k=5](images/fondation/im4.png)
 
 </div>
 
-Figure 1. K-fold cross-validation (k=5). À chaque fold, un bloc différent sert de validation (orange) et les quatre autres servent d'entraînement (vert). Chaque observation passe exactement une fois en validation. Le score CV est la moyenne des k erreurs.
+*Figure 1. K-fold cross-validation (k=5). À chaque fold, un bloc différent sert de validation (orange) et les quatre autres servent d'entraînement (vert). Chaque observation passe exactement une fois en validation.*
 
-La moyenne des k erreurs est une estimation empirique de l'EPE. L'écart-type entre les folds donne une idée de la variance de $\hat{f}$ — un modèle instable produit des erreurs très dispersées selon les folds.
+Le score CV est la moyenne des k erreurs de validation :
 
-En pratique pour choisir $\lambda$ : on fait tourner la CV pour chaque valeur candidate, on garde celle qui minimise l'erreur CV, puis on ré-entraîne le modèle final sur **tout** le train set avec ce $\lambda$. Le test set n'a toujours pas été touché.
+$$\widehat{\text{EPE}}_{\text{CV}} = \frac{1}{k}\sum_{j=1}^{k} \underbrace{\frac{1}{|\mathcal{V}_j|}\sum_{i \in \mathcal{V}_j}\left(y_i - \hat{f}^{-j}(x_i)\right)^2}_{\text{MSE sur le fold } j}$$
+
+où $\hat{f}^{-j}$ est le modèle entraîné sur tous les folds sauf $j$, et $\mathcal{V}_j$ est l'ensemble de validation du fold $j$. Chaque terme est un MSE sur données non vues — en moyennant sur $k$ training sets différents, on approche la double espérance de l'EPE complet. L'écart-type entre les $k$ termes donne une idée de la variance de $\hat{f}$ — un modèle instable produit des erreurs très dispersées selon les folds.
+
+En pratique pour choisir $\lambda$ : on fait tourner la CV pour chaque valeur candidate, on garde celle qui minimise $\widehat{\text{EPE}}_{\text{CV}}$, puis on ré-entraîne le modèle final sur **tout** le train set avec ce $\lambda$. Le test set n'a toujours pas été touché.
 
 ### (iii) Walk-forward validation pour les séries temporelles
 
@@ -82,11 +86,11 @@ Le k-fold suppose que les observations sont échangeables — qu'on peut les mé
 
 <div style="text-align: center;">
 
-![Figure 2. Walk-forward validation. Le train set grandit à chaque split, la validation est toujours dans le futur par rapport au train. Le test set est bloqué à la fin de la série — la période la plus récente, celle qui ressemble le plus à la production.](images/fondation/im5.png)
+![Walk-forward validation](images/fondation/im5.png)
 
 </div>
 
-Figure 2. Walk-forward validation. Le train set grandit à chaque split, la validation est toujours dans le futur par rapport au train. Le test set est bloqué à la fin de la série — la période la plus récente, celle qui ressemble le plus à la production.
+*Figure 2. Walk-forward validation. Le train set grandit à chaque split, la validation est toujours dans le futur par rapport au train. Le test set est bloqué à la fin de la série — la période la plus récente, celle qui ressemble le plus à la production.*
 
 ### (iv) Data leakage
 
@@ -137,11 +141,11 @@ Biais et variance évoluent en sens inverse avec la complexité du modèle. L'er
 
 <div style="text-align: center;">
 
-![Figure 3. Trade-off biais-variance : l'erreur totale (violet) est la somme du biais² (orange) et de la variance (bleu). Le minimum définit la complexité optimale du modèle.](images/fondation/im1.png)
+![Trade-off biais-variance](images/fondation/im1.png)
 
 </div>
 
-Figure 3. Trade-off biais-variance : l'erreur totale (violet) est la somme du biais² (orange) et de la variance (bleu). Le minimum définit la complexité optimale du modèle.
+*Figure 3. Trade-off biais-variance : l'erreur totale (violet) est la somme du biais² (orange) et de la variance (bleu). Le minimum définit la complexité optimale du modèle.*
 
 Trop simple, le modèle sous-fit (*underfitting*, fort biais). Trop complexe, il sur-fit (*overfitting*, forte variance). L'objectif est de trouver le point minimum de l'erreur totale.
 
@@ -178,11 +182,11 @@ La courbe en U est le cadre classique. Belkin et al. (2019) montrent qu'elle est
 
 <div style="text-align: center;">
 
-![Figure 4. Double descent. Dans le régime classique (gauche), on retrouve la courbe en U. Au seuil d'interpolation, l'erreur de test explose. Dans le régime overparamétrisé (droite), elle redescend en dessous du minimum classique.](images/fondation/im3.png)
+![Double descent](images/fondation/im3.png)
 
 </div>
 
-Figure 4. Double descent. Dans le régime classique (gauche), on retrouve la courbe en U. Au seuil d'interpolation, l'erreur de test explose. Dans le régime overparamétrisé (droite), elle redescend en dessous du minimum classique.
+*Figure 4. Double descent. Dans le régime classique (gauche), on retrouve la courbe en U. Au seuil d'interpolation, l'erreur de test explose. Dans le régime overparamétrisé (droite), elle redescend en dessous du minimum classique.*
 
 L'intuition : parmi tous les modèles qui interpolent parfaitement les données, certains sont plus lisses que d'autres. Avec plus de paramètres que d'équations, le système est sous-déterminé. La descente de gradient converge naturellement vers la solution de **norme minimale** (*minimum norm solution*), qui est souvent la plus régulière.
 

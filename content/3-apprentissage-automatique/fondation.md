@@ -4,7 +4,7 @@ title: Fondations
 
 # Fondations du Machine Learning
 
-> Prédiction, biais-variance et régularisation.
+> Prédiction, généralisation et biais-variance.
 
 ---
 
@@ -46,7 +46,63 @@ $$\boxed{\text{EPE} = \underbrace{\mathbb{E}\left[(f(x) - \hat{f}(x))^2\right]}_
 
 ---
 
-## 3. La décomposition biais-variance
+## 3. Évaluer la généralisation : le sampling
+
+L'EPE est une espérance théorique — en pratique, on ne peut pas la calculer directement. Comment l'estimer ? C'est précisément le rôle du sampling : découper les données pour estimer honnêtement $\mathbb{E}[(Y - \hat{f}(x))^2]$ sur des observations que le modèle n'a pas vues.
+
+### (i) Train / Validation / Test
+
+On ne peut pas mesurer la généralisation sur les données d'entraînement — on mesurerait la mémorisation. On découpe en trois ensembles aux rôles distincts :
+
+- **Train set** : estime $\hat{\theta}$. Le modèle voit ces données.
+- **Validation set** : choisit les hyperparamètres ($\lambda$, architecture...). Indirectement contaminé par nos décisions de modélisation.
+- **Test set** : estime l'erreur finale. Ne doit **jamais** être consulté avant la toute fin — sinon on optimise implicitement pour lui.
+
+### (ii) K-fold cross-validation
+
+Quand le dataset est petit, sacrifier 20% en validation est coûteux. La **k-fold cross-validation** résout ce problème :
+
+<div style="text-align: center;">
+
+![Figure 1. K-fold cross-validation (k=5). À chaque fold, un bloc différent sert de validation (orange) et les quatre autres servent d'entraînement (vert). Chaque observation passe exactement une fois en validation. Le score CV est la moyenne des k erreurs.](images/fondation/im4.png)
+
+</div>
+
+Figure 1. K-fold cross-validation (k=5). À chaque fold, un bloc différent sert de validation (orange) et les quatre autres servent d'entraînement (vert). Chaque observation passe exactement une fois en validation. Le score CV est la moyenne des k erreurs.
+
+La moyenne des k erreurs est une estimation empirique de l'EPE. L'écart-type entre les folds donne une idée de la variance de $\hat{f}$ — un modèle instable produit des erreurs très dispersées selon les folds.
+
+En pratique pour choisir $\lambda$ : on fait tourner la CV pour chaque valeur candidate, on garde celle qui minimise l'erreur CV, puis on ré-entraîne le modèle final sur **tout** le train set avec ce $\lambda$. Le test set n'a toujours pas été touché.
+
+### (iii) Walk-forward validation pour les séries temporelles
+
+Le k-fold suppose que les observations sont échangeables — qu'on peut les mélanger librement. En séries temporelles c'est faux : utiliser le futur pour prédire le passé constitue une fuite d'information (*data leakage*). On utilise le **walk-forward validation** :
+
+<div style="text-align: center;">
+
+![Figure 2. Walk-forward validation. Le train set grandit à chaque split, la validation est toujours dans le futur par rapport au train. Le test set est bloqué à la fin de la série — la période la plus récente, celle qui ressemble le plus à la production.](images/fondation/im5.png)
+
+</div>
+
+Figure 2. Walk-forward validation. Le train set grandit à chaque split, la validation est toujours dans le futur par rapport au train. Le test set est bloqué à la fin de la série — la période la plus récente, celle qui ressemble le plus à la production.
+
+### (iv) Data leakage
+
+Le problème plus général est le **data leakage** : toute information du futur ou du test set qui se retrouve dans le train, souvent de façon invisible. Exemples courants :
+
+- Normaliser les features sur tout le dataset **avant** de splitter.
+- Imputer des valeurs manquantes avec la moyenne globale avant de splitter.
+- Calculer des features sur des fenêtres glissantes incluant des points futurs.
+
+Dans tous ces cas le modèle semble excellent en CV et s'effondre en production.
+
+> **Règle** : le split est toujours la première opération, avant tout preprocessing. Tout ce qui est appris sur les données (moyenne, variance, encodages) doit être appris sur le train set uniquement, puis appliqué au test set.
+
+---
+
+## 4. La décomposition biais-variance
+
+L'EPE mesure l'erreur totale. La K-fold nous donne une estimation empirique. Mais d'où vient cette erreur ? La décomposition biais-variance répond à cette question en isolant deux sources distinctes d'erreur réductible.
 
 ### (i) Dérivation
 
@@ -79,31 +135,13 @@ Biais et variance évoluent en sens inverse avec la complexité du modèle. L'er
 
 <div style="text-align: center;">
 
-![Figure 1. Trade-off biais-variance : l'erreur totale (violet) est la somme du biais² (orange) et de la variance (bleu). Le minimum définit la complexité optimale du modèle.](images/fondation/im1.png)
+![Figure 3. Trade-off biais-variance : l'erreur totale (violet) est la somme du biais² (orange) et de la variance (bleu). Le minimum définit la complexité optimale du modèle.](images/fondation/im1.png)
 
 </div>
 
-Figure 1. Trade-off biais-variance : l'erreur totale (violet) est la somme du biais² (orange) et de la variance (bleu). Le minimum définit la complexité optimale du modèle.
+Figure 3. Trade-off biais-variance : l'erreur totale (violet) est la somme du biais² (orange) et de la variance (bleu). Le minimum définit la complexité optimale du modèle.
 
 Trop simple, le modèle sous-fit (*underfitting*, fort biais). Trop complexe, il sur-fit (*overfitting*, forte variance). L'objectif est de trouver le point minimum de l'erreur totale.
-
----
-
-## 4. Au-delà du trade-off classique : le double descent
-
-La courbe en U est le cadre classique. Belkin et al. (2019) montrent qu'elle est incomplète. Si on continue à augmenter la complexité au-delà du **seuil d'interpolation** — le point où le modèle fit parfaitement les données d'entraînement (erreur train $= 0$) — l'erreur de test explose puis **redescend** :
-
-<div style="text-align: center;">
-
-![Figure 3. Double descent. Dans le régime classique (gauche), on retrouve la courbe en U. Au seuil d'interpolation, l'erreur de test explose. Dans le régime overparamétrisé (droite), elle redescend en dessous du minimum classique.](images/fondation/im3.png)
-
-</div>
-
-Figure 3. Double descent. Dans le régime classique (gauche), on retrouve la courbe en U. Au seuil d'interpolation, l'erreur de test explose. Dans le régime overparamétrisé (droite), elle redescend en dessous du minimum classique.
-
-L'intuition : parmi tous les modèles qui interpolent parfaitement les données, certains sont plus lisses que d'autres. Avec plus de paramètres que d'équations, le système est sous-déterminé. La descente de gradient converge naturellement vers la solution de **norme minimale** (*minimum norm solution*), qui est souvent la plus régulière.
-
-C'est une **régularisation implicite** — par opposition au $\lambda$ explicite de Ridge/Lasso. L'architecture et l'algorithme d'optimisation jouent le rôle de régularisateur. C'est ce qui explique pourquoi les grands réseaux de neurones, bien qu'interpolant parfaitement le train set, généralisent néanmoins bien.
 
 ---
 
@@ -132,53 +170,21 @@ Le terme générique pour ce phénomène est le **distribution shift**. C'est un
 
 ---
 
-## 6. Évaluer la généralisation : le sampling
+## 6. Au-delà du trade-off classique : le double descent
 
-### (i) Train / Validation / Test
-
-On ne peut pas mesurer la généralisation sur les données d'entraînement — on mesurerait la mémorisation. On découpe en trois ensembles aux rôles distincts :
-
-- **Train set** : estime $\hat{\theta}$. Le modèle voit ces données.
-- **Validation set** : choisit les hyperparamètres ($\lambda$, architecture...). Indirectement contaminé par nos décisions de modélisation.
-- **Test set** : estime l'erreur finale. Ne doit **jamais** être consulté avant la toute fin — sinon on optimise implicitement pour lui.
-
-### (ii) K-fold cross-validation
-
-Quand le dataset est petit, sacrifier 20% en validation est coûteux. La **k-fold cross-validation** résout ce problème :
+La courbe en U est le cadre classique. Belkin et al. (2019) montrent qu'elle est incomplète. Si on continue à augmenter la complexité au-delà du **seuil d'interpolation** — le point où le modèle fit parfaitement les données d'entraînement (erreur train $= 0$) — l'erreur de test explose puis **redescend** :
 
 <div style="text-align: center;">
 
-![Figure 4. K-fold cross-validation (k=5). À chaque fold, un bloc différent sert de validation (orange) et les quatre autres servent d'entraînement (vert). Chaque observation passe exactement une fois en validation. Le score CV est la moyenne des k erreurs.](images/fondation/im4.png)
+![Figure 4. Double descent. Dans le régime classique (gauche), on retrouve la courbe en U. Au seuil d'interpolation, l'erreur de test explose. Dans le régime overparamétrisé (droite), elle redescend en dessous du minimum classique.](images/fondation/im3.png)
 
 </div>
 
-Figure 4. K-fold cross-validation (k=5). À chaque fold, un bloc différent sert de validation (orange) et les quatre autres servent d'entraînement (vert). Chaque observation passe exactement une fois en validation. Le score CV est la moyenne des k erreurs.
+Figure 4. Double descent. Dans le régime classique (gauche), on retrouve la courbe en U. Au seuil d'interpolation, l'erreur de test explose. Dans le régime overparamétrisé (droite), elle redescend en dessous du minimum classique.
 
-En pratique pour choisir $\lambda$ : on fait tourner la CV pour chaque valeur candidate, on garde celle qui minimise l'erreur CV, puis on ré-entraîne le modèle final sur **tout** le train set avec ce $\lambda$. Le test set n'a toujours pas été touché.
+L'intuition : parmi tous les modèles qui interpolent parfaitement les données, certains sont plus lisses que d'autres. Avec plus de paramètres que d'équations, le système est sous-déterminé. La descente de gradient converge naturellement vers la solution de **norme minimale** (*minimum norm solution*), qui est souvent la plus régulière.
 
-### (iii) Walk-forward validation pour les séries temporelles
-
-Le k-fold suppose que les observations sont échangeables — qu'on peut les mélanger librement. En séries temporelles c'est faux : utiliser le futur pour prédire le passé constitue une fuite d'information (*data leakage*). On utilise le **walk-forward validation** :
-
-<div style="text-align: center;">
-
-![Figure 5. Walk-forward validation. Le train set grandit à chaque split, la validation est toujours dans le futur par rapport au train. Le test set est bloqué à la fin de la série — la période la plus récente, celle qui ressemble le plus à la production.](images/fondation/im5.png)
-
-</div>
-
-Figure 5. Walk-forward validation. Le train set grandit à chaque split, la validation est toujours dans le futur par rapport au train. Le test set est bloqué à la fin de la série — la période la plus récente, celle qui ressemble le plus à la production.
-
-### (iv) Data leakage
-
-Le problème plus général est le **data leakage** : toute information du futur ou du test set qui se retrouve dans le train, souvent de façon invisible. Exemples courants :
-
-- Normaliser les features sur tout le dataset **avant** de splitter.
-- Imputer des valeurs manquantes avec la moyenne globale avant de splitter.
-- Calculer des features sur des fenêtres glissantes incluant des points futurs.
-
-Dans tous ces cas le modèle semble excellent en CV et s'effondre en production.
-
-> **Règle** : le split est toujours la première opération, avant tout preprocessing. Tout ce qui est appris sur les données (moyenne, variance, encodages) doit être appris sur le train set uniquement, puis appliqué au test set.
+C'est une **régularisation implicite** — par opposition au $\lambda$ explicite de Ridge/Lasso. L'architecture et l'algorithme d'optimisation jouent le rôle de régularisateur. C'est ce qui explique pourquoi les grands réseaux de neurones, bien qu'interpolant parfaitement le train set, généralisent néanmoins bien.
 
 ---
 
@@ -187,8 +193,8 @@ Dans tous ces cas le modèle semble excellent en CV et s'effondre en production.
 | Concept | Rôle |
 |---|---|
 | EPE = biais² + variance + $\sigma^2$ | Décompose l'erreur de prédiction en trois termes |
+| Train / Val / Test + CV | Estime empiriquement l'EPE — la moyenne des folds approxime $\mathbb{E}[(Y-\hat{f})^2]$ |
 | Biais | Erreur structurelle du modèle — indépendante de la taille des données |
 | Variance | Sensibilité aux fluctuations des données d'entraînement |
-| Double descent | Au-delà du seuil d'interpolation, régularisation implicite par le minimum norm |
 | Hypothèse i.i.d. | Condition de validité du cadre — extrapolation et distribution shift l'invalident |
-| Train / Val / Test + CV | Infrastructure pour estimer honnêtement la généralisation |
+| Double descent | Au-delà du seuil d'interpolation, régularisation implicite par le minimum norm |

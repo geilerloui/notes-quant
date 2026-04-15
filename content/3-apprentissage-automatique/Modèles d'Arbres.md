@@ -279,6 +279,33 @@ et expliquer pk random foreest a été inventé juste apres
 
 utilise CART comme base learner
 
+
+on fait du bootstraping 
+![[Pasted image 20260415223833.png|556]]
+
+puis on prends le premier in bag train on va construire un arbre avec sqrt(d) features a chaque fois à la première itération on choisit uniquement Fatigue et Toucher ? 
+
+
+![[Pasted image 20260415224923.png|483]]
+
+2e itération on tire aléatoireemnt avec remise deux nouvelles features 
+
+
+![[Pasted image 20260415224939.png|509]]
+Et on itère comme ça jusqu'à la création de l'arbre
+
+Enfin on aura une forêt d'arbre 
+
+![[Pasted image 20260415225510.png|474]]
+
+
+Une prédiction:
+![[Pasted image 20260415230017.png|573]]
+
+
+
+
+
 # AdaBoost 1997 Freund & Schapire
 
 

@@ -264,6 +264,10 @@ Reprenons les étapes de construction pour calculer l'importance cumulée :
 
 ![[Pasted image 20260415203850.png]]
 
+hyperparamètres: => ça c'est ceux du random forest mais probablmenet mettre ceux du decision tree
+* n_estimators: Le nombre d'arbres plus il y'en a mieux cest jusqu'à un certain plateau de stabilité
+* max_depth: la profondeur des arbres
+* min_samples_leaf: le nombre minimum d'échantillon pour créer une feuille 
 
 
 
@@ -273,11 +277,15 @@ Reprenons les étapes de construction pour calculer l'importance cumulée :
 et expliquer pk random foreest a été inventé juste apres
 
 
+# Méthode du bagging
 
-# Random forest Brieman 2001
+La base c'est un base learner puis on aggrège, on pourrait même se taper un délire c le graphe en 3D que j'ai fais pour la régression du decision tree ben c'est comme si je générai m graphes en parallèle et chacun donnée leurs propres valeur et on fait une prédiction.
+
+## Random forest Brieman 2001
 
 
-utilise CART comme base learner
+
+utilise CART comme base learner on parle de base learner 
 
 
 on fait du bootstraping 
@@ -288,7 +296,7 @@ puis on prends le premier in bag train on va construire un arbre avec sqrt(d) fe
 
 ![[Pasted image 20260415224923.png|483]]
 
-2e itération on tire aléatoireemnt avec remise deux nouvelles features 
+2e itération on tire aléatoirement avec remise deux nouvelles features 
 
 
 ![[Pasted image 20260415224939.png|509]]
@@ -300,30 +308,163 @@ Enfin on aura une forêt d'arbre
 
 
 Une prédiction:
-![[Pasted image 20260415230017.png|573]]
+![[Pasted image 20260416094358.png]]
+
+out of bag errors:
+- **Collecte des votes OOB** : Tu identifies tous les arbres où l'Observation 2 était dans le tableau **Out-of-Bag** (par exemple, les arbres 1, 4 et 5).
+- **Passage dans les arbres** : Tu fais "descendre" les caractéristiques de l'obs 2 (Fièvre: Oui, Fatigue: Oui, Toux: Non) dans chacun de ces arbres spécifiques.
+- **Résumé local** : Tu obtiens une petite table de vote juste pour cette observation (ex: 2 votes "Grippe" / 1 vote "Sain").
+- **Prédiction finale OOB** : La majorité l'emporte. Si "Grippe" gagne, ta prédiction OOB pour l'obs 2 est **YES**.
+- **Comparaison** : Tu compares ce **YES** à la vraie valeur dans ton tableau d'origine (la colonne "Gri.").
+	- Si c'est identique : l'observation est bien classée.
+    - Si c'est différent : c'est une erreur.
+
+
+
+Erreur $\mathrm{OOB}=\frac{\text { Nombre d'observations mal classées }}{\text { Nombre total d'observations }(\mathrm{N})}$
+
+
+Feature importance:
+* méthode du gini importance MDI Mean Decrease Impurity -> par défaut
+* Permutation importance: plus recommandé et utilise le out of bag (OOB) l'idée est que si une variable est importante "casser" ses données devrait faire chuter la précision du modèle.
+
+
+
+hyperparamètres:
+* n_estimators: Le nombre d'arbres plus il y'en a mieux cest jusqu'à un certain plateau de stabilité
+* max_depth: la profondeur des arbres
+* min_samples_leaf: le nombre minimum d'échantillon pour créer une feuille 
+
+
+# Boosting
+
+Principe du weak learner
+
+## AdaBoost 1997 Freund & Schapire
+
+
+\textbf{Overview.} We want to create a \textbf{Forest of Stumps}, even though stumps are not great at making accurate classifications. These Stumps are technically "weak learners". In contrast, to random forest where each tree has an equal vote on the final classification,  in Adaboost some stumps get more say in the final classification than others. Three core ideas of Adaboost:
+\begin{enumerate}
+    \item It combines a lot of "weak learners" to make classifications. The weak learners are almost always stumps.
+    \item Some stumps get more say in the classification than others.
+    \item Each stump is made by taking the previous stump's mistakes into account.
+\end{enumerate}
+
+
+
+Etape 1: on donne un poids égale à chaque observation
+
+Etape 2: A l'itération t, on construit un unique stump: un arbre CART arrêté après le noeud racine. On teste chaque feature (eg Chest Pain, Blocked Arteries, Patient Weight) et on choisit le split qui minimise l'erreur pondérée:
+$$
+\varepsilon_t=\sum_{i=1}^n w_{i, t} \cdot \mathbf{1}\left[h_t\left(x_i\right) \neq y_i\right]
+$$
+C'est exactement comme CART classique, sauf qu'on pondère les exemples par $w_{i, t}$ au lieu de les traiter uniformément. Les exemples difficiles (mal classés aux étapes précédentes) ont un poids plus élevé, donc le stump est forcé de les prendre en compte.
+
+Pour chaque feature candidate, on construit le stump associé et on calcule son erreur pondérée. À $t=1$ tous les poids sont $w_{i, 1}=1 / 8$ ( 8 exemples ici), donc:
+
+$$
+\varepsilon_t=\frac{\text { nombre d'exemples mal classés }}{8}
+$$
+D'après l'image :
+- Chest Pain : 3 incorrects $\rightarrow \varepsilon=3 / 8$
+- Blocked Arteries: Cor $3+\operatorname{Inc} 3$ à gauche, Cor $1+\operatorname{Inc} 1$ à droite $\rightarrow \varepsilon=4 / 8=1 / 2$
+- Weight $>176$ : 0 incorrect à gauche, 1 incorrect à droite $\rightarrow \varepsilon=1 / 8$
+
+Donc on choisit Weight $>\mathbf{1 7 6}$ car c'est lui qui minimise $\varepsilon_t$.
+
+![[Pasted image 20260416105200.png|620]]
+étape 3:  Calculer le poids du stump $\alpha_t$
+Une fois le stump $h_t$ construit, on calcule son erreur pondérée totale:
+
+$$
+\varepsilon_t=\sum_{\substack{i=1 \\ h_t\left(x_i\right) \neq y_i}}^n w_{i, t}
+$$
+Un seul exemple mal classé, et tous les poids sont $w_{i, 1}=1 / 8$, donc:
+
+$$
+\varepsilon_t=1 \times \frac{1}{8}=\frac{1}{8}
+$$
+
+Puis on lui attribue un poids $\alpha_t$ qui mesure son influence dans la décision finale:
+
+$$
+\alpha_t=\frac{1}{2} \ln \left(\frac{1-\varepsilon_t}{\varepsilon_t}\right)
+$$
+$\alpha_t=\frac{1}{2} \ln \left(\frac{1-1 / 8}{1 / 8}\right)=\frac{1}{2} \ln \left(\frac{7 / 8}{1 / 8}\right)=\frac{1}{2} \ln (7) \approx 0.97$
+Cest un $\alpha_t$ assez élevé, il aura beaucoup d'influence sur la décision finale.
+
+
+
+Le comportement de cette courbe est intuitif :
+- $\varepsilon_t$ proche de $0 \rightarrow$ le stump est très bon $\rightarrow \alpha_t$ grand et positif → beaucoup d'influence
+- $\varepsilon_t=0.5 \rightarrow$ le stump ne vaut pas mieux qu'un pile ou face $\rightarrow \alpha_t=0 \rightarrow$ aucune influence
+- $\varepsilon_t$ proche de $1 \rightarrow$ le stump se trompe sur presque tout $\rightarrow \alpha_t$ grand et négatif → son vote est inversé
+
+![[Pasted image 20260416110650.png|275]]
+
+Ce dernier cas est subtil mais élégant : un stump qui se trompe systématiquement est en réalité informatif - il suffit d'inverser sa prédiction.
+
+D'où vient cette formule? Elle n'est pas arbitraire. Le classifieur final d'AdaBoost est $H(x)=\operatorname{sign}\left(\sum_t \alpha_t h_t(x)\right)$, et on minimise la loss exponentielle:
+
+$$
+\mathcal{L}=\sum_{i=1}^n e^{-y_i \sum_t \alpha_t h_t\left(x_i\right)}
+$$
+
+
+En dérivant par rapport à $\alpha_t$ et en annulant, on obtient exactement la formule ci-dessus. C'est le résultat d'une optimisation, pas un choix ad hoc.
+
+Exemple numérique : pour Chest Pain avec $\varepsilon_t=3 / 8$ :
+
+$$
+\alpha_t=\frac{1}{2} \ln \left(\frac{5 / 8}{3 / 8}\right)=\frac{1}{2} \ln \left(\frac{5}{3}\right) \approx 0.255
+$$
+
+Step 4 — Mise à jour des poids
+
+On met à jour les poids selon la règle :
+
+$$w_{i,t+1} = w_{i,t} \cdot e^{-y_i \alpha_t h_t(x_i)}, \quad i = 1, \ldots, n$$
+
+Le signe de l'exposant dépend de si l'exemple est bien ou mal classé.
+
+**Cas 1 — exemple bien classé** ($y_i = h_t(x_i)$) : le produit $y_i h_t(x_i) = 1$, donc :
+
+$$w_{i,t+1} = w_{i,t} \cdot e^{-\alpha_t}$$
+
+Le poids **diminue** — cet exemple est déjà bien géré, on lui accorde moins d'importance.
+
+**Cas 2 — exemple mal classé** ($y_i \neq h_t(x_i)$) : le produit $y_i h_t(x_i) = -1$, donc :
+
+$$w_{i,t+1} = w_{i,t} \cdot e^{+\alpha_t}$$
+
+Le poids **augmente** — le prochain stump sera forcé de se concentrer sur cet exemple.
+![[Pasted image 20260416111212.png|555]]
+**Exemple numérique** avec $\alpha_t = 0.97$ et $w_{i,t} = 1/8$ :
+
+$$\text{Exemple mal classé :} \quad \frac{1}{8} \cdot e^{+0.97} \approx 0.33$$
+
+$$\text{Exemple bien classé :} \quad \frac{1}{8} \cdot e^{-0.97} \approx 0.05$$
+
+Plus $\alpha_t$ est grand (stump de bonne qualité), plus le contraste entre les deux cas est fort : les exemples mal classés voient leur poids exploser, les bien classés voient le leur s'effondrer. C'est ce mécanisme qui force chaque stump à se concentrer sur les erreurs du précédent.
+
+
+![[Pasted image 20260416111212.png|588]]
 
 
 
 
-
-# AdaBoost 1997 Freund & Schapire
-
-
-
-
-
-# Gradient Boosting Friedman 2001
+## Gradient Boosting Friedman 2001
 
 
 il utilise CART comme weak learner
 
 
-# XGBoost Chen & Guestrin 2016
+## XGBoost Chen & Guestrin 2016
 
 
-# LightGBM - Ke et al 2017 Microsoft
+## LightGBM - Ke et al 2017 Microsoft
 
 
-# CatBoost Prokorenkova 2018 Yandex
+## CatBoost Prokorenkova 2018 Yandex
 
 

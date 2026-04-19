@@ -45,8 +45,8 @@ Navigation : Classe ↔ Log-odds (linéaire) ↔ Probabilité
 
 #### Exemples visuels des odds
 
-| Définition des odds | Probabilité vs Odds | Probabilité de perdre |
-|-------------------|-------------------|-------------------|
+| Définition des odds                            | Probabilité vs Odds                            | Probabilité de perdre                              |
+| ---------------------------------------------- | ---------------------------------------------- | -------------------------------------------------- |
 | ![[images/regression-logistique/im1.png\|242]] | ![[images/regression-logistique/im2.png\|299]] | ![[images/regression-logistique/im3 (1).png\|328]] |
 
 **Définition :** Les odds sont le rapport entre "quelque chose qui arrive" et "quelque chose qui n'arrive pas".

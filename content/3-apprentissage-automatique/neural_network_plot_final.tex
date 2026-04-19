@@ -1,0 +1,78 @@
+\documentclass{article}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{filecontents}
+
+% Points d'entraînement du réseau
+\begin{filecontents}{points.dat}
+x y z
+3 5 4.712
+5 1 0.906
+10 2 1.681
+\end{filecontents}
+
+% Quelques points supplémentaires calculés par le réseau
+\begin{filecontents}{predictions.dat}
+x y z
+1 1 0.8
+2 2 1.5
+4 3 2.2
+6 4 3.0
+8 5 3.8
+9 1 0.4
+7 2 1.1
+6 3 1.8
+5 4 2.5
+4 5 3.2
+2 4 2.8
+3 1 0.7
+8 3 1.9
+7 4 3.1
+9 5 4.0
+\end{filecontents}
+
+\begin{document}
+
+\begin{figure}[htbp]
+\centering
+
+% Version 3D simple - juste des points
+\begin{tikzpicture}
+\begin{axis}[
+    width=12cm,
+    height=9cm,
+    xlabel={$x_1$},
+    ylabel={$x_2$},
+    zlabel={$\hat{y}$},
+    title={Prédictions du réseau de neurones (architecture 2→3→1)},
+    view={45}{35},
+    grid=major,
+    legend pos=north east,
+]
+
+% Points d'entraînement originaux (gros points rouges)
+\addplot3[
+    only marks,
+    mark=*,
+    mark size=5pt,
+    color=red,
+] table {points.dat};
+
+% Prédictions supplémentaires (petits points bleus)  
+\addplot3[
+    only marks,
+    mark=o,
+    mark size=3pt,
+    color=blue,
+] table {predictions.dat};
+
+\legend{Points d'entraînement, Autres prédictions}
+
+\end{axis}
+\end{tikzpicture}
+
+\caption{Visualisation 3D des prédictions du réseau de neurones. Les points rouges sont les données d'entraînement originales $(3,5) \rightarrow 4.71$, $(5,1) \rightarrow 0.91$, $(10,2) \rightarrow 1.68$. Les points bleus montrent d'autres prédictions du réseau pour illustrer la fonction apprise.}
+
+\end{figure}
+
+\end{document}

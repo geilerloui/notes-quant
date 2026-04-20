@@ -183,8 +183,8 @@ $J(\theta)=\frac{1}{2n}\sum_{i=1}^{n}(y^{(i)} - g_2(g_1(XW^{(1)})W^{(2)} ))^2$
 ### A. Architecture de Base
 
 #### Fonctions d'activation
-
 ![[im5.png]]
+
 
 Le choix de la fonction d'activation dans les couches cachées est crucial pour les performances du réseau. Chaque fonction a ses avantages et inconvénients :
 
@@ -203,7 +203,7 @@ Lorsque la matrice de poids $W$ est initialisée avec des valeurs trop important
 
 Le problème est que le gradient local de la sigmoid $z \times (1-z)$ devient alors **proche de zéro** ("vanish"), rendant les gradients pour $x$ et $W$ également nuls. Le reste de la rétropropagation sera nul à cause de la multiplication dans la chain rule.
 
-![[im6.png|542]]
+![[im6.png|494]]
 
 *2. Diminution systématique du gradient*
 

@@ -75,6 +75,9 @@ $$
 - Odds contre 1 à 6 → $\log(1/6) = -1.79$
 - Odds en faveur 6 à 1 → $\log(6) = +1.79$
 
+
+EN FAIT LES LOG ODDS NE SONT DEFINI QUE POUR UNE POPULATION GENERALE comme en stat si j'ai un sample de la population eg X=50 ans le mien est y=1 survécu mais en réalité dans la population on a 1000 personnes de 50 ans avec 80% de survécu et 20% de non log(odds(X=50 ans)) = log80%/20%=0.60
+
 ### La fonction sigmoïde
 
 **Définition :**

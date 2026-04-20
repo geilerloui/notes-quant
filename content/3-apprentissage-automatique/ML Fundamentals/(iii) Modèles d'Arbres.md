@@ -1,6 +1,6 @@
-# Arbre de décision
+# I - Arbre de décision
 
-## (a) Classification
+## A. Classification
 ### Rappel : deux familles de modèles
 
 En classification supervisée, on distingue deux approches :
@@ -197,7 +197,7 @@ Figure X. Feature importance
 
 
 
-## (b) Régression
+## B. Régression
 
 **Étape 1 — Initialisation** : On fait ça
 
@@ -331,11 +331,11 @@ hyperparamètres: => ça c'est ceux du random forest mais probablmenet mettre ce
 et expliquer pk random foreest a été inventé juste apres
 
 
-# Méthode du bagging
+# II - Méthode du bagging
 
 La base c'est un base learner puis on aggrège, on pourrait même se taper un délire c le graphe en 3D que j'ai fais pour la régression du decision tree ben c'est comme si je générai m graphes en parallèle et chacun donnée leurs propres valeur et on fait une prédiction.
 
-## Random forest Brieman 2001
+## A. Random forest Brieman 2001
 
 
 
@@ -390,11 +390,11 @@ hyperparamètres:
 * min_samples_leaf: le nombre minimum d'échantillon pour créer une feuille 
 
 
-# Boosting
+# III - Boosting
 
 Principe du weak learner
 
-## AdaBoost — Freund & Schapire, 1997
+## A. AdaBoost — Freund & Schapire, 1997
 
 ### Le cadre général : stagewise additive modeling
 
@@ -536,7 +536,7 @@ $$H(x) = \text{sign}\left[0.97 \times (+1) + 0.66 \times (+1)\right] = \text{sig
 ![[Pasted image 20260416153745.png]]
 
 
-## Gradient Boosting — Friedman, 2001
+## B. Gradient Boosting — Friedman, 2001
 
 **(a) Adaboost:** Pour rappel, AdaBoost construisait son modèle selon la récurrence :
 
@@ -663,10 +663,10 @@ $F_1(x_3) = 73.3 + 0.1 \times (-17.3) = 71.6$
 📌 *[Image : $F_1(x)$]*
 
 
-## XGBoost Chen & Guestrin 2016
+## C. XGBoost Chen & Guestrin 2016
 
 
-## LightGBM - Ke et al 2017 Microsoft
+## D. LightGBM - Ke et al 2017 Microsoft
 
 
-## CatBoost Prokorenkova 2018 Yandex
+## E. CatBoost Prokorenkova 2018 Yandex

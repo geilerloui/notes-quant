@@ -70,11 +70,9 @@ On ne peut pas mesurer la généralisation sur les données d'entraînement — 
 
 Quand le dataset est petit, sacrifier 20% en validation est coûteux. La **k-fold cross-validation** résout ce problème :
 
-<div style="text-align: center;">
 
 ![K-fold cross-validation, k=5](images/fondation/im4.png)
 
-</div>
 
 *Figure 1. K-fold cross-validation (k=5). À chaque fold, un bloc différent sert de validation (orange) et les quatre autres servent d'entraînement (vert). Chaque observation passe exactement une fois en validation.*
 
@@ -90,11 +88,10 @@ En pratique pour choisir $\lambda$ : on fait tourner la CV pour chaque valeur ca
 
 Le k-fold suppose que les observations sont échangeables — qu'on peut les mélanger librement. En séries temporelles c'est faux : utiliser le futur pour prédire le passé constitue une fuite d'information (*data leakage*). On utilise le **walk-forward validation** :
 
-<div style="text-align: center;">
+
 
 ![Walk-forward validation](images/fondation/im5.png)
 
-</div>
 
 *Figure 2. Walk-forward validation. Le train set grandit à chaque split, la validation est toujours dans le futur par rapport au train. Le test set est bloqué à la fin de la série — la période la plus récente, celle qui ressemble le plus à la production.*
 
@@ -145,11 +142,11 @@ Supposons $f(x) = x^2$. On compare régression linéaire (2 paramètres) vs poly
 
 Biais et variance évoluent en sens inverse avec la complexité du modèle. L'erreur totale dessine une courbe en U :
 
-<div style="text-align: center;">
+
 
 ![Trade-off biais-variance](images/fondation/im1.png)
 
-</div>
+
 
 *Figure 3. Trade-off biais-variance : l'erreur totale (violet) est la somme du biais² (orange) et de la variance (bleu). Le minimum définit la complexité optimale du modèle.*
 
@@ -186,11 +183,10 @@ Le terme générique pour ce phénomène est le **distribution shift**. C'est un
 
 La courbe en U est le cadre classique. Belkin et al. (2019) montrent qu'elle est incomplète. Si on continue à augmenter la complexité au-delà du **seuil d'interpolation** — le point où le modèle fit parfaitement les données d'entraînement (erreur train $= 0$) — l'erreur de test explose puis **redescend** :
 
-<div style="text-align: center;">
+
 
 ![Double descent](images/fondation/im3.png)
 
-</div>
 
 *Figure 4. Double descent. Dans le régime classique (gauche), on retrouve la courbe en U. Au seuil d'interpolation, l'erreur de test explose. Dans le régime overparamétrisé (droite), elle redescend en dessous du minimum classique.*
 

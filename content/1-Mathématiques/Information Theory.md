@@ -203,7 +203,7 @@ $$\mathcal{L}(\theta) = -\frac{1}{n} \sum_{i=1}^n \sum_{c=1}^C y_{i,c} \log q_\t
 
 où $y_{i,c}$ est l'indicatrice de la vraie classe.
 
-**Interprétation** : on minimise le "coût de compression" de la vraie distribution avec notre modèle. Plus le modèle est proche de la vérité, moins on gaspille de bits.
+📌 **Interprétation** : on minimise le "coût de compression" de la vraie distribution avec notre modèle. Plus le modèle est proche de la vérité, moins on gaspille de bits.
 
 ![[Pasted image 20260421101915.png|133]]
 *Exemple : matrice de confusion comme distribution jointe*
@@ -214,7 +214,7 @@ La **divergence de Kullback-Leibler** mesure l'écart entre deux distributions :
 
 $$\boxed{KL(p \parallel q) = H_p(q) - H(p) = \sum_{x} p(x) \log_2\left(\frac{p(x)}{q(x)}\right)}$$
 
-**Interprétations** :
+📌 **Interprétations** :
 - **Compression** : surcoût moyen d'utiliser $q$ au lieu de $p$
 - **Information** : information supplémentaire nécessaire pour corriger $q$ vers $p$
 
@@ -254,8 +254,6 @@ Passons maintenant au cas de **deux variables** $X$ (émetteur) et $Y$ (récepte
 
 #### Le scénario
 
-#### Le scénario
-
 $X$ (émetteur Bob) veut transmettre des mots à $Y$ (récepteur Alice) à travers un canal de communication potentiellement bruité. Voici la distribution jointe observée :
 
 $$p(X,Y) := \begin{array}{l | ccc || c}
@@ -268,15 +266,19 @@ y = \text{Fish} & 0.125 & 0.25  & 0.125 & 0.500 \\
 p(x)            & 0.375 & 0.375 & 0.250 & 1.000
 \end{array}$$
 
-**Interprétation** : quand Bob envoie $X = \text{"Cat"}$, Alice reçoit $Y = \text{"Fish"}$ dans $p(Y = \text{Fish} | X = \text{Cat}) = \frac{0.25}{0.375} = 0.67$ soit 67% des cas !
+Cette table représente la probabilité jointe $p(X=x, Y=y)$ d'observer simultanément Bob qui envoie $x$ et Alice qui reçoit $y$.
 
 #### Distribution conditionnelle du canal
 
 | **Table des probabilités conditionnelles** | **Graphique du canal** |
 |---|---|
-| $p(Y \mid X) := \begin{array}{l \| ccc} & y = \text{Dog} & y = \text{Cat} & y = \text{Fish} \\ \hline x = \text{Dog}  & 0.667 & 0     & 0.333 \\ x = \text{Cat}  & 0     & 0.333 & 0.667 \\ x = \text{Fish} & 0.5   & 0     & 0.5   \\ \end{array}$ | ![[Pasted image 20260421171731.png\|285]] |
+| $p(Y \mid X) := \begin{array}{l \| ccc} & y = \text{Dog} & y = \text{Cat} & y = \text{Fish} \\ \hline x = \text{Dog}  & 0.667 & 0     & 0.333 \\ x = \text{Cat}  & 0     & 0.333 & 0.667 \\ x = \text{Fish} & 0.5   & 0     & 0.5   \\ \end{array}$ | ![[Pasted image 20260422092206.png\|313]] |
 
 *Le tableau montre $p(Y=y\|X=x)$ : la probabilité qu'Alice reçoive $y$ sachant que Bob envoie $x$. Le graphique illustre ce canal de transmission.*
+
+📌 **Interprétation concrète** : quand Bob envoie $X = \text{"Cat"}$, Alice reçoit $Y = \text{"Fish"}$ dans $p(Y = \text{Fish} | X = \text{Cat}) = 0.667$ soit 67% des cas ! Le canal est donc très bruité.
+
+
 
 ### B. Entropies jointes et conditionnelles
 
@@ -284,7 +286,10 @@ p(x)            & 0.375 & 0.375 & 0.250 & 1.000
 
 L'**entropie jointe** mesure l'incertitude totale du système :
 
-$$H(X, Y) = \sum_{x,y} p(x,y) \log_2\left(\frac{1}{p(x,y)}\right)$$
+$$H(X, Y) = \sum_{x,y} p(x,y) L(x,y) =\sum_{x,y} p(x,y) \log_2\left(\frac{1}{p(x,y)}\right)$$
+
+![[Pasted image 20260422092720.png|189]]
+Figure. Visualisation de la distribution pour l'entropie jointe.
 
 #### Entropie conditionnelle
 
@@ -292,7 +297,7 @@ L'**entropie conditionnelle** $H(Y|X)$ mesure l'incertitude sur $Y$ une fois $X$
 
 $$H(Y|X) = \sum_x p(x) \sum_y p(y|x) \log_2\left(\frac{1}{p(y|x)}\right) = \sum_{x,y} p(x,y) \log_2\left(\frac{1}{p(y|x)}\right)$$
 
-**Interprétation** : c'est le "bruit moyen" du canal. Si Bob dit "Cat", Alice hésite encore entre "Cat" et "Fish".
+📌 **Interprétation** : c'est le "bruit moyen" du canal. Si Bob dit "Cat", Alice hésite encore entre "Cat" et "Fish".
 
 Dans notre exemple : $H(Y|X) = 0.938$ bits/mot.
 
@@ -310,7 +315,7 @@ L'**information mutuelle** quantifie l'information partagée entre $X$ et $Y$ :
 
 $$\boxed{I(X,Y) = H(Y) - H(Y|X) = H(X) - H(X|Y)}$$
 
-**Interprétations** :
+📌 **Interprétations** :
 - **Réduction d'incertitude** : combien connaître $X$ réduit l'incertitude sur $Y$
 - **Information transmise** : quelle fraction de l'information survit au canal
 
@@ -367,36 +372,50 @@ $$\boxed{VI(X,Y) = H(X|Y) + H(Y|X)}$$
 
 ## IV. Extension au cas continu
 
-### A. Entropie différentielle
+### A. Motivation : Pourquoi le cas continu ?
+
+Dans un fil de cuivre ou dans l'air, on ne peut pas envoyer des "carrés" parfaits de 0V et 5V. La physique fait que ça bave partout. On utilise donc des **sinus** parce qu'ils se propagent très bien :
+- Envoyer un "1", c'est envoyer un sinus qui vibre fort : $5 \sin(\omega t)$
+- Envoyer un "0", c'est envoyer un sinus qui vibre peu : $1 \sin(\omega t)$
+
+Quand on plot nos trajectoires, on ne regarde que le **sommet du sinus** — chaque point représente la valeur d'un sommet reçu après avoir traversé le canal. La trajectoire, **c'est l'évolution de l'amplitude de ton sinus**.
+
+Si on enlève le bruit, cette amplitude serait une **ligne droite parfaite** à 5V. Mais le bruit (chaleur, interférences) fait que ton "5V" se transforme en une **distribution Gaussienne** centrée sur 5V.
+
+Cela nous amène naturellement aux distributions continues et à l'entropie différentielle.
+
+### B. Entropie différentielle
 
 #### Définition
 
 Pour une variable continue $X$ de densité $p(x)$ :
 
-$$\boxed{h(X) = -\int_{-\infty}^{\infty} p(x) \log p(x) \, dx}$$
+$\boxed{h(X) = -\int_{-\infty}^{\infty} p(x) \log p(x) \, dx}$
 
 **Attention cruciale** : contrairement au cas discret, $h(X)$ peut être **négative** !
-
+[]
 #### Exemple : loi gaussienne
 
 Pour $X \sim \mathcal{N}(\mu, \sigma^2)$ :
-$$h(X) = \frac{1}{2} \log(2\pi e \sigma^2)$$
+$h(X) = \frac{1}{2} \log(2\pi e \sigma^2)$
 
 - Si $\sigma^2 < 1/(2\pi e) \approx 0.058$, alors $h(X) < 0$
 - Plus la variance est faible, plus l'entropie est négative
 
+C'est la formule spécifique à la distribution Gaussienne. En théorie de l'information on utilise cette distribution car pour une puissance donnée, c'est elle qui possède l'entropie la plus élevée. C'est le "pire" bruit possible.
+
 #### Problème des unités
 
 L'entropie différentielle **dépend des unités** ! Si on mesure une longueur en mètres puis en centimètres :
-$$h(X_{\text{cm}}) = h(X_{\text{m}}) + \log(100) = h(X_{\text{m}}) + 4.61 \text{ nats}$$
+$h(X_{\text{cm}}) = h(X_{\text{m}}) + \log(100) = h(X_{\text{m}}) + 4.61 \text{ nats}$
 
 **Conséquence** : on ne peut pas comparer directement des entropies différentielles de variables dans des unités différentes.
 
-### B. Information mutuelle continue
+### C. Information mutuelle continue
 
 Heureusement, l'**information mutuelle reste bien définie** :
 
-$$I(X,Y) = \iint p(x,y) \log\left(\frac{p(x,y)}{p(x)p(y)}\right) dx \, dy$$
+$I(X,Y) = \iint p(x,y) \log\left(\frac{p(x,y)}{p(x)p(y)}\right) dx \, dy$
 
 **Propriété clé** : $I(X,Y)$ est **invariante par transformation monotone** — elle ne dépend pas des unités.
 
@@ -406,11 +425,70 @@ $$I(X,Y) = \iint p(x,y) \log\left(\frac{p(x,y)}{p(x)p(y)}\right) dx \, dy$$
 
 **Independent Component Analysis (ICA)** : minimiser $I(S_1, S_2, \ldots, S_n)$ entre les composantes
 
-### C. KL divergence continue
+### D. Exemple concret : Canal de communication
 
-$$KL(p \parallel q) = \int p(x) \log\left(\frac{p(x)}{q(x)}\right) dx$$
+#### Modélisation du bruit
 
-#### Applications modernes
+Dans la réalité d'un câble, le bruit agit de manière continue. On résout une **Équation différentielle stochastique** (EDS). On utilise un processus d'Ornstein-Uhlenbeck :
+$dV_t = -\theta V_t dt + \sigma dW_t$
+
+- **$dW_t$** : C'est le mouvement brownien (le bruit pur)
+- **$-\theta V_t dt$** : Tendance du signal à revenir vers zéro à cause de la résistance du câble
+
+Pour simplifier, on peut utiliser le modèle discret : $V_t = V_{t-1} + \varepsilon_t$
+
+#### Calcul de l'entropie du bruit
+
+On utilise la formule Gaussienne :
+$h(N) = \frac{1}{2} \log_2(2\pi e \sigma^2)$
+
+Où $\sigma^2$ est la puissance du bruit. On a $\sigma_{\text{total}} = \sigma_{\text{choc}} \times \sqrt{\text{longueur canal}}$ car les bruits s'ajoutent de manière quadratique.
+
+#### Résultats numériques
+
+Sur un exemple concret :
+- **Dispersion finale** (Sigma total) : 3.50 V
+- **Entropie différentielle du bruit** : 3.85 bits
+- **Taux d'erreur binaire (BER)** : 23.72%
+
+📌 **Interprétation** : On a 3.85 bits d'incertitude "gratuite" vs 1 bit de message. Comme 3.85 > 1, le bruit recouvre largement le signal. C'est comme essayer d'entendre un murmure (1 bit) au milieu d'un réacteur d'avion (3.85 bits).
+
+#### Visualisation du problème
+
+![[Pasted image 20260422120921.png]]
+*Figure : Modélisation du "bordel" — les cloches se chevauchent*
+
+La zone **marron** représente l'incertitude : quand le voltage tombe dans cette zone, le récepteur ne sait plus si c'est un "0" bruité ou un "1" affaibli. Plus cette zone est large, plus l'Information Mutuelle diminue.
+
+#### Solutions pratiques
+
+Comment sauver cette liaison ? Trois leviers (tous touchent à l'entropie) :
+
+1. **Augmenter la puissance ($S$)** : Passer de 5V à 20V écarte les cloches. La zone marron diminue.
+
+2. **Réduire le bruit ($N$)** : Refroidir le composant ou mieux blinder le câble pour baisser $\sigma$.
+
+3. **Codes correcteurs d'erreurs** : Même avec 23% d'erreurs, des bits de contrôle intelligents permettent de retrouver le message original.
+
+#### Formule de Shannon et capacité du canal
+
+La célèbre formule de Shannon :
+$C = \log_2\left(1 + \frac{S}{N}\right)$
+
+- $C$ : nombre de bits par seconde transmissibles
+- $S/N$ : rapport Signal/Bruit
+
+**Comment ça devient des paliers ?**
+- Si $C = 3$, on a assez de "place" pour $2^3 = 8$ paliers distincts
+- Si le bruit augmente et $C = 1$, il ne reste que $2^1 = 2$ paliers (0V ou 5V)
+
+### E. Applications modernes en ML
+
+#### KL divergence continue
+
+$KL(p \parallel q) = \int p(x) \log\left(\frac{p(x)}{q(x)}\right) dx$
+
+#### Applications
 
 **Variational Autoencoders (VAE)** : la loss ELBO contient un terme KL entre l'encodeur $q_\phi(z|x)$ et le prior $p(z)$
 

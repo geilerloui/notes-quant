@@ -24,12 +24,9 @@ $$\mathbb{E}[\varepsilon_t \mid \mathcal{F}_{t-1}] = 0$$
 
 **Le white noise ne suppose rien sur la distribution.** Les trois propriétés ci-dessus n'impliquent pas que $\varepsilon_t$ est gaussien. Il peut être uniforme, t-Student avec fat tails, binaire — peu importe. En pratique on suppose souvent $\varepsilon_t \sim N(0,\sigma^2)$ parce que ça simplifie l'estimation par MLE, mais c'est une hypothèse supplémentaire.
 
-<div style="text-align:center">
+
 
 ![Trois white noises valides](images/serie-temporelle/im1.png)
-
-</div>
-
 *Figure 1. Trois white noises valides — même structure (moyenne nulle, variance constante, non corrélés), distributions différentes. La t-Student(3) produit des valeurs extrêmes bien plus fréquentes que la gaussienne.*
 
 ---
@@ -60,12 +57,8 @@ La variance **croît linéairement avec le temps** — le processus est non stat
 
 En finance, les **prix** $S_t$ suivent un random walk. Les **rendements** $r_t = S_t - S_{t-1}$ sont stationnaires. C'est pour cela qu'on travaille toujours avec les rendements.
 
-<div style="text-align:center">
 
 ![Stationnarité vs random walk](images/serie-temporelle/im2.png)
-
-</div>
-
 *Figure 2. À gauche : AR(1) stationnaire avec $|\phi|<1$ — oscille autour de zéro et y revient. À droite : random walk avec $\phi=1$ — dérive sans limite, variance qui grandit sans cesse.*
 
 ---
@@ -119,12 +112,7 @@ La différence fondamentale avec l'AR :
 - **AR(p)** : mémoire **infinie** des chocs, qui s'atténue géométriquement. Les poids $\phi, \phi^2, \phi^3, \ldots$ sont contraints — ils découlent tous d'un seul paramètre $\phi$.
 - **MA(q)** : mémoire **finie et exacte** — exactement $q$ périodes, puis le choc disparaît complètement. Les poids $\theta_1, \ldots, \theta_q$ sont **libres** — estimés indépendamment, sans contrainte entre eux.
 
-<div style="text-align:center">
-
 ![AR vs MA structure des poids](images/serie-temporelle/im4.png)
-
-</div>
-
 *Figure 4. À gauche : les poids d'un AR(1) — décroissance géométrique $\phi^k$, jamais exactement nuls, tous contraints par un seul paramètre $\phi$. À droite : les poids d'un MA(2) — libres aux lags 1 et 2, exactement nuls ensuite. La coupure est nette.*
 
 Un MA(q) peut parfois mieux représenter la réalité qu'un AR à beaucoup de lags. Si le vrai mécanisme est "le choc d'hier compte beaucoup, celui d'avant-hier un peu, et tout ce qui précède n'a aucun effet", le MA le capture directement. L'AR serait obligé d'approcher cette coupure nette avec de nombreux lags.
@@ -189,23 +177,18 @@ Sur l'exemple $[2,4,6,8,10]$ : la série est parfaitement linéaire, $X_{t-1}$ e
 
 ### La règle de lecture
 
-<div style="text-align:center">
-
 ![ACF et PACF pour AR(1) et AR(2)](images/serie-temporelle/im5.png)
-
-</div>
-
 *Figure 5. Pour un AR(1) et un AR(2) : l'ACF décroît lentement dans les deux cas — elle ne permet pas de distinguer. La PACF coupe nettement après le lag $p$ — c'est elle qui donne directement l'ordre du modèle.*
 
 La règle pratique : **regarder où la PACF rentre dans les bandes de confiance** (tracées à $\pm 2/\sqrt{T}$). Le lag de coupure donne $p$.
 
 Pour les MA, les rôles s'inversent : c'est l'ACF qui coupe net après le lag $q$, et la PACF qui décroît lentement. Pour un ARMA, les deux décroissent — on utilise alors AIC/BIC.
 
-<div style="text-align:center">
+
 
 ![Tableau récapitulatif ACF PACF](images/serie-temporelle/im6.png)
 
-</div>
+
 
 *Figure 6. Règle de lecture selon le modèle. AR : ACF décroît, PACF coupe après $p$. MA : ACF coupe après $q$, PACF décroît. ARMA : les deux décroissent — utiliser AIC/BIC.*
 

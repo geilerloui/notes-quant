@@ -280,12 +280,7 @@ L'effet de $\lambda$ dans les deux cas :
 
 La solution régularisée est le premier point de contact entre les ellipses de la loss OLS et la contrainte. La différence entre Ridge et Lasso est géométrique :
 
-<div style="text-align: center;">
-
 ![Figure 5. Géométrie Ridge vs Lasso. À gauche, la contrainte sphérique de Ridge provoque une tangence hors des axes : les coefficients sont contractés mais non nuls. À droite, la contrainte losange de Lasso provoque une tangence sur un coin : certains coefficients sont exactement nuls.](images/regression-lineaire/im5.png)
-
-</div>
-
 *Figure 5. Géométrie Ridge vs Lasso. À gauche, la contrainte sphérique de Ridge provoque une tangence hors des axes : les coefficients sont contractés mais non nuls. À droite, la contrainte losange de Lasso provoque une tangence sur un coin : certains coefficients sont exactement nuls.*
 
 - **Ridge** : tangence rarement sur un axe → $\theta_j \neq 0$, coefficients contractés vers zéro.

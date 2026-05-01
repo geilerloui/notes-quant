@@ -379,58 +379,6 @@ L'idée : si on contraint $f_j$ et $P_N$, alors les deux directions $X \to Y$ et
 #### Approche 1 : Single-environnement
 ---
 
-### C. LiNGAM (Linear Non-Gaussian Acyclic Model)
-
-**Modèle.** SCM linéaire avec bruits indépendants non-gaussiens :
-$$
-X_j = \sum_{i \in \text{PA}_j} \alpha_{ji} X_i + N_j, \quad N_j \text{ non-gaussien, indépendants}
-$$
-
-**Théorème (Shimizu et al. 2006).** Le DAG est **identifiable à partir de $P(X)$**.
-
-**Pourquoi ça marche (cas bivarié).** Suppose $Y = \alpha X + N_Y$ avec $X \perp N_Y$, $N_Y$ non-gaussien.
-
-Si on essaie de fitter le modèle inverse $X = \beta Y + N_X'$, on calcule $\beta$ par moindres carrés et on regarde le résidu $N_X' = X - \beta Y$.
-* Si la vraie direction est $X \to Y$ : $N_X'$ est *corrélé* à $Y$ (donc à la cause supposée).
-* Si la vraie direction est $Y \to X$ : $N_X'$ est *indépendant* de $Y$.
-
-→ Test simple : on fit dans les deux sens, on regarde dans quelle direction le résidu est indépendant de la cause supposée. C'est ça la direction causale.
-
-**⚠️ Le piège du cas gaussien.** Si $N_Y$ est gaussien, **les deux directions donnent un résidu indépendant** (théorème Darmois–Skitovich). C'est pour ça que le cas gaussien est non-identifiable.
-
-**Visualisation.** Pour des bruits uniformes, le nuage de points $(X, Y)$ a des **bords nets** dans la direction causale. L'exercice 1 du notebook illustre ça : tu génères 1000 points dans un sens et dans l'autre, et tu vois la différence de forme à l'œil nu.
-
-### D. ANM (Additive Noise Models)
-
-**Modèle.** Généralisation non-linéaire :
-$$
-Y = f(X) + N_Y, \quad X \perp N_Y
-$$
-avec $f$ non-linéaire. Le bruit $N_Y$ peut maintenant être gaussien.
-
-**Théorème (Hoyer et al. 2009).** Sauf cas très particuliers (comme $f$ linéaire + $N_Y$ gaussien), le DAG est **identifiable**.
-
-**Pourquoi ça marche.** Même argument que LiNGAM : si on fit le modèle inverse $X = g(Y) + N_X'$ avec $g$ non-linéaire, le résidu $N_X'$ ne sera *pas* indépendant de $Y$ — sauf dans la vraie direction causale.
-
-> 💡 **C'est puissant.** ANM couvre quasi tous les cas pratiques : bruit gaussien et $f$ non-linéaire (la situation la plus fréquente en sciences expérimentales). LiNGAM était le cas spécial linéaire.
-
-### E. Test d'indépendance résiduelle (HSIC)
-
-**Le problème pratique.** Comment teste-t-on numériquement "le résidu est indépendant de $X$" ?
-
-**Solution.** **HSIC** (Hilbert-Schmidt Independence Criterion). C'est un test d'indépendance non-paramétrique qui :
-* mesure la dépendance entre deux variables aléatoires de manière complètement non-linéaire,
-* fonctionne sans avoir à supposer une forme paramétrique,
-* a une distribution sous $H_0$ qu'on peut calculer.
-
-**Pipeline causal discovery (cas bivarié).**
-1. Fitter $\hat Y = \hat f(X)$ (régression non-linéaire, ex: GAM ou GP)
-2. Calculer le résidu $\hat N_Y = Y - \hat f(X)$
-3. Tester $\hat N_Y \perp X$ via HSIC. Si p-value élevée → direction $X \to Y$ plausible.
-4. Refaire dans l'autre sens.
-5. La direction "gagnante" est celle où l'indépendance résiduelle est la plus forte.
-
-C'est exactement ce que fait Peters dans le notebook avec la fonction `dHSIC` du package R.
 
 ### F. Au-delà du bivarié : algorithmes pour $d > 2$ variables
 
@@ -476,49 +424,54 @@ Idée : étendre au cas multivarié la logique du bivarié vue en C/D/E — expl
 
 ### XX. Independence based approach
 
-Algo "PC"  AUthors Date + PC stands for what ? 
+**Algo PC** (Spirtes & Glymour, 1991). PC = **P**eter & **C**lark (initiales des auteurs).
 
-On commence par un complete (edge between all pairs of variable ie there is no independence) undirected graph. Then
-1. Identify the skeleton
-2. Identify the v-structure (immoralities) and orient them
-3. Orient qualifying edges that are incident on colliders
+**Hypothèses.**
+* **Causal sufficiency** : pas de confondeurs latents
+* **Markov** + **Faithfulness** : d-séparation dans le DAG ⟺ indépendance dans la distribution
+
+> ⚠️ Si l'une saute, l'algo se trompe. FCI relâche la sufficiency.
+
+**Output.** Un **CPDAG** — toutes les arêtes ne sont pas forcément orientables. Les arêtes restées non-orientées correspondent aux endroits où plusieurs DAGs de la classe d'équivalence de Markov sont compatibles avec les données.
+
+On part d'un graphe complet non-orienté (une arête entre toutes les paires de variables, donc aucune indépendance), puis on applique trois étapes :
+1. Identifier le squelette
+2. Identifier les v-structures (immoralities) et les orienter
+3. Orienter les arêtes restantes incidentes aux colliders
 
 ![[Pasted image 20260430210234.png|177]]
 
-Pour ce qui est du squelette on a deux boucles for :
-Première boucle on trovue que $A \perp B \mid \{ \}$ 
+**Étape 1 : identifier le squelette**
 
+On effectue un test statistique d'indépendance sur les données via une double boucle for sur la taille $|Z|$ du conditioning set.
 
-(1) Étape 1 : Identify the skeleton
+Première itération $|Z|=0$ : pour chaque arête du graphe complet, on lance un test stat sur les données.
+* Arête $A-B$ : test → "$A \perp B$ ?" → oui → on coupe.
+* Arête $A-C$ : test → "$A \perp C$ ?" → non → on garde.
+* etc.
+
+→ À la fin, une seule arête coupée ($A-B$). Le graphe de travail a 9 arêtes au lieu de 10.
+
+Deuxième itération $|Z|=1$ : on ajoute un conditioning set de taille 1.
+* Arête $A-C$ : "$A \perp C \mid B$ ?" non, "$A \perp C \mid D$ ?" non, "$A \perp C \mid E$ ?" non → on garde.
+* Arête $A-D$ : "$A \perp D \mid C$ ?" → oui → on coupe.
+* etc.
+
+→ À la fin, plusieurs arêtes coupées (toutes celles non-incidentes à $C$, séparées par $\{C\}$).
 
 | Graphe complet                            | Fin de 1ère itération                     | Fin de 2e itération                       |
 | ----------------------------------------- | ----------------------------------------- | ----------------------------------------- |
 | ![[Pasted image 20260430210313.png\|204]] | ![[Pasted image 20260430210410.png\|191]] | ![[Pasted image 20260430210506.png\|186]] |
 
+**Étape 2 : identifier les v-structures (immoralities) et les orienter**
 
+**Définition.** Un triplet $(X, Z, Y)$ est une **v-structure** si $X-Z$ et $Z-Y$ sont dans le squelette et $X, Y$ ne sont pas adjacents.
 
-puis $\forall$ other pairs $(X,Y), X \perp Y \mid \{C\}$ 
+**Sepset.** Le $\text{sepset}(X, Y)$ est le conditioning set $Z$ qui a permis de couper l'arête $X-Y$ à l'étape 1. On l'a stocké pour le réutiliser ici. Pour $|Z|=0$ : $\operatorname{sepset}(A, B) = \emptyset$. Pour $|Z|=1$ : $\operatorname{sepset}(A, D) = \{C\}, \operatorname{sepset}(A, E) = \{C\}$, etc.
 
+**Règle d'orientation.** $Z \notin \text{sepset}(X, Y) \implies X \to Z \leftarrow Y$.
 
-En gros on effectue un test statistique d'indépendance sur nos données :
-
-Première itération $|Z|=0$ :
-On commence avec $Z=\emptyset$ puis pour chaque arête du graphe complet, on lance un test stats sur les données : 
-* $\text { Arête } A-B \text { : test stat } \text { → } A \perp B \text { ?" } \text { → } \text { oui } \text { → } \text { on coupe. }$
-* $\text { Arête } A-C \text { : test } \text { → } " A \perp C \text { ?" } \text { → } \text { non } \text { → } \text { on garde. }$
-* etc
-=> Résultat à la fin de cette itération : on a coupé une seule arête $A-B$. Le graphe de rtavail a maintenant 9 arêtes au lieu de 10.
-
-$\text { Deuxième itération: }|Z|=1$
-On va maintenant ajouter un conditioning set de taille 1. 
-* Arête $A-C$ : on teste " $A \perp C \mid B$ ?" non, " $A \perp C \mid D$ ?" non, " $A \perp C \mid E$ ?" non → on garde.
-* $\text { Arête } A-D: \text { on teste " } A \perp D \mid C \text { ?" } \text { → } \text { oui } \text { → } \text { on coupe. }$
-* etc
-=> Résultat à la fin de cette itération : On a coupé plusieurs arêtes 
-
-Étape 2 : 2. Identify the v-structure (immoralities) and orient them
-
-On va récupérer les sepset (separating set) en en gros c'est sur quelle variable j'ai conditioné durant mes deux itérations on a pour $|Z|=0$ : $\operatorname{sepset}(A, B)=\emptyset$ puis pour $|Z|=1$ : on a $\operatorname{sepset}(A, D)=\{C\}, \operatorname{sepset}(A, E)=\{C\}$ etc.  
+> 💡 **Intuition.** Le collider est la seule structure où conditionner *crée* la dépendance. Si $Z$ n'a pas été nécessaire pour séparer $X$ et $Y$, c'est qu'il agit comme un collider entre eux.
 
 $$
 \begin{array}{|c|c|c|c|}
@@ -531,17 +484,24 @@ $$
 \hline
 (A, C, E) & \{C\} & C \in \{C\} & \text{rien} \\
 \hline
-etc & ... & ... & ... \\
+\text{etc} & ... & ... & ... \\
 \hline
 \end{array}
 $$
 
 
-| Fin de 2e itération                       | Fin de l'étape 2                          |
+| Fin de l'étape 1                          | Fin de l'étape 2                          |
 | ----------------------------------------- | ----------------------------------------- |
 | ![[Pasted image 20260430210506.png\|186]] | ![[Pasted image 20260430211616.png\|242]] |
 
-Etape 3 : Orient qualifying edges that are incident on colliders - il va propager les arêtes restées non-orientées. La règle générale : on oriente une arête si ne pas l'orienter dans un sens créer une contradiction
+**Étape 3 : orienter les arêtes restantes incidentes aux colliders**
+
+On propage l'orientation sur les arêtes restées non-orientées selon deux contraintes : **pas de nouvelle v-structure** (toutes ont déjà été détectées à l'étape 2) et **pas de cycle**. Codifié par les **règles de Meek** appliquées jusqu'à point fixe :
+* **R1** : $A \to B$, $B - C$, $A, C$ non-adjacents → $B \to C$ *(sinon nouvelle v-structure)*
+* **R2** : $A \to B \to C$, $A - C$ → $A \to C$ *(sinon cycle)*
+* **R3, R4** : variantes plus subtiles, mêmes principes
+
+Sur cet exemple, R1 s'applique deux fois : $C \to D$ puis $C \to E$.
 
 
 | Fin de l'étape 2                          | Fin de l'étape 3                          |
@@ -552,6 +512,63 @@ Etape 3 : Orient qualifying edges that are incident on colliders - il va propage
 
 
 ### XX. Functional / asymmetry-based approach
+
+#### Cas bivarié
+
+L'idée générale : on **postule un modèle paramétrique** pour le SCM ($Y = \alpha X + N_Y$ ou $Y = f(X) + N_Y$), avec $X \perp N_Y$. Si la vraie direction est $X \to Y$ et qu'on fitte le modèle **dans le bon sens**, le résidu est indépendant de la cause. Si on fitte **dans le mauvais sens**, le résidu reste corrélé à la "cause supposée". On compare les deux directions, la bonne est celle où l'indépendance résiduelle tient.
+
+**LiNGAM** (Shimizu et al. 2006). Cas linéaire avec bruits non-gaussiens indépendants :
+$$
+Y = \alpha X + N_Y, \quad X \perp N_Y, \quad N_Y \text{ non-gaussien}
+$$
+Le DAG est identifiable à partir de $P(X, Y)$.
+
+> ⚠️ **Piège du cas gaussien.** Si $N_Y$ est gaussien, les deux directions donnent un résidu indépendant (théorème Darmois–Skitovich). C'est pour ça que le cas gaussien est non-identifiable — la gaussianité est trop symétrique.
+
+**ANM** (Hoyer et al. 2009). Généralisation non-linéaire :
+$$
+Y = f(X) + N_Y, \quad X \perp N_Y
+$$
+avec $f$ non-linéaire. Le bruit $N_Y$ peut maintenant être gaussien — c'est la non-linéarité de $f$ qui brise la symétrie. Sauf cas très particuliers (comme $f$ linéaire + $N_Y$ gaussien), le DAG est identifiable.
+
+> 💡 ANM couvre quasi tous les cas pratiques : bruit gaussien et $f$ non-linéaire (la situation la plus fréquente en sciences expérimentales). LiNGAM est le cas spécial linéaire.
+
+**Test d'indépendance résiduelle (HSIC).** Comment teste-t-on numériquement "le résidu est indépendant de $X$" ? Avec **HSIC** (Hilbert-Schmidt Independence Criterion), un test non-paramétrique qui mesure la dépendance de manière complètement non-linéaire et a une distribution sous $H_0$ calculable.
+
+**Pipeline complet.**
+1. Fitter $\hat Y = \hat f(X)$ (OLS pour LiNGAM, régression non-linéaire type GAM/GP pour ANM)
+2. Calculer le résidu $\hat N_Y = Y - \hat f(X)$
+3. Tester $\hat N_Y \perp X$ via HSIC. P-value élevée → direction $X \to Y$ plausible.
+4. Refaire dans l'autre sens.
+5. Direction "gagnante" = celle où l'indépendance résiduelle est la plus forte.
+
+C'est ce que fait Peters dans le notebook avec `dHSIC`.
+
+**Visualisation.** Pour des bruits uniformes en LiNGAM, le nuage $(X, Y)$ a des **bords nets** dans la direction causale. L'exercice 1 du notebook illustre ça : 1000 points générés dans un sens vs l'autre, différence visible à l'œil.
+
+#### Cas multivarié
+
+*TODO — DirectLiNGAM (Shimizu et al. 2011) : généralisation multivariée. Algo glouton qui identifie itérativement la **variable la plus exogène** (résidus les plus indépendants après régression sur toutes les autres), la place en tête de l'ordre causal, la retire, recommence. À la fin : ordre causal complet → DAG. RESIT (Peters et al. 2014) = équivalent pour ANM.*
+
+*Output : **DAG complet** (pas un CPDAG), parce que l'asymétrie fonctionnelle oriente toutes les arêtes — gros avantage par rapport à PC.*
+
+> ⚠️ **Le piège en pratique.** L'algo rend *toujours* un DAG complet, même quand les hypothèses sont violées (variables binaires, non-linéarités fortes, confondeurs cachés). Contrairement à PC qui peut renvoyer une arête non-orientée pour signaler son ignorance, DirectLiNGAM tranche systématiquement — parfois à tort.
+
+
+#### Cas Multivarié
+
+
+
+⚠️ bien précisé que y'a des limites dans l'algo on a bien vu que certaines contraintes sont violés dans le graphe on a des choses un peu incohérentes etc
+
+
+
+
+### XX. Score-based approach
+
+GES (Greedy Equivalence Search) algorithm
+
+https://mschauer.github.io/CausalInference.jl/latest/examples/ges_basic_examples/
 
 
 ---

@@ -1168,6 +1168,14 @@ En pratique, le compromis penche presque toujours en faveur de TD : la réductio
 > - **Bootstrap = propagation rapide.** L'information se propage entre états voisins via la TD target, sans attendre des récompenses réelles partout.
 
 ### B. TD Control
+#### SARSA(0)
+
+
+
+#### SARSAMAX ou Q-Learning
+
+
+
 
 ## V. POMDP
 

@@ -384,7 +384,7 @@ La première dit que la valeur optimale d'un état = la valeur de la meilleure a
 - **Policy Iteration** (C) — alterner les deux jusqu'à atteindre $\pi_*$.
 - **Value Iteration** (D) — fusionner évaluation et amélioration en une seule boucle (Bellman optimality).
 
-### A. Policy Evaluation
+### A. Policy Evaluation (Policy Prediction)
 
 **Le problème.** *Policy Evaluation* (aussi appelé **prediction problem**) consiste à calculer la fonction de valeur $v_\pi$ d'une politique **fixée** $\pi$. On ne cherche pas la meilleure politique ici — on évalue celle qu'on a sous la main.
 
@@ -539,7 +539,7 @@ Mais cette dernière égalité, c'est **exactement l'équation de Bellman d'opti
 > - **Sideways** : tie à 3 — n'importe quelle action convient. On choisit Flat par convention.
 > - **Bear** : Short. **Changement** par rapport à $\pi$ qui jouait Long.
 > 
-> Donc $\pi' = (\text{Long}, \text{Flat}, \text{Short})$.
+> Donc $\pi' = (\text{Long}, \text{Flat}, \text{Short})$ !! La politique stochastique est devenu déterministe !!
 > 
 > **Le résultat fascinant.** $\pi'$ est exactement la politique candidate $\pi^*$ que nous avions conjecturée en I.C ! On a donc *récupéré la politique optimale en une seule étape* de Policy Improvement, en partant d'une politique passive. Et la valeur a fait un bond énorme :
 > 
@@ -709,7 +709,7 @@ Les méthodes **Monte Carlo** (MC) abandonnent l'hypothèse de modèle connu. El
 - **Pas de bootstrap.** *Bootstrap* = utiliser une estimation de $V(s')$ pour mettre à jour $V(s)$. C'est ce que fait DP (et plus tard TD). MC, lui, calcule chaque retour **à partir des récompenses réelles** observées jusqu'à la fin de l'épisode — sans jamais utiliser d'autres $V$. Conséquence : les estimations de chaque état sont **indépendantes**. C'est plus simple à analyser, mais on ne profite pas de la structure récursive de Bellman.
 - **Mise à jour en fin d'épisode.** Pour calculer $G_t$, il faut connaître toutes les récompenses jusqu'à la fin. Donc MC ne peut pas mettre à jour à chaque pas — il attend la fin de chaque épisode. Pas d'apprentissage en ligne, contrairement à TD (IV).
 
-### A. MC Prediction
+### A. MC Prediction (MC Evaluation)
 
 **Le problème.** *Prediction* signifie : on a une politique $\pi$ fixée, et on veut estimer $v_\pi$. Mêmes objectifs que Policy Evaluation (II.A), mais sans le modèle.
 
@@ -754,6 +754,11 @@ Le grand intérêt de First-Visit : les retours collectés à travers les épiso
 > Retourner V
 > ```
 
+**Exemple :** Pour estimer $v_{\pi}(X)$ le calcul du gain $(G_t)$ ne commence qu'à partir de la première apparition de l'état $X$ dans chaque épisode. Eg pour l'épisode 1 on a $G_t=R_0+R_1+R_2$ avec $\gamma=1$, le gain est donc juste une somme simple des récompenses jusqu'à l'état terminal $Z$. 
+
+![[Pasted image 20260502111915.png]]
+Figure. First-Vist MC Example
+
 #### Every-Visit MC
 
 > [!warning] Every-Visit MC
@@ -782,6 +787,11 @@ Le grand intérêt de First-Visit : les retours collectés à travers les épiso
 > ```
 
 > 💡 **First-Visit ou Every-Visit ?** Les deux convergent vers $v_\pi$. First-Visit a une analyse plus simple (échantillons i.i.d., biais nul), Every-Visit utilise plus d'échantillons par épisode (donc moins d'épisodes nécessaires) au prix d'une corrélation entre échantillons. En pratique, la différence est mineure ; First-Visit reste le choix par défaut dans la littérature pédagogique.
+
+**Exemple :** Pour estimer $v_{\pi}(X)$ le calcul du gain $(G_t)$ ne commence qu'à partir de la première apparition de l'état $X$ dans chaque épisode. Eg pour l'épisode 1 on a $G_t=R_0+R_1+R_2$ avec $\gamma=1$, le gain est donc juste une somme simple des récompenses jusqu'à l'état terminal $Z$. Sauf que, vu que c'est "every-visit" dés que l'état $X$ apparait une seconde fois on refait le processus.
+
+![[Pasted image 20260502112036.png|459]]
+Figure. Every-visit MC
 
 #### Mise à jour incrémentale
 
@@ -906,6 +916,8 @@ Si on est gloutonne par rapport à notre $Q$ courante, on choisit toujours $\arg
 > Imaginons un agent qui ouvre des portes pour gagner des récompenses. Il essaie d'abord la Porte B et reçoit $0$. Puis la Porte A et reçoit $1$. Avec une politique purement gloutonne, à chaque visite suivante il prendra Porte A (parce que $Q(\text{A}) = 1 > Q(\text{B}) = 0$) — il y gagne $3$, puis $1$, puis $2$… et ne réessaiera **jamais** la Porte B. Or peut-être qu'en y retournant il aurait découvert $Q(\text{B}) = 100$.
 > 
 > L'estimation initiale de $Q(\text{B})$ après une seule visite ($0$) est **bruitée** : avec une seule observation, on n'a aucune idée fiable de la vraie valeur. Une politique gloutonne agit comme si chaque estimation était certaine — ce qu'elle n'est pas. D'où la nécessité d'**explorer**.
+
+![[Pasted image 20260502112120.png]]
 
 La solution standard : la politique **ε-greedy**, qui prend la meilleure action *la plupart du temps* mais teste de temps en temps une autre action au hasard.
 
@@ -1168,14 +1180,139 @@ En pratique, le compromis penche presque toujours en faveur de TD : la réductio
 > - **Bootstrap = propagation rapide.** L'information se propage entre états voisins via la TD target, sans attendre des récompenses réelles partout.
 
 ### B. TD Control
+
+**L'idée.** En IV.A on faisait de la prédiction TD : politique fixée, on estime $v_\pi$. Maintenant on veut le **contrôle** : trouver $\pi_*$. Comme en III.B (MC Control), on suit le squelette **GPI** — alterner évaluation et amélioration — mais en utilisant TD pour l'évaluation au lieu de MC.
+
+Les deux problèmes identifiés en III.B se reposent à l'identique :
+
+- **On a besoin de $Q$, pas de $V$.** Sans modèle, $V$ ne suffit pas à choisir l'action. On apprend donc directement la Q-fonction.
+- **Il faut explorer.** On utilise une politique $\varepsilon$-greedy par rapport à $Q$, avec décroissance GLIE de $\varepsilon$.
+
+Ce qui change par rapport à MC Control : la mise à jour de $Q$ se fait à chaque pas (bootstrap) au lieu d'à la fin de l'épisode. Et il y a deux façons naturelles de bootstrap-er sur $Q$ — d'où deux algorithmes : **SARSA** et **Q-learning**.
+
 #### SARSA(0)
 
+**Le nom.** SARSA vient des cinq objets utilisés dans la mise à jour : **S**tate $s_t$, **A**ction $a_t$, **R**eward $r_t$, next **S**tate $s_{t+1}$, next **A**ction $a_{t+1}$. À chaque pas, on a besoin de ce quintuplet pour mettre à jour.
 
+**Construction.** On part de l'équation de Bellman pour $q_\pi$ :
 
-#### SARSAMAX ou Q-Learning
+$$q_\pi(s, a) = \mathbb{E}_\pi\big[ r_t + \gamma \, q_\pi(s_{t+1}, a_{t+1}) \mid s_t = s,\, a_t = a \big].$$
 
+Même coup de génie qu'en TD(0) : on remplace la vraie $q_\pi$ par notre estimation $Q$, et on observe une réalisation au lieu de calculer l'espérance.
 
+> [!warning] Mise à jour SARSA(0)
+> $Q(s_t, a_t) \;\leftarrow\; Q(s_t, a_t) + \alpha\Big[ r_t + \gamma \, Q(s_{t+1}, a_{t+1}) - Q(s_t, a_t) \Big]$
+> 
+> où $a_{t+1}$ est l'action effectivement choisie selon la politique $\varepsilon$-greedy courante en $s_{t+1}$.
 
+**Le point clé : $a_{t+1}$ est l'action que l'agent va *réellement* prendre.** On l'tire selon $\pi$ au pas $t+1$, on l'utilise dans la mise à jour, *puis* on l'exécute. La mise à jour évalue donc la politique que l'agent suit réellement, $\varepsilon$-greedy comprise.
+
+> 💡 **SARSA est on-policy.** *On-policy* signifie que la politique évaluée par les mises à jour est la même que celle que l'agent suit pour explorer. SARSA évalue $q_{\pi_\varepsilon}$ où $\pi_\varepsilon$ est la politique $\varepsilon$-greedy courante — il "prend en compte" le coût de l'exploration. Si l'exploration peut faire prendre une mauvaise action $a_{t+1}$, $Q(s_t, a_t)$ baisse en conséquence.
+
+> [!note]- Pseudo-code SARSA(0)
+> ```
+> Entrée : MDP (sans modèle), gamma, alpha, schedule epsilon_k
+> Sortie : politique pi (et Q-fonction associée)
+> 
+> Initialiser Q(s, a) = 0 pour tout (s, a)
+> Pour chaque épisode k = 1, 2, 3, ... :
+>     epsilon ← epsilon_k
+>     Observer s_0
+>     Choisir a_0 ~ politique epsilon-greedy par rapport à Q
+>     Boucle (sur les pas t = 0, 1, 2, ...) :
+>         Exécuter a_t, observer r_t et s_{t+1}
+>         Choisir a_{t+1} ~ politique epsilon-greedy par rapport à Q
+>         Q(s_t, a_t) ← Q(s_t, a_t) + alpha * [r_t + gamma * Q(s_{t+1}, a_{t+1}) - Q(s_t, a_t)]
+>         s_t ← s_{t+1}, a_t ← a_{t+1}
+>         Si s_t terminal : sortir
+> Retourner pi(s) = argmax_a Q(s, a)
+> ```
+
+#### SARSAMAX (ou Q-Learning)
+
+**L'astuce.** SARSA utilise $Q(s_{t+1}, a_{t+1})$ — l'action que l'agent va réellement prendre. Q-learning utilise $\max_{a'} Q(s_{t+1}, a')$ — la **meilleure** action possible en $s_{t+1}$, indépendamment de ce que l'agent va vraiment faire.
+
+Pourquoi ce choix ? Parce qu'on revient à l'équation de Bellman *d'optimalité* (vue en I.C) :
+
+$$q_*(s, a) = \mathbb{E}\Big[ r_t + \gamma \max_{a'} q_*(s_{t+1}, a') \mid s_t = s,\, a_t = a \Big].$$
+
+Le $\max$ remplace l'espérance sur $\pi$. Q-learning échantillonne directement cette équation, sans même attendre que l'agent prenne $a_{t+1}$.
+
+> [!warning] Mise à jour Q-learning (SARSAMAX)
+> $Q(s_t, a_t) \;\leftarrow\; Q(s_t, a_t) + \alpha\Big[ r_t + \gamma \max_{a'} Q(s_{t+1}, a') - Q(s_t, a_t) \Big]$
+> 
+> On utilise le maximum sur les actions à l'état suivant, sans tenir compte de l'action que l'agent va effectivement choisir.
+
+> 💡 **Q-learning est off-policy.** *Off-policy* signifie que la politique évaluée (la politique gloutonne, via le $\max$) est *différente* de la politique suivie par l'agent (l'$\varepsilon$-greedy, nécessaire pour explorer). Q-learning estime directement $q_*$ — la Q-fonction *optimale* — même si l'agent agit de manière sous-optimale pour explorer. C'est ce qui en fait le premier algorithme RL réellement "en boucle fermée" sur l'optimalité.
+
+> [!note]- Pseudo-code Q-learning
+> ```
+> Entrée : MDP (sans modèle), gamma, alpha, schedule epsilon_k
+> Sortie : politique pi (et Q-fonction associée)
+> 
+> Initialiser Q(s, a) = 0 pour tout (s, a)
+> Pour chaque épisode k = 1, 2, 3, ... :
+>     epsilon ← epsilon_k
+>     Observer s_0
+>     Boucle (sur les pas t = 0, 1, 2, ...) :
+>         Choisir a_t ~ politique epsilon-greedy par rapport à Q
+>         Exécuter a_t, observer r_t et s_{t+1}
+>         Q(s_t, a_t) ← Q(s_t, a_t) + alpha * [r_t + gamma * max_{a'} Q(s_{t+1}, a') - Q(s_t, a_t)]
+>         s_t ← s_{t+1}
+>         Si s_t terminal : sortir
+> Retourner pi(s) = argmax_a Q(s, a)
+> ```
+> 
+> Note : par rapport à SARSA, on n'a plus besoin de tirer $a_{t+1}$ avant la mise à jour. La cible bootstrap $\max_{a'} Q(s_{t+1}, a')$ est calculée directement à partir de $Q$.
+
+#### SARSA vs Q-learning : on-policy vs off-policy
+
+La différence entre les deux algorithmes tient à *un seul caractère* dans la mise à jour, mais elle change la nature de ce qu'on apprend.
+
+| | **SARSA** | **Q-learning** |
+|---|:---:|:---:|
+| Cible | $r_t + \gamma Q(s_{t+1}, a_{t+1})$ | $r_t + \gamma \max_{a'} Q(s_{t+1}, a')$ |
+| Type | **on-policy** | **off-policy** |
+| Politique évaluée | $\pi_\varepsilon$ (celle suivie) | $\pi_*$ (gloutonne) |
+| Tient compte de l'exploration ? | Oui | Non |
+| Converge vers | $q_{\pi_\varepsilon}$ → $q_*$ si $\varepsilon \to 0$ | $q_*$ directement |
+
+> 💡 **Pourquoi cette distinction est-elle importante ?** Le cas classique pour comprendre est le **cliff walking** de Sutton & Barto : un grid-world où marcher près d'une falaise rapporte $-100$ si on tombe. Q-learning apprend la politique optimale "longer la falaise au plus court". SARSA apprend une politique plus prudente "s'éloigner de la falaise" — parce qu'avec l'exploration $\varepsilon$-greedy, longer la falaise risque de tomber, donc SARSA en tient compte. Q-learning ignore ce risque parce qu'il évalue la politique purement gloutonne.
+> 
+> **En résumé** : Q-learning est plus agressif et apprend l'optimum théorique ; SARSA est plus conservateur et apprend l'optimum *sous l'exploration que l'on impose*. Si $\varepsilon \to 0$, les deux convergent vers la même politique $\pi_*$.
+
+> [!example] Régime de marché — SARSA vs Q-learning, un pas de mise à jour
+> 
+> **Setup.** Politique $\varepsilon$-greedy avec $\varepsilon = 0.2$, $\gamma = 0.9$, $\alpha = 0.1$. On suppose que l'agent a déjà été entraîné et que sa Q-fonction courante en Bear vaut
+> 
+> $Q(\text{Bear}, \text{Long}) = 11,\quad Q(\text{Bear}, \text{Flat}) = 13,\quad Q(\text{Bear}, \text{Short}) = 15.$
+> 
+> L'action gloutonne en Bear est donc Short.
+> 
+> **Transition observée** : l'agent est en $s_t = \text{Sideways}$, prend $a_t = \text{Long}$ (au hasard via exploration), reçoit $r_t = 0$, et arrive en $s_{t+1} = \text{Bear}$. Initialement $Q(\text{Sideways}, \text{Long}) = 12$ (par hypothèse).
+> 
+> **Cas 1 : SARSA.** L'agent tire $a_{t+1}$ selon sa politique $\varepsilon$-greedy en Bear. Avec $\varepsilon = 0.2$ et 3 actions, la probabilité de choisir l'action gloutonne (Short) est $0.8 + 0.2/3 \approx 0.867$. Imaginons qu'**il explore** et tire $a_{t+1} = \text{Long}$ (probabilité $0.2/3 \approx 0.067$).
+> 
+> $Q(\text{Sideways}, \text{Long}) \leftarrow 12 + 0.1 \cdot [0 + 0.9 \cdot Q(\text{Bear}, \text{Long}) - 12]$
+> $= 12 + 0.1 \cdot [0 + 0.9 \cdot 11 - 12] = 12 + 0.1 \cdot (-2.1) = 11.79.$
+> 
+> SARSA "voit" que l'exploration peut amener à prendre Long en Bear (mauvais), et réduit l'estimation en conséquence.
+> 
+> **Cas 2 : Q-learning.** Pas besoin de tirer $a_{t+1}$. On utilise directement $\max_{a'} Q(\text{Bear}, a') = 15$ (Short).
+> 
+> $Q(\text{Sideways}, \text{Long}) \leftarrow 12 + 0.1 \cdot [0 + 0.9 \cdot 15 - 12] = 12 + 0.1 \cdot 1.5 = 12.15.$
+> 
+> Q-learning estime que depuis Bear on prendra la meilleure action (Short), peu importe ce que l'agent fait réellement. La mise à jour est plus optimiste.
+> 
+> **Écart entre les deux** : $11.79$ vs $12.15$, une différence de $0.36$ sur cette seule transition. Sur des milliers de pas, cet écart systématique change la politique apprise : Q-learning apprend $q_*$ pur, SARSA apprend une version "dégradée" qui intègre le bruit d'exploration.
+> 
+> **Trois choses à retenir.**
+> 
+> - **La différence tient à un mot** : $a_{t+1}$ tiré (SARSA) vs $\max_{a'}$ (Q-learning).
+> - **On-policy vs off-policy** : SARSA évalue la politique réellement suivie, Q-learning évalue la politique optimale.
+> - **Convergence** : les deux convergent vers $\pi_*$ si $\varepsilon \to 0$ (GLIE), mais leur comportement *en cours d'apprentissage* diffère — Q-learning plus agressif, SARSA plus conservateur.
+
+> 💡 **Bilan TD Control.** SARSA et Q-learning sont les deux algorithmes fondamentaux du contrôle TD. Q-learning est devenu dominant dans la littérature moderne parce qu'il apprend $q_*$ directement — c'est l'ancêtre de **DQN** (Deep Q-Network), qui remplace la table $Q$ par un réseau de neurones. SARSA reste pertinent quand le coût de l'exploration est réel (robotique, systèmes physiques) : on préfère une politique qui tient compte du fait qu'on explore.
 
 ## V. POMDP
 

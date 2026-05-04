@@ -98,6 +98,62 @@ Cas typique : on veut comparer deux portefeuilles à expositions et rendements c
 
 Pourquoi : la matrice $H$ et les expositions $X$ sont définies sur l'univers complet. Mettre à zéro les poids hors portefeuille permet d'utiliser le même cadre matriciel pour tous les portefeuilles, et donc de comparer leurs expositions / contributions au risque sur la même base.
 
+## 1.5 Construction des facteurs Barra et critiques classiques
+
+Section un peu disparate qui répond à trois questions souvent posées en entretien sur Barra : **comment** les facteurs sont construits, et deux **failles classiques** du modèle.
+
+### Construction des facteurs : recap
+
+Selon le type de facteur, la construction diffère :
+
+- **Industries / countries / currencies** (discrets) : exposition $X_{n,k} \in \{0, 1\}$, simple appartenance. Une industrie est typiquement définie selon GICS (ou un mapping propriétaire MSCI similaire).
+- **Style factors** (continus) : agrégation pondérée de **descriptors** (book-to-price, earnings yield, leverage…), puis standardisation z-score sur l'univers à chaque date → $X_{n,k} \sim \mathcal{N}(0, 1)$ cross-sectionnellement (cf. §2.1).
+- **Market** : intercept (colonne de 1).
+
+Le point clé : les expositions $X$ sont **construites à partir des caractéristiques observables des stocks** (secteur, fondamentaux, prix), pas estimées par régression. Seuls les *factor returns* $f$ sont estimés. C'est ce qui distingue Barra d'un modèle statistique type PCA.
+
+### Critique 1 : utiliser le modèle local ou le modèle global ?
+
+*Question d'entretien typique : "Si tu trades en Chine, tu prends `bacne5s` (local) ou `bagemtrd` (global) ?"*
+
+La réponse naïve "toujours le local, c'est plus précis" est **insuffisante**. La vraie réponse dépend de l'usage :
+
+- **Attribution P&L intra-région fine** → modèle local (`bacne5s`) : facteurs spécifiques au marché chinois (secteurs locaux, devise CNY, années de listing, etc.) qu'un modèle global dilue.
+- **Comparaison inter-régions** → modèle global (`bagemtrd`) : facteurs commensurables entre régions ("Tech global" vs "Tech US" vs "Tech Asie"). Le local ne permet pas de comparer (cf. §6.6).
+- **Portefeuille mixte / multi-régions** → souvent les **deux en parallèle** : local pour la finesse, global pour la cohérence d'ensemble.
+
+L'erreur en entretien c'est de dire "que le local" — ça montre qu'on n'a pas pensé au problème d'agrégation entre régions.
+
+### Critique 2 : industries peu peuplées → facteur déformé par un seul stock
+
+Le factor return d'une industrie est essentiellement la **moyenne pondérée des returns** des stocks de cette industrie (cf. §3.2 : interprétation des $f_k$ comme moyennes pondérées). Si une industrie ne contient que **3 ou 4 stocks**, le factor return de cette industrie est dominanté par les mouvements individuels de ces stocks.
+
+> [!note] Conséquence pratique
+> Si l'industrie "Aerospace France" ne contient que Airbus + Safran + Thales, alors $f_{\text{Aerospace France}}$ va être dirigé à 95% par les news Airbus. Ça transforme un facteur censé capturer un *risque systématique* en facteur essentiellement *idiosyncratique* déguisé.
+
+Conséquences pour l'attribution P&L et le risk management :
+- L'attribution P&L sur cette industrie sera trompeuse : on attribue à "Aerospace" ce qui est en fait du stock-picking sur Airbus.
+- Le risk forecasting sur cette industrie sous-estime ou surestime selon que les news Airbus dominent ou non la période d'estimation.
+
+**Solutions** :
+- Regrouper les industries trop petites en méga-secteurs.
+- Utiliser le modèle global (qui a plus de stocks par industrie).
+- Surveiller le **nombre de stocks par industrie** et la **concentration** (Herfindahl) comme métrique de qualité du modèle.
+
+### Critique 3 : colinéarité résiduelle entre facteurs (modèle USA)
+
+Même après la standardisation et les contraintes (§3.1), des facteurs peuvent être fortement corrélés par construction. Exemple classique sur `bausfastd` : **Size** et **Mid Cap** (Mid Cap est en gros une fonction non linéaire de Size, type cube ou indicatrice centrée).
+
+> [!note] Pourquoi c'est problématique
+> Si $X_{\text{Size}}$ et $X_{\text{MidCap}}$ sont fortement corrélées :
+> - La matrice $X^\top V X$ devient mal conditionnée → instabilité numérique de l'inversion.
+> - Les factor returns $\hat{f}_{\text{Size}}$ et $\hat{f}_{\text{MidCap}}$ deviennent **fortement anti-corrélés** (un grand $+f_{\text{Size}}$ est compensé par un grand $-f_{\text{MidCap}}$ qui ne signifie rien économiquement).
+> - L'attribution P&L sur ces deux facteurs devient illisible : on voit du $+10\text{k}\$ Size et $-9\text{k}\$ MidCap qui s'annulent presque, alors que l'effet net est faible.
+
+C'est exactement le phénomène classique de **multicollinéarité en régression** : les coefficients sont individuellement instables même si la prédiction reste OK. MSCI a (en principe) traité ça en orthogonalisant les descriptors, mais la robustesse varie selon les modèles. Le modèle US est souvent pointé du doigt sur ce sujet.
+
+**Diagnostic en pratique** : calculer la matrice de corrélation des $X_k$ sur l'univers → si $|\rho_{kl}| > 0.6$ pour deux facteurs, c'est suspect.
+
 # 2. Stage 1 — Choix des facteurs
 
 Les facteurs Barra se rangent en **5 familles** :
@@ -149,9 +205,9 @@ Spécifique au modèle **global** : MSCI regroupe les ~16 descriptors style en *
 ### Formulation mathématique
 
 Soit $D \in \mathbb{R}^{N \times p}$ la matrice des **descriptors** standardisés ($p \approx 16$), et $W \in \mathbb{R}^{p \times K_{\text{meta}}}$ la matrice de poids (sparse) fournie par MSCI, avec $K_{\text{meta}} = 8$. Les expositions aux méta-facteurs sont :
-$
+$$
 X_{\text{meta}} = D \cdot W \quad \in \mathbb{R}^{N \times 8}
-$
+$$
 
 $W$ est **sparse par construction** : seuls les descriptors d'une même famille contribuent à leur méta-facteur. Par exemple la colonne *Quality* de $W$ a 5 entrées non nulles (Leverage, Investment Quality, Earnings Variability, Earnings Quality, Profitability) et zéro partout ailleurs.
 
@@ -163,9 +219,9 @@ $W$ est **sparse par construction** : seuls les descriptors d'une même famille 
 ### Conséquence pour le modèle
 
 Le modèle `bagemtrd` régresse en pratique sur les **méta-facteurs** (8 styles) plutôt que sur les descriptors bruts (16) :
-$
+$$
 r = \underbrace{X_{\text{meta}}}_{N \times 8} f_{\text{meta}} + X_{\text{indus}} f_{\text{indus}} + X_{\text{country}} f_{\text{country}} + u
-$
+$$
 
 Et l'attribution P&L (cf. §6.4) se fait directement au niveau méta : *"+6k$ vient de Quality, +3k$ de Momentum, −2k$ de Volatility"* — lisible pour un PM, là où *"+1.2k$ Earnings Variability, +2.1k$ Earnings Quality, +0.8k$ Investment Quality…"* serait illisible.
 
@@ -549,6 +605,11 @@ C'est la base de l'**attribution de risque ex-ante** (avec $F$ à la place de $f
 
 ## 6.4 Attribution du P&L en dollars
 
+
+![[Pasted image 20260504173828.png]]
+Image totalment random avec p&l cumulé 
+
+
 Les sections précédentes raisonnent en *returns* (sans dimension, en %). Sur un desk de trading, on veut **attribuer un P&L en dollars** : "le trader a gagné +10k$ aujourd'hui, c'est dû à quoi ?"
 
 ### Dérivation
@@ -722,3 +783,257 @@ On pourrait être tenté d'utiliser le modèle global pour tout, ce qui donnerai
 ### Lien avec le cross-impact
 
 Le même mécanisme waterfall est utilisé pour le cross-impact d'un basket multi-régions : voir [[(iii) Cross-impact|note Cross-impact §IV]] pour le détail. La logique est la même : non-comparabilité des facteurs inter-régions → décomposition par bloc régional.
+
+## 6.7 Optimisation de portefeuille type Markowitz avec Barra
+
+Application classique : on **branche Barra dans Markowitz**. Au lieu d'estimer la covariance des stocks $\Sigma$ à partir des returns historiques bruts, on l'estime via le modèle factoriel.
+
+### Problème de la covariance empirique
+
+Markowitz classique demande $\mu \in \mathbb{R}^N$ (rendements espérés) et $\Sigma \in \mathbb{R}^{N \times N}$ (covariance). Or estimer $\Sigma$ à partir d'un historique brut pose **trois problèmes** (cf. *bearcave.com / Zivot & Wang 2006, ch. 15*) :
+
+1. **Coût numérique** : $\mathcal{O}(N^2)$ paramètres → ingouvernable pour $N = 5000$.
+2. **Erreur d'estimation** : la covariance est calculée à partir de moyennes temporelles bruitées → la frontière efficiente "vraie" est entourée d'une **bande d'erreur** large.
+3. **Singularité** : si $T < N$ (moins de périodes que de stocks), $\Sigma$ est non inversible → Markowitz **ne peut pas être résolu** du tout.
+
+### Solution : remplacer $\Sigma$ par $\Sigma_{\text{Barra}}$
+
+On injecte directement la décomposition du §5.1 :
+$$
+\Sigma_{\text{Barra}} = X F X^\top + D
+$$
+
+**Avantages** :
+- $\mathcal{O}(K^2 + N)$ paramètres au lieu de $\mathcal{O}(N^2)$.
+- Toujours **inversible** (positive définie sous hypothèses faibles).
+- Bande d'erreur de la frontière considérablement réduite.
+
+Le problème d'optimisation devient :
+$$
+\min_h \; h^\top (X F X^\top + D)\, h \quad \text{s.c.} \quad h^\top \mu = \mu_{\text{cible}}, \quad \mathbf{1}^\top h = 1
+$$
+
+### Estimation de $\mu$ : le maillon faible
+
+Le risque ($\Sigma$) est résolu, mais $\mu$ reste un problème ouvert. Trois approches courantes :
+
+1. **Moyenne empirique** : $\hat{\mu} = \frac{1}{T}\sum_t r_t$. Simple mais **très bruité** → frontière instable d'une période à l'autre. C'est le talon d'Achille classique de Markowitz.
+2. **Black-Litterman** : on combine un *prior* d'équilibre du marché (CAPM implicite) avec des *views* subjectives sur certains facteurs ou stocks. Plus stable.
+3. **Barra pour $\mu$ aussi** : $\hat{\mu} = X \bar{f}$ avec $\bar{f}$ la moyenne des factor returns. Cohérent avec le risque (même modèle pour $\mu$ et $\Sigma$) mais hypothèse forte (les factor returns moyens persistent).
+
+### Lecture du graphe BearCave
+
+![[Pasted image 20260504165345.png]]
+
+Le blog [bearcave.com](http://bearcave.com/finance/factor_models/factor_notes/factor_model_notes.html) compare trois frontières sur un univers jouet (15 stocks, 3 industries TECH/OIL/OTHER) :
+
+| Courbe | Description | Lecture |
+|---|---|---|
+| **Noir** : MV portfolio | Markowitz avec $\Sigma$ empirique brute, long/short | référence "naive" |
+| **Rouge** : BARRA Industry Factor | Markowitz avec $\Sigma_{\text{Barra}} = B F B^\top + D$ (3 facteurs industrie) | frontière factorielle |
+| **Bleu** : Long Only | Markowitz empirique avec contrainte $h \geq 0$ | impact de la contrainte long-only |
+
+> [!note] Ce qu'on lit sur le graphe
+> - **À gauche (faible vol)** : la frontière Barra (rouge) est légèrement à droite de la MV classique (noir). Lecture : la covariance empirique **sous-estime** la vol minimale réalisable (overfit du bruit), Barra est plus réaliste.
+> - **À droite (haute vol)** : les deux frontières convergent. À vol élevée on est dominé par le pari directionnel, le bruit d'estimation compte moins.
+> - **Long-only (bleu)** : nettement en-dessous — la contrainte $h \geq 0$ coûte du rendement à vol donnée, surtout à droite où on aimerait shorter certains secteurs.
+
+### Algorithme R minimal (Zivot & Wang)
+
+```r
+# B : matrice d'expositions (N x K), exemple 15 stocks x 3 industries TECH/OIL/OTHER
+# returns : matrice T x N des excess returns historiques
+
+# 1. Estimation OLS des factor returns par cross-section
+F_hat_ols <- solve(t(B) %*% B) %*% t(B) %*% t(returns)
+E_hat <- t(returns) - B %*% F_hat_ols
+diagD_hat <- apply(E_hat, 1, var)
+Dinv_hat <- diag(diagD_hat^(-1))
+
+# 2. Estimation FGLS (pondérée par 1/var idio) -> mimicking portfolios
+H <- solve(t(B) %*% Dinv_hat %*% B) %*% t(B) %*% Dinv_hat
+F_hat <- t(H %*% t(returns))
+
+# 3. Covariance Barra des stocks
+cov_barra <- B %*% var(F_hat) %*% t(B) + diag(diagD_hat)
+
+# 4. Markowitz classique avec cov_barra au lieu de cov(returns)
+# -> résoudre min h' cov_barra h s.c. contraintes
+```
+
+Les lignes de $H$ donnent directement les **factor mimicking portfolios** (cf. §4.2). Sur l'exemple BearCave, la ligne TECH a des poids non nuls uniquement sur DATGEN (0.22), DEC (0.32), IBM (0.28), TANDY (0.18) — les 4 stocks tech de l'univers, pondérés.
+
+> [!note]- Références
+> - **Zivot, Wang** (2006). *Modeling Financial Time Series with S-Plus*, ch. 15. Springer. — référence pédagogique standard.
+> - **bearcave.com** — portage R du chapitre, avec frontier plot sur données Berndt.
+> - **Connor, Goldberg, Korajczyk** (2010). *Portfolio Risk Analysis*. Princeton. — référence académique sur les modèles factoriels.
+
+## 6.8 Attribution P&L intraday
+
+Jusqu'ici toutes les attributions P&L (§6.4, §6.6) raisonnent en **end-of-day** : on prend $f^{EOD}$ fourni par MSCI à la cloche, on multiplie par les expositions et on obtient la décomposition du P&L de la journée. Mais pour un trader sur un desk, on veut suivre le P&L **au fil de la journée** (typiquement toutes les 5 min) et savoir en temps réel quels facteurs contribuent au P&L courant.
+
+### Setup
+
+À chaque tick intraday $t$ (5 min), on dispose de :
+- $r^{intraday}(t) = (S^{(t)} - S^{(open)})/S^{(open)}$ : returns **cumulés depuis l'open** des stocks de l'univers,
+- $X$, $H$, $D$ : matrices Barra fournies en EOD de la veille (considérées **constantes sur la journée** — hypothèse Barra : les expositions bougent lentement),
+- $\Delta^{cash}(t)$ : positions du portefeuille en \$, qui peuvent bouger si le trader trade.
+
+### Calcul à chaque tick
+
+On applique la même formule qu'en §6.4, mais avec des factor returns intraday cumulés :
+$$
+f^{intraday}(t) = H \cdot r^{intraday}(t)
+$$
+$$
+\Delta\text{P\&L}(t) = (\Delta^{cash})^\top X\, f^{intraday}(t) + (\Delta^{cash})^\top u^{intraday}(t)
+$$
+Où $u^{intraday}(t) = r^{intraday}(t) - X\, f^{intraday}(t)$ est le résidu intraday.
+
+### Pourquoi le return cumulé (et pas l'incrémental 5-min)
+
+Deux raisons :
+1. **Cohérence à la close** : à $t = \text{close}$, $r^{intraday}(\text{close}) = r^{EOD}$, donc $f^{intraday}(\text{close}) = H \cdot r^{EOD} \approx f^{EOD}_{MSCI}$. L'attribution intraday converge naturellement vers l'attribution EOD officielle.
+2. **Lecture opérationnelle** : *"depuis l'open, ce trader a gagné +5k\$ dont +3k\$ Tech et +2k\$ Momentum"* — c'est pile la question que pose le PM à 11h du matin.
+
+### Tracé du P&L au fil de la journée
+
+En répétant le calcul à chaque tick, on construit une **courbe temporelle** du P&L cumulé décomposé facteur par facteur :
+
+> [!note]- Forme typique d'un dashboard intraday
+> Pour un trader long Tech / short Energy, le dashboard pourrait montrer :
+>
+> | Heure | P&L total | Tech | Energy | Momentum | Idio |
+> |---|---|---|---|---|---|
+> | 9h35 | +1.2k\$ | +0.8k | +0.1k | +0.2k | +0.1k |
+> | 11h00 | +4.5k\$ | +3.0k | +0.5k | +0.7k | +0.3k |
+> | 14h00 | +8.1k\$ | +5.5k | +1.0k | +1.2k | +0.4k |
+> | 16h00 | +10.0k\$ | +6.0k | +1.0k | +1.5k | +1.5k |
+>
+> On voit la dynamique : Tech pousse le P&L toute la journée, Momentum accélère l'après-midi, l'idio finit fort sur la cloche.
+
+### Validation à la close
+
+La propriété clé du système : à la cloche on doit retrouver l'attribution officielle MSCI :
+$$
+f^{intraday}(\text{close}) \stackrel{!}{\approx} f^{EOD}_{MSCI}
+$$
+C'est le **test de cohérence** quotidien du système intraday : si l'écart est petit, le pipeline est OK. Si l'écart dérive, soit $H$ est mal calibré, soit il y a un bug d'alignement temporel.
+
+## 6.9 Reconstruction de $H$ pour Inde et Chine national
+
+Problème pratique rencontré sur deux modèles Barra :
+- **`baine2l`** (Inde)
+- **`bacne5s`** (Chine national, A-shares mainland)
+
+MSCI fournit pour ces modèles les expositions $X^{EOD}$, la variance idio $D$, et les factor returns déjà calculés $f^{EOD}$ — mais **pas la matrice $H$** (alors que pour `bausfastd`, `baeutrd`, etc., $H$ est livré directement).
+
+### Pourquoi on a besoin de $H$ : l'intraday
+
+C'est le seul cas qui motive la reconstruction. Pour le **P&L EOD** sur ces régions, on n'a pas besoin de $H$ : il suffit d'utiliser le $f^{EOD}_{MSCI}$ déjà livré et d'appliquer la formule du §6.4 :
+$$
+\Delta\text{P\&L}^{EOD} = (\Delta^{cash})^\top X\, f^{EOD}_{MSCI} + (\Delta^{cash})^\top u^{EOD}
+$$
+
+C'est uniquement pour le **P&L intraday** (cf. §6.8) qu'on a besoin de $H$, parce que MSCI ne livre pas de $f^{intraday}$ — il faut le reconstruire à chaque tick via $f^{intraday}(t) = H \cdot r^{intraday}(t)$.
+
+### Méthode : on n'invente rien, on ré-applique la formule du §3.1.3
+
+La formule du factor mimicking portfolio est déjà écrite dans le §3.1.3 :
+$$
+\hat{f} = \underbrace{R (R' X' V X R)^{-1} R' X' V}_{H}\, r
+$$
+
+Donc $H$ est **calculable côté client** dès qu'on a :
+- $X$ (expositions) → livré par MSCI ✅
+- $V$ (poids WLS, $\sqrt{\text{Cap}}$) → calculable depuis les caps ✅
+- $R$ (matrice de restriction des contraintes industries / countries) → connue de la méthodologie Barra ✅
+
+Il n'y a aucun ingrédient secret. La "reconstruction" est juste **l'application mécanique de la formule du §3.1.3** avec les inputs MSCI.
+
+### Validation : système d'alerte sur écarts factor returns
+
+Une fois $H$ calculé, on a deux estimations du factor return EOD :
+- $\hat{f}^{\text{new}} = H \cdot r^{EOD}$ : recalculé avec notre $H$ reconstruit.
+- $\hat{f}^{MSCI}$ : fourni par MSCI.
+
+On compare les deux vecteurs :
+$$
+\Delta f_k = \hat{f}^{\text{new}}_k - \hat{f}^{MSCI}_k \quad \text{pour chaque facteur } k
+$$
+
+**Système d'alerte** : si pour un facteur $k$ donné, $|\Delta f_k|$ dépasse un seuil (par exemple quelques bps), on lève une alerte. Ça peut indiquer :
+- une mise à jour de méthodologie MSCI (ils ont changé leurs poids WLS, ajouté des contraintes…),
+- un bug de pipeline (mauvais alignement de dates, $X$ périmé, etc.),
+- un cas pathologique (stock manquant, IPO du jour…).
+
+### Résumé du workflow
+
+```
+[X, V, R, r^EOD, f^EOD_MSCI]  (livrés par MSCI sur Inde / Chine national)
+         |
+         v
+   H = R(R'X'VXR)^{-1} R'X'V       <- formule §3.1.3
+         |
+         +---> P&L intraday : f^intraday(t) = H r^intraday(t)
+         |
+         +---> Alerte : compare H r^EOD vs f^EOD_MSCI
+```
+
+## 6.10 Série temporelle des factor exposures
+
+Outil de **risk monitoring** : on trace l'évolution dans le temps des **expositions factorielles en \$** du portefeuille, méta-facteur par méta-facteur.
+
+### Quantité tracée
+
+Pour chaque date $t$ et chaque méta-facteur $k$ (cf. §2.3), on calcule :
+$$
+E_k(t) = (\Delta^{cash}(t))^\top X_k(t) \quad \in \mathbb{R}\, (\$)
+$$
+
+C'est l'**exposition en dollars** du portefeuille au facteur $k$ à la date $t$ — même quantité que dans la ligne 4 du tableau d'unités du §6.4.
+
+> [!note] Vocabulaire à ne pas confondre
+> - $X$ → **factor exposures** (sans dim., z-scores). Donné par MSCI.
+> - $f$ → **factor returns** (en %). Estimé par régression cross-section.
+> - $(\Delta^{cash})^\top X_k$ → **exposition $\$ du portefeuille au facteur $k$**. C'est ce qu'on trace ici.
+> - $(\Delta^{cash})^\top X_k \cdot f_k$ → **P&L $\$ dû au facteur $k$** (cf. §6.4).
+
+### Construction de la série
+
+On répète le calcul tous les jours sur une fenêtre d'observation (typiquement 6 mois ≈ 126 jours ouvrés) :
+$$
+E = \begin{pmatrix}
+E_1(t_1) & E_1(t_2) & \cdots & E_1(t_T) \\
+E_2(t_1) & E_2(t_2) & \cdots & E_2(t_T) \\
+\vdots & \vdots & \ddots & \vdots \\
+E_8(t_1) & E_8(t_2) & \cdots & E_8(t_T)
+\end{pmatrix} \in \mathbb{R}^{8 \times T}
+$$
+
+- **Lignes** : les 8 méta-facteurs (Value, Size, Momentum, Quality, Yield, Volatility, Growth, Liquidity).
+- **Colonnes** : les dates.
+
+### Pourquoi les méta-facteurs (`bagemtrd`)
+
+C'est le seul modèle qui donne quelque chose de **lisible rapidement** sur ce type de visualisation. Avec ~16 descriptors style + ~40 industries + ~50 countries, on aurait ~100 courbes superposées → inexploitable pour l'œil humain. Avec **8 méta-facteurs styles**, on a un dashboard qu'un risk manager peut lire d'un coup d'œil.
+
+### Visualisation typique
+
+8 courbes temporelles superposées (une par méta-facteur), axe $x$ = dates, axe $y$ = exposition en \$.
+
+> [!note]- Forme typique du dashboard
+> | Méta-facteur | $E_k$ il y a 6 mois | $E_k$ aujourd'hui | Tendance |
+> |---|---|---|---|
+> | Value | +\$1.2M | +\$2.5M | ↗↗ (renforcement value) |
+> | Size | −\$0.8M | −\$0.3M | ↗ (less small-cap tilt) |
+> | Momentum | +\$3.0M | +\$2.8M | → stable |
+> | Quality | +\$0.5M | +\$0.4M | → stable |
+> | Yield | 0 | 0 | → neutre |
+> | Volatility | −\$1.5M | −\$2.2M | ↘ (renforcement low-vol) |
+> | Growth | +\$0.2M | −\$0.1M | ↘ (passage growth → neutre) |
+> | Liquidity | +\$0.3M | +\$0.5M | ↗ |
+
+### Cas d'usage (risk monitoring)
+
+Outil utilisé par les **risk managers** pour suivre les paris factoriels du portefeuille au cours du temps. Les usages exacts dépendent du desk (détection de drift, monitoring de tilts vs benchmark, alertes seuils…).

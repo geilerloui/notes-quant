@@ -6,6 +6,11 @@ order: 1
 
 > La **Transaction Cost Analysis (TCA)** est l'analyse des coûts payés par un investisseur pour exécuter ses ordres sur le marché. C'est un sujet central pour les gérants institutionnels parce que les coûts d'exécution rongent directement la performance : un alpha de 50 bps peut être complètement effacé par 30 bps de coûts mal maîtrisés. Cette note pose les bases : comment décomposer un coût total, comment le mesurer en bps, quels benchmarks d'exécution utiliser, et la tension fondamentale entre trader vite (impact élevé) et trader lentement (risque de marché). La modélisation du market impact lui-même — le coût caché le plus important — est traitée dans [[(ii) Market Impact - Modèles et calibration]].
 
+
+# Faut rajouter un truc 
+
+tu sais toute l'histoire de market order, limit order, order book les trucs de base de la liquidité de la microstructure quoi 
+
 ## I. Structure des coûts de transaction
 
 ### A. Décomposition générale

@@ -48,6 +48,14 @@ Quand on restreint $E(Y|X)$ aux fonctions **linéaires**, on obtient : $E(Y|X) =
 
 **Figure 2.** Interprétation géométrique dans $L^2$. $E(Y|X)$ est la projection orthogonale de $Y$ sur $L^2_X$. Le résidu $\varepsilon = Y - E(Y|X)$ est orthogonal à tout le sous-espace $L^2_X$.
 
+### Geometry
+
+\textbf{(iii) Geometry.} Estimation of $y$ using OLS regression can be visualized as the orthogonal projection of the vector $y$ onto the column space of $X$. The estimated error term, epsilon, is the orthogonal distance between the projection and the true vector $y$. Figure 1 shows this projection for a $y$ that is regressed on two explanatory variables, $X_1$ and $X_2$.
+
+donc en gros qd je pose que $\hat{\beta}=(X^TX)^{-1}X^T y$ - en gros $X^Ty$ est le vecteur des produits scalaires entre chaque colonne de X et $y$. Comment $y$ se projette sur chaque direction $X_j$ individuellement. 
+Et le $(X^TX)^{-1}$ c'est la matrice de Gram des colonnes de $X$ en gros si les colonnes de $X$ sont orthogonales (corrélations nulles) alors $X^TX$ est diagonale sinon je sais pas quoi.
+
+![[geo-1.png|430]]
 ### C. Vue probabiliste — OLS comme maximum de vraisemblance
 
 > [!warning] Hypothèse probabiliste
@@ -149,6 +157,14 @@ $\beta$ se lit ainsi : **si $X$ augmente d'une unité, $Y$ augmente en moyenne d
 > 
 > où $\rho_{Y X_j | X_{-j}}$ est la **corrélation partielle** entre $Y$ et $X_j$ conditionnellement à tous les autres prédicteurs. La corrélation partielle mesure exactement ce qui reste de la relation entre $Y$ et $X_j$ une fois qu'on a retiré l'effet linéaire de toutes les autres variables. C'est le fondement probabiliste de l'interprétation "à autres prédicteurs constants".
 
+
+en fait ici ce serait bien d'avoir le même graphe mais avec les données de notre mpg la 
+
++aussi une table avec t-stat p value pr l'interprétation
+
+
+
+
 #### Prédicteurs catégoriels — les variables indicatrices (dummies)
 
 Quand un prédicteur $X$ est catégoriel (par exemple `origin` ∈ {USA, Europe, Japon}), on ne peut pas l'inclure tel quel dans la régression — il faut l'**encoder en variables indicatrices** (one-hot encoding).
@@ -157,13 +173,18 @@ Quand un prédicteur $X$ est catégoriel (par exemple `origin` ∈ {USA, Europe,
 
 L'intuition la plus simple part du cas à **deux groupes** A et B. On définit une seule variable indicatrice :
 
-$$x_i = \begin{cases} 0 & \text{si l'observation } i \text{ appartient au groupe A (référence)} \\ 1 & \text{si l'observation } i \text{ appartient au groupe B} \end{cases}$$
+$$x_i = \begin{cases} 0 & i \in A \\ 1 & i \in B \end{cases}$$
 
 et on régresse $y_i = \beta_0 + \beta_1 x_i + \varepsilon_i$.
 
+Cas 1 : on pose que $x_i=0$ on a donc $y_i=\beta_0+\varepsilon_i$ et $\frac{1}{n_A}\sum_{i=1}^{n}y_i = \frac{1}{n_A}\sum_{i=1}^{n} (\beta_0 + \varepsilon_i)$ en développant on obtient $\bar{y}_A=\beta_0$ car le bruit est nulle en moyenne. 
+Cas 2 : on pose que $x_i=1$ on a donc $y_i=\beta_0+\beta_1 + \varepsilon_i$ on fait la même technique $\frac{1}{n_B}\sum_{i=1}^{n}y_i = \frac{1}{n_A}\sum_{i=1}^{n} (\beta_0 + \beta_1 + \varepsilon_i)$ on obtient $\bar{y}_B =\beta_0+\beta_1$ ainsi $\beta_1=\bar{y}_B-\bar{y}_A$ 
+
+
+
 > [!warning] Lecture des coefficients (cas 2 groupes)
-> - **$\beta_0$** : pour $x = 0$, on a $y_i = \beta_0 + \varepsilon_i$ → $\beta_0 = $ **moyenne du groupe A** (groupe de référence)
-> - **$\beta_1$** : la pente vaut $\frac{\Delta y}{\Delta x} = \frac{\Delta y}{1} = \Delta y$ → $\beta_1 = $ **différence des moyennes** entre B et A
+> - **$\beta_0$** : pour $x = 0$, on a $y_i = \beta_0 + \varepsilon_i$ → $\beta_0 =$ **moyenne du groupe A** (groupe de référence)
+> - **$\beta_1$** : la pente vaut $\frac{\Delta y}{\Delta x} = \frac{\Delta y}{1} = \Delta y$ → $\beta_1 =$ **différence des moyennes** entre B et A
 > 
 > $$\beta_0 = \overline{y}_A, \qquad \beta_1 = \overline{y}_B - \overline{y}_A$$
 
@@ -172,6 +193,9 @@ et on régresse $y_i = \beta_0 + \beta_1 x_i + \varepsilon_i$.
 **Figure 4.** Régression sur dummy = comparaison de moyennes. Les deux nuages de points représentent les deux groupes ; les losanges noirs marquent les moyennes empiriques. La droite OLS passe **exactement** par les deux moyennes : $\beta_0$ est la hauteur de la moyenne du groupe A (à $x=0$), et $\beta_1$ est l'écart vertical entre les deux moyennes.
 
 > 💡 **Régression sur dummy = t-test.** Tester $H_0 : \beta_1 = 0$ via la statistique de Student de la régression revient *exactement* à tester $H_0 : \overline{y}_A = \overline{y}_B$ via un t-test classique de comparaison de moyennes. Les deux approches donnent **la même p-value**. Ce n'est pas une coïncidence : la régression linéaire englobe les comparaisons de moyennes comme cas particulier. C'est le premier exemple d'un fait plus général : *régression sur dummies = ANOVA*.
+
+
+pareil ici avoir une table de t test pour vraiment comprendre le rapport entre les deux. 
 
 ##### Généralisation à $K$ groupes — le modèle ANOVA
 

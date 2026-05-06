@@ -39,11 +39,11 @@ $$\hat\beta_{\text{bucket}} = \sum_{i \in \text{bucket}} w_i \hat\beta_i$$
 
 Sur la période suivante, on mesure le rendement moyen de chaque bucket.
 
-<div style="text-align: center;">
 
-![Effet taille — Banz (1981)](images/anomalies/im1.png)
 
-</div>
+![Effet taille — Banz (1981)](images/5-Finance/anomalies/im1.png)
+
+
 
 *Figure 1. Rendement moyen annuel par quintile de capitalisation boursière. Les petites caps (Q1) rapportent environ 24% contre 11% pour les grandes caps (Q5), une différence que les betas ne peuvent pas expliquer.*
 
@@ -69,11 +69,11 @@ Le coefficient $\gamma_{2}$ est **négatif et significatif** — plus la capital
 
 En regardant les données mois par mois, Keim et Roll remarquent que la surperformance des petites caps n'est pas répartie uniformément sur l'année. Elle se concentre massivement sur **les premiers jours de janvier**.
 
-<div style="text-align: center;">
 
-![Effet janvier — Keim & Roll (1983)](images/anomalies/im2.png)
 
-</div>
+![Effet janvier — Keim & Roll (1983)](images/5-Finance/anomalies/im2.png)
+
+
 
 *Figure 2. Rendement moyen mensuel des petites caps par mois de l'année. Janvier concentre environ 8% de rendement, soit près de 8 fois la moyenne des autres mois.*
 
@@ -87,11 +87,10 @@ L'explication la plus crédible : les investisseurs vendent leurs positions perd
 
 On trie les actions par leur ratio **book-to-market (BM)** : valeur comptable divisée par valeur de marché. Un BM élevé signifie que le marché valorise l'entreprise peu par rapport à ses actifs — c'est une action *value*. Un BM faible signifie que le marché valorise l'entreprise très au-dessus de ses actifs — c'est une action *growth*.
 
-<div style="text-align: center;">
 
-![Effet value — Rosenberg et al. (1985)](images/anomalies/im3.png)
 
-</div>
+![Effet value — Rosenberg et al. (1985)](images/5-Finance/anomalies/im3.png)
+
 
 *Figure 3. Rendement moyen annuel par quintile de ratio book-to-market. Les actions value (Q5, haut BM) surperforment les actions growth (Q1, bas BM) d'environ 10% par an, indépendamment de leur beta.*
 
@@ -112,11 +111,11 @@ Jegadeesh et Titman trient les actions par leur rendement cumulé sur les **6 à
 
 Ils observent ensuite les rendements sur les **6 mois suivants** (période de détention). La stratégie momentum consiste à acheter les winners et vendre les losers — c'est un portefeuille **long-short**.
 
-<div style="text-align: center;">
 
-![Momentum — Jegadeesh & Titman (1993)](images/anomalies/im4.png)
 
-</div>
+![Momentum — Jegadeesh & Titman (1993)](images/5-Finance/anomalies/im4.png)
+
+
 
 *Figure 4. Stratégie momentum : acheter les winners (rendement passé élevé) et vendre les losers. La prime momentum est d'environ 13% par an sur 1965–1989, non expliquée par les différences de beta entre les deux groupes.*
 

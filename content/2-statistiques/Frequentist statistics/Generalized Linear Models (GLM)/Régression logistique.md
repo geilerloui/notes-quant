@@ -47,7 +47,7 @@ Navigation : Classe ↔ Log-odds (linéaire) ↔ Probabilité
 
 | Définition des odds                            | Probabilité vs Odds                            | Probabilité de perdre                              |
 | ---------------------------------------------- | ---------------------------------------------- | -------------------------------------------------- |
-| ![[images/regression-logistique/im1.png\|242]] | ![[images/regression-logistique/im2.png\|299]] | ![[images/regression-logistique/im3 (1).png\|328]] |
+| ![[images/2-Statistiques/Frequentist/regression-logistique/im1.png\|242]] | ![[images/2-Statistiques/Frequentist/regression-logistique/im2.png\|299]] | ![[images/2-Statistiques/Frequentist/regression-logistique/im3 (1).png\|328]] |
 
 **Définition :** Les odds sont le rapport entre "quelque chose qui arrive" et "quelque chose qui n'arrive pas".
 
@@ -67,7 +67,7 @@ $$
 
 | Asymétrie des odds | Symétrie des log-odds |
 |-------------------|-------------------|
-| ![[images/regression-logistique/im4.png\|433]] | ![[images/regression-logistique/im5.png\|450]] |
+| ![[images/2-Statistiques/Frequentist/regression-logistique/im4.png\|433]] | ![[images/2-Statistiques/Frequentist/regression-logistique/im5.png\|450]] |
 
 **Problème d'asymétrie :** Les odds de perdre vs gagner créent une asymétrie (odds $< 1$ vs odds $> 1$).
 
@@ -133,7 +133,7 @@ $$
 La logique de la régression logistique est de naviguer entre trois espaces : 
 Obésité $(y)$ → log-odds → probabilité $p(y=1|x)$
 
-![[images/regression-logistique/Pasted image 20260418145222.png|377]]
+![[Pasted image 20260418145222.png|377]]
 
 ### Étape 2 — Modélisation linéaire des log-odds
 
@@ -141,7 +141,7 @@ On va initialiser $w_0=-5$ et $w_1=0.15$ pour le calcul des $\text{log-odds}_i=w
 
 **Note importante :** Les log-odds peuvent atteindre ±∞, résolvant le problème des bornes de la régression linéaire classique.
 
-![[images/regression-logistique/Pasted image 20260418151041.png|361]]
+![[Pasted image 20260418151041.png|361]]
 
 ### Étape 3 — Optimisation (MLE + Gradient Descent)
 
@@ -164,7 +164,7 @@ $\sigma(x)=\frac{e^{\text{log-odds}}}{1+e^{\text{log-odds}}}$
 
 Une fois qu'on a les paramètres $w_0$ et $w_1$, on peut calculer les probabilités pour chaque échantillon : $p(y=1|x_1) = 0.12$, $p(y=1|x_2) = 0.15$, etc. On fixe un seuil $\eta = 0.5$ : chaque échantillon au-dessus de ce seuil est classifié comme obèse.
 
-![[images/regression-logistique/Pasted image 20260418151313.png|363]]
+![[Pasted image 20260418151313.png|363]]
 
 ---
 
@@ -172,13 +172,13 @@ Une fois qu'on a les paramètres $w_0$ et $w_1$, on peut calculer les probabilit
 
 ### Données
 
-![[images/regression-logistique/Pasted image 20260418152205.png|283]]
+![[Pasted image 20260418152205.png|283]]
 
 ### Visualisation 3D des données et plan des log-odds
 
 | Visualisation 3D des données | Plan des log-odds |
 |------------------------------|-------------------|
-| ![[images/regression-logistique/Pasted image 20260418152730.png]] | ![[images/regression-logistique/Pasted image 20260418154035.png]] |
+| ![[Pasted image 20260418152730.png]] | ![[Pasted image 20260418154035.png]] |
 
 **Plan des log-odds :** Ce graphique montre UN choix de paramètres : $w_0=-6$, $w_1=0.08$, $w_2=0.15$
 
@@ -192,7 +192,7 @@ Ce graphique montre UN choix de paramètres : $w_0=-6$, $w_1=0.08$, $w_2=0.15$
 
 | Surface 3D                           | Projection 2D                        |
 | ------------------------------------ | ------------------------------------ |
-| ![[images/regression-logistique/Pasted image 20260418155040.png]] | ![[images/regression-logistique/Pasted image 20260418155550.png]] |
+| ![[Pasted image 20260418155040.png]] | ![[Pasted image 20260418155550.png]] |
 
 #### Coefficients forts
 
@@ -212,7 +212,7 @@ $P(\text{obèse}) = p(y=1)= \sigma(-15 + 0.3 \times \text{poids} + 0.4 \times \t
 
 | Surface 3D | Projection 2D |
 |------------|---------------|
-| ![[images/regression-logistique/Pasted image 20260418155807.png\|305]] | ![[images/regression-logistique/Pasted image 20260418160136.png\|305]] |
+| ![[Pasted image 20260418155807.png\|305]] | ![[Pasted image 20260418160136.png\|305]] |
 
 ---
 
@@ -220,7 +220,7 @@ $P(\text{obèse}) = p(y=1)= \sigma(-15 + 0.3 \times \text{poids} + 0.4 \times \t
 
 ### Dataset avec variables catégorielles
 
-![[images/regression-logistique/Pasted image 20260418175327.png|401]]
+![[Pasted image 20260418175327.png|401]]
 
 **Caractéristique :** Avec des données discrètes, la régression logistique produit une grille de probabilités plutôt qu'une surface continue. Chaque combinaison de features catégorielles correspond à une probabilité spécifique.
 
@@ -273,7 +273,7 @@ $OR_{âge} = e^(1.052) = 2.863$
 
 **✅ Interprétation correcte :** "Chaque semaine supplémentaire **multiplie les odds par 2.863**, soit les **augmente de 186.3%**"
 
-![[images/regression-logistique/Pasted image 20260418185333.png]]
+![[Pasted image 20260418185333.png]]
 
 
 ### Régularisation

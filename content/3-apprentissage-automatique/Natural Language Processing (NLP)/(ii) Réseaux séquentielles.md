@@ -37,12 +37,12 @@ Architecture RNN avec **état caché de dimension 3** :
 ![[Pasted image 20260419192535.png|388]]
 
 2e représentation
-![[im3 (1).png|438]]
+JAI PERDU LIMAGE
 
 ![[Pasted image 20260419194323.png|307]]
 
 3e représentation
-![[im2.png|95]]
+![[images/1-Mathématiques/Probabilité/Échantillonage/im2.png|95]]
 
 # I - RNN : Fondements des Réseaux Récurrents
 
@@ -355,7 +355,7 @@ Pour cette raison, les modèles Seq2seq sont souvent appelés **"modèles encode
 
 Nous avons deux séquences de mots avec leurs variables aléatoires correspondantes :
 
-![[im2 (1).png]]
+JAI PERDU LAIMAGE
 
 ### Seq2seq comme Modèle de Langage Conditionnel
 
@@ -398,7 +398,7 @@ $$\underset{y^1, \ldots, y^{T_y}}{\arg \max} \, P(y^1, \ldots, y^{T_y} | x)$$
 
 **Beam width $B = 3$** (garder 3 mots à chaque étape) :
 
-![[im4.png|241]]
+jai perdu l'image
 
 ![[im5 (1).png|490]]
 

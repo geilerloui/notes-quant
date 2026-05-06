@@ -183,7 +183,7 @@ $J(\theta)=\frac{1}{2n}\sum_{i=1}^{n}(y^{(i)} - g_2(g_1(XW^{(1)})W^{(2)} ))^2$
 ### A. Architecture de Base
 
 #### Fonctions d'activation
-![[im5.png]]
+![[images/3-Apprentissage automatique/Supervised learning/im5.png]]
 
 
 Le choix de la fonction d'activation dans les couches cachées est crucial pour les performances du réseau. Chaque fonction a ses avantages et inconvénients :
@@ -203,7 +203,7 @@ Lorsque la matrice de poids $W$ est initialisée avec des valeurs trop important
 
 Le problème est que le gradient local de la sigmoid $z \times (1-z)$ devient alors **proche de zéro** ("vanish"), rendant les gradients pour $x$ et $W$ également nuls. Le reste de la rétropropagation sera nul à cause de la multiplication dans la chain rule.
 
-![[im6.png|494]]
+![[images/3-Apprentissage automatique/Supervised learning/im6.png|494]]
 
 *2. Diminution systématique du gradient*
 
@@ -217,7 +217,7 @@ Si un neurone est "clampé" à zéro lors du forward pass (i.e., $z = 0$, il ne 
 
 Il arrive qu'en passant tout le dataset d'entraînement dans un réseau entraîné, une large fraction (ex: 40%) des neurones soient restés à zéro tout le temps.
 
-![[im7.png|598]]
+![[images/3-Apprentissage automatique/Supervised learning/im7.png|598]]
 
 **Solutions possibles** :
 - **Leaky ReLU** : pente légère (0.01) pour les valeurs négatives

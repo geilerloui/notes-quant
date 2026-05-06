@@ -12,7 +12,7 @@ $$
 to describe the problem of finding an $x$ that minimizes $f_{0}(x)$ among all $x$ that satisfy the conditions $f_{i}(x) \leq 0, i=1, \ldots, m,$ and $h_{i}(x)=0, i=1, \ldots, p .$ We call $x \in \mathbf{R}^{n}$
 the optimization variable and the function $f_{0}: \mathbf{R}^{n} \rightarrow \mathbf{R}$ the objective function or cost function. The inequalities $f_{i}(x) \leq 0$ are called inequality constraints, and the corresponding functions $f_{i}: \mathbf{R}^{n} \rightarrow \mathbf{R}$ are called the inequality constraint functions. The equations $h_{i}(x)=0$ are called the equality constraints, and the functions $h_{i}: \mathbf{R}^{n} \rightarrow \mathbf{R}$ are the equality constraint functions. If there are no constraints $(i . e .,$ $m=p=0$ ) we say the problem (4.1) is unconstrained.
 
-![[prob-1.png|530]]
+![[ex-4.png|287]]
 
 
 \textbf{Definition (Optimal and feasible).} A point $x \in \mathcal{D}$ is feasible if it satisfies the constraints $f_{i}(x) \leq 0, i=1, \ldots, m,$ and $h_{i}(x)=0, i=1, \ldots, p$ The problem (4.1) is said to be feasible if there exists at least one feasible point, and infeasible otherwise. The set of all feasible points is called the feasible set or the constraint set. The optimal value $p^{\star}$ of the problem (4.1) is defined as

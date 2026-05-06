@@ -90,7 +90,7 @@ Le résidu $\varepsilon = Y - E(Y|X)$ est **orthogonal à $L^2_X$**, ce qui sign
 
 Ces propriétés ne sont pas des hypothèses qu'on impose : elles **découlent directement de la géométrie**.
 
-![Interprétation géométrique dans L²|440](images/regression-lineaire/im2.png)
+![Interprétation géométrique dans L²|440](images/2-Statistiques/Frequentist/regression-lineaire/im2.png)
 *Figure 2. Interprétation géométrique dans $L^2$. $E(Y|X)$ est la projection orthogonale de $Y$ sur le sous-espace $L^2_X$ des fonctions (mesurables) de $X$. Le résidu $\varepsilon = Y - E(Y|X)$ est orthogonal à tout le sous-espace $L^2_X$.*
 
 #### 2.2 MAE → médiane conditionnelle

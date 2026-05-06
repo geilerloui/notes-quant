@@ -171,7 +171,7 @@ Pour une fonction $f(x, y)$, la **dérivée partielle par rapport à $x$** en $(
 
 L'image suivante montre les deux cas côte à côte — à gauche on fixe $y = y_0$ et on fait varier $x$, à droite on fixe $x = x_0$ et on fait varier $y$. La tangente rouge c'est la dérivée partielle, et les points $f(x_0, y_0)$ et $f(x, y_0)$ (ou $f(x_0, y)$) sont annotés sur la courbe bleue.
 
-![[im3.png|518]]
+![[images/5-Finance/capm/im3.png|518]]
 
 > [!note]- À améliorer
 > Annoter cette image avec $\Delta x$, $\Delta f$ style 3blue1brown pour montrer visuellement le rise/run → slope = $\Delta f / \Delta x$.

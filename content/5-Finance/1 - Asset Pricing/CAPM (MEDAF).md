@@ -17,9 +17,9 @@ Markowitz montre qu'en combinant des actifs, on peut réduire le risque sans sac
 
 **Le blocage pratique.** Pour $N$ actions, il faut estimer $N(N-1)/2$ covariances. Pour 500 actions, cela représente 124 750 paramètres — ingérable et trop bruité pour être fiable.
 
-<div style="text-align:center">
-<img src="images/capm/im1.png" style="max-width:75%" alt="Frontière efficiente et CML" />
-</div>
+![[images/5-Finance/capm/im1.png]]
+
+
 
 *Figure 1. Frontière efficiente et Capital Market Line. Tout investisseur rationnel détient le portefeuille tangent $T$ pour sa partie risquée, dosé avec $R_f$ selon son aversion au risque.*
 
@@ -92,9 +92,7 @@ $$\mathbb{E}[R_i] = R_f + \beta_i \cdot \underbrace{(\mathbb{E}[R_m] - R_f)}_{\t
 - **Au-dessus de la SML** : $\alpha > 0$ — l'actif offre plus que ce que son risque justifie → sous-évalué, signal d'achat.
 - **En dessous de la SML** : $\alpha < 0$ — l'actif offre moins → sur-évalué, signal de vente.
 
-<div style="text-align:center">
-<img src="images/capm/im2.png" style="max-width:75%" alt="Security Market Line" />
-</div>
+![[images/5-Finance/capm/im2.png]]
 
 *Figure 2. Security Market Line. Le point marché ($\beta=1$) est sur la droite par construction. Les actifs au-dessus ont $\alpha > 0$ (sous-évalués), ceux en dessous ont $\alpha < 0$ (sur-évalués).*
 
@@ -114,9 +112,7 @@ $$\underbrace{(\sigma^i)^2}_{\text{Risque total}} = \underbrace{(\beta_i)^2 \, \
 
 > **Exemple.** McDonalds ($\beta = 0.70$, $\sigma = 1.05$) et Amazon ($\beta = 1.46$, $\sigma = 1.02$) ont une volatilité totale similaire, mais de nature opposée. Amazon est quasi entièrement systématique — son risque est non diversifiable et justifie un rendement attendu plus élevé. McDonalds a surtout du risque propre qu'on peut éliminer en diversifiant.
 
-<div style="text-align:center">
-<img src="images/capm/im4.png" style="max-width:75%" alt="Décomposition du risque total" />
-</div>
+![[images/5-Finance/capm/im4.png]]
 
 *Figure 4. Décomposition du risque total par actif. La part systématique (non diversifiable, rémunérée) croît avec $\beta$. La part idiosyncratique (diversifiable, non rémunérée) varie selon les caractéristiques propres de chaque titre.*
 
@@ -145,9 +141,7 @@ Quand $N \to \infty$ :
 - Le terme $\frac{1}{N} \cdot \overline{\text{Var}} \to 0$ — le risque idiosyncratique disparaît car les $\varepsilon_i$ indépendants s'annulent mutuellement.
 - Le terme $\left(1 - \frac{1}{N}\right) \cdot \overline{\text{Cov}} \to \overline{\text{Cov}}$ — les covariances convergent vers leur moyenne, c'est le plancher systématique.
 
-<div style="text-align:center">
-<img src="images/capm/im3.png" style="max-width:75%" alt="Diversification du risque" />
-</div>
+![[images/5-Finance/capm/im3.png]]
 
 *Figure 3. Diversification du risque de portefeuille. Le risque spécifique décroît en $1/N$ et s'annule avec une trentaine d'actions. Le risque systématique constitue un plancher incompressible.*
 
@@ -234,6 +228,7 @@ Le $k$ ainsi obtenu est le **rendement implicite dans le prix** : "compte tenu d
 > | Hermès | $8.7\%$ | $0.8$ | $8.0\%$ | $+0.7\%$ | Acheter |
 > | Renault | $9.5\%$ | $1.1$ | $9.5\%$ | $\approx 0$ | Neutre |
 > | EADS | $10.5\%$ | $1.4$ | $11.0\%$ | $-0.5\%$ | Éviter |
+
 
 ### (iii) DCF complet
 
@@ -327,9 +322,7 @@ La procédure :
 3. Observer les rendements réalisés sur la période suivante
 4. Rouler la fenêtre et recommencer
 
-<div style="text-align:center">
-<img src="images/capm/im5.png" style="max-width:75%" alt="BJS — SML empirique vs théorique" />
-</div>
+![[images/5-Finance/capm/im5.png|558]]
 
 *Figure 5. Résultat de BJS (1972). La relation $\beta$/rendement est bien positive et linéaire, mais la droite empirique (bleue) est plus plate que la SML théorique (pointillée). L'intercept empirique $z > r_f$ : les actifs à bas $\beta$ surperforment ($\alpha > 0$), les actifs à haut $\beta$ sous-performent ($\alpha < 0$).*
 
@@ -347,9 +340,7 @@ $$R_{i,t} = \gamma_{0,t} + \gamma_{1,t}\hat{\beta}_i + \gamma_{2,t}\hat{\beta}_i
 
 Cela donne une série temporelle de coefficients $\hat{\gamma}_t$ — un jeu par mois sur ~400 mois. On teste ensuite si la moyenne temporelle de chaque $\hat{\gamma}$ est significativement différente de zéro ou de la valeur prédite par le CAPM.
 
-<div style="text-align:center">
-<img src="images/capm/im6.png" style="max-width:75%" alt="Fama-MacBeth — méthode et résultats" />
-</div>
+![[images/5-Finance/capm/im6.png]]
 
 *Figure 6. Méthode Fama-MacBeth (gauche) et résultats des quatre hypothèses testées (droite). H1, H3 et H4 sont confirmées — $\beta$ est bien le seul facteur de risque rémunéré et la relation est linéaire. H2 est rejetée : l'intercept est trop élevé, confirmant BJS.*
 
@@ -366,9 +357,7 @@ Roll montre deux théorèmes :
 - **Théorème 1.** La SML est vérifiée exactement *si et seulement si* le proxy utilisé pour $M$ est efficient.
 - **Théorème 2.** Si on utilise un proxy efficient, la SML est vérifiée *par construction mathématique* — peu importe que le vrai CAPM soit vrai ou faux.
 
-<div style="text-align:center">
-<img src="images/capm/im7.png" style="max-width:75%" alt="Critique de Roll (1977)" />
-</div>
+![[images/5-Finance/capm/im7.png]]
 
 *Figure 7. Critique de Roll (1977). Quel que soit le résultat empirique — SML vérifiée ou violée — on ne peut rien conclure sur la validité du CAPM. Tout résultat s'explique par le choix du proxy, pas par le modèle.*
 

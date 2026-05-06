@@ -8,7 +8,7 @@ Le CAPM prédit une chose simple : plus le bêta d'un actif est élevé, plus so
 
 | | |
 |:---:|:---:|
-| ![CAPM prediction](images/facteurs-fondamentaux/beta-capm-prediction.svg) | ![Actual data](images/facteurs-fondamentaux/beta-actual-data.svg) |
+| ![CAPM prediction](beta-capm-prediction.svg) | ![Actual data](beta-actual-data.svg) |
 
 *Figure 1. Chaque point = un décile d'actions trié par bêta (1963–1990). En haut : la prédiction du CAPM. En bas : les données réelles — pente non significativement différente de zéro.*
 
@@ -20,7 +20,7 @@ FF s'appuient alors sur la littérature des anomalies des années 1980 — une p
 
 **(i) Rappel comptable — le bilan et les notations**
 
-![Balance sheet](images/facteurs-fondamentaux/imZ.png)
+![Balance sheet](imZ.png)
 
 *Figure 2. Balance sheet — rappel comptable des notations utilisées.*
 
@@ -71,7 +71,7 @@ Les value stocks surperforment les growth stocks sur le long terme. C'est le *va
 
 En ML, une feature est une observation passive — l'âge, le salaire. Elle existe dans le monde, tu la mesures. FF **construisent** leurs facteurs. SMB et HML sont des portefeuilles long-short — des stratégies actives qui génèrent un rendement chaque mois. Ce rendement mensuel, c'est le facteur.
 
-![Long-short portfolio](images/facteurs-fondamentaux/long-short-portfolio.svg)
+![Long-short portfolio](long-short-portfolio.svg)
 
 *Figure 3. Construction du facteur SMB comme portefeuille long-short.*
 
@@ -81,7 +81,7 @@ Le short **annule** l'exposition au marché : si le marché monte de 2%, les lon
 
 Chaque juillet, FF trient toutes les actions selon deux critères indépendants : médiane $ME$ → Small/Big, et 30ᵉ/70ᵉ percentiles $B/M$ → Growth/Neutral/Value. L'intersection donne 6 portefeuilles.
 
-![Grille 2x3](images/facteurs-fondamentaux/grid-2x3.svg)
+![Grille 2x3](grid-2x3.svg)
 
 *Figure 4. Les 6 portefeuilles issus du double tri taille × B/M.*
 
@@ -97,7 +97,7 @@ $$HML = \frac{1}{2}(R_{SV} + R_{BV}) - \frac{1}{2}(R_{SG} + R_{BG})$$
 
 **(v) La timeline — rebalancement annuel**
 
-![Timeline rebalancement](images/facteurs-fondamentaux/timeline-rebalancing.svg)
+![Timeline rebalancement](timeline-rebalancing.svg)
 
 *Figure 5. Rebalancement annuel en juillet — les compositions sont fixes 12 mois.*
 
@@ -138,7 +138,7 @@ Ce qui change entre les 25 régressions : uniquement $\mathbf{R}_i$. La matrice 
 
 **(i) Panel A — rendements moyens**
 
-![Panel A Summary Statistics](images/facteurs-fondamentaux/imX.png)
+![Panel A Summary Statistics](imX.png)
 
 *Figure 6. Panel A — moyenne et écart-type des rendements mensuels des 25 portefeuilles.*
 
@@ -148,7 +148,7 @@ Le fait que les rendements bougent selon ces deux axes indépendants est exactem
 
 **(ii) Panel B — coefficients de régression**
 
-![Panel B Regression Results](images/facteurs-fondamentaux/imY.png)
+![Panel B Regression Results](imY.png)
 
 *Figure 7. Panel B — coefficients $a$, $b$, $s$, $h$ et leurs t-stats pour les 25 portefeuilles.*
 
@@ -269,7 +269,7 @@ Tout le papier revient à trouver le meilleur moyen d'estimer les bénéfices fu
 
 La formule parle de bénéfices futurs $E$ mais ne dit pas comment les mesurer aujourd'hui. L'argument central : le compte de résultat est une cascade, et chaque étage rajoute des décisions comptables qui bruitent le signal.
 
-![Cascade du compte de résultat — chaque étage rajoute du bruit comptable.](images/facteurs-fondamentaux/novy_cascade_compte_resultat.png)
+![Cascade du compte de résultat — chaque étage rajoute du bruit comptable.](novy_cascade_compte_resultat.png)
 
 *Figure 1. La cascade du compte de résultat. Plus on descend, plus on accumule de décisions comptables discrétionnaires.*
 
@@ -298,7 +298,7 @@ Il moyenne ensuite les coefficients sur toutes les périodes. La t-stat teste si
 
 > **Ce que cette régression fait concrètement.** Il n'y a pas de portefeuille ici — c'est une régression sur les actions individuelles. On prend toutes les actions du marché américain (plusieurs milliers), on régresse leurs rendements mensuels sur leurs caractéristiques fondamentales, et on regarde quelles caractéristiques ont un $\hat{\beta}$ significativement différent de zéro. C'est un test statistique pur pour identifier quelles variables prédisent les rendements en coupe transversale.
 
-![Table 1 — Régressions Fama-McBeth. 7 spécifications différentes, une par colonne.](images/facteurs-fondamentaux/novy_fama_mcbeth.png)
+![Table 1 — Régressions Fama-McBeth. 7 spécifications différentes, une par colonne.](novy_fama_mcbeth.png)
 
 *Figure 2. Fama-McBeth regression. Encadrés rouges : une seule mesure testée seule. Encadrés bleus : GP/A testé conjointement avec une autre mesure.*
 
@@ -334,7 +334,7 @@ $$r_{i,t} - r_f = \alpha_i + \beta_i^{MKT} \cdot MKT_t + \beta_i^{SMB} \cdot SMB
 >
 > Le coefficient sur HML indique à quel point un portefeuille ressemble à des value stocks (positif) ou à des growth stocks (négatif).
 
-![Table 2 — Portefeuilles triés par GP/A (Panel A) et par B/M (Panel B).](images/facteurs-fondamentaux/novy_linear_regression.png)
+![Table 2 — Portefeuilles triés par GP/A (Panel A) et par B/M (Panel B).](novy_linear_regression.png)
 
 *Figure 3. Portefeuilles triés par profitabilité (Panel A) et par B/M (Panel B). Les rendements augmentent dans les deux cas de Low à High. Mais les coefficients HML vont dans des directions opposées.*
 
@@ -345,13 +345,13 @@ Les rendements augmentent de Low GP/A ($0.31\%$ par mois) à High GP/A ($0.62\%$
 
 Les entreprises très profitables se comportent comme des growth stocks, à l'opposé des value stocks qui ont $\beta^{HML} = +0.51$. C'est une observation visuelle qui donne l'intuition. Pour le vérifier formellement, il construit la matrice de données suivante :
 
-![Matrice de données : n actions × d caractéristiques fondamentales.](images/facteurs-fondamentaux/novy_matrice_donnees.png)
+![Matrice de données : n actions × d caractéristiques fondamentales.](novy_matrice_donnees.png)
 
 *Figure 4. Structure des données utilisées pour calculer la table de corrélation. Chaque ligne est une action, chaque colonne une caractéristique fondamentale. La colonne B/M est en rouge car sa corrélation avec GP/A est négative.*
 
 À partir de cette matrice il calcule la corrélation de Pearson entre chaque paire de colonnes.
 
-![Figure 18 — Table de corrélation entre les caractéristiques fondamentales.](images/facteurs-fondamentaux/novy_correlation.png)
+![Figure 18 — Table de corrélation entre les caractéristiques fondamentales.](novy_correlation.png)
 
 *Figure 5. Table de corrélation (Figure 18 du papier). La ligne GP/A est encadrée en rouge. Le chiffre clé : corrélation GP/A vs B/M $= -0.18$, $t = -17.2$.*
 
@@ -390,7 +390,7 @@ $$\text{Sharpe seul} = \frac{0.5\%}{3\%} = 0.17 \qquad \text{Sharpe mixte} = \fr
 
 Le Sharpe double.
 
-![Figure 17 — Performance du portefeuille mixte de 1963 à 2010.](images/facteurs-fondamentaux/novy_hedging.png)
+![Figure 17 — Performance du portefeuille mixte de 1963 à 2010.](novy_hedging.png)
 
 *Figure 6. Sharpe ratio annualisé glissant de 1963 à 2010. Le mix 50/50 (trait plein) est systématiquement plus stable que la stratégie value seule (pointillés) et la stratégie profitabilité seule (tirets). La stratégie value s'effondre en 2000 pendant la bulle tech — la profitabilité compense.*
 
@@ -536,7 +536,7 @@ $$B/M \uparrow \;\Rightarrow\; r \uparrow \qquad OP \uparrow \;\Rightarrow\; r \
 
 La Table 1 présente les rendements moyens mensuels des portefeuilles triés par taille × $B/M$ (Panel A), taille × $OP$ (Panel B), et taille × $INV$ (Panel C). Pour les microcaps (ligne Small), les patterns sont nets.
 
-![Table 1 — rendements moyens des portefeuilles univariés](images/facteurs-fondamentaux/ff5_table1.png)
+![Table 1 — rendements moyens des portefeuilles univariés](ff5_table1.png)
 
 *Figure 8. Table 1 — rendements moyens mensuels des portefeuilles taille × B/M (Panel A), taille × OP (Panel B), taille × INV (Panel C). En bleu : patterns conformes à la théorie DDM. En rouge : anomalies pour les megacaps.*
 
@@ -585,7 +585,7 @@ La Table 1 trie selon un seul critère à la fois. Mais $B/M$, $OP$ et $INV$ son
 
 Le test GRS mesure si un modèle laisse des alphas significatifs sur les portefeuilles tests. FF montrent qu'en ajoutant RMW et CMA au modèle $\{R_m - R_f,\ SMB,\ HML\}$, le GRS baisse — le modèle s'améliore. Mais l'observation centrale est différente : **ajouter HML à un modèle qui contient déjà RMW et CMA n'améliore pas significativement le GRS dans aucun des panels testés**.
 
-![Table 2 — test GRS selon les combinaisons de facteurs](images/facteurs-fondamentaux/ff5_table2.png)
+![Table 2 — test GRS selon les combinaisons de facteurs](ff5_table2.png)
 
 *Figure 9. Table 2 — statistique GRS et mesures d'adéquation pour différentes combinaisons de facteurs, sur les trois panels de portefeuilles tests. Les combinaisons encadrées en rouge montrent que RMW CMA sans HML fait aussi bien que le modèle complet.*
 
@@ -609,7 +609,7 @@ $$HML_t = \alpha + \beta^{MKT}(R_{m,t} - R_{f,t}) + \beta^{SMB} \cdot SMB_t + \b
 
 Et symétriquement pour SMB, RMW, CMA, et le marché.
 
-![Table 3 — régressions croisées des facteurs](images/facteurs-fondamentaux/ff5_table3.png)
+![Table 3 — régressions croisées des facteurs](ff5_table3.png)
 
 *Figure 10. Table 3 — chaque ligne régresse un facteur sur les quatre autres. La ligne HML est encadrée en bleu : $R^2 = 0.51$, $\beta^{CMA} = 1.04$ ($t = 23.03$).*
 
@@ -633,7 +633,7 @@ Les $R^2$ des autres régressions sont bien plus faibles. SMB, RMW et CMA ne son
 
 La Table 1 montrait des effets univariés potentiellement pollués par les corrélations entre $B/M$, $OP$ et $INV$. La Table 4 répond à la vraie question : une fois qu'on contrôle simultanément pour les trois variables, les effets persistent-ils ?
 
-![Table 4 — rendements des portefeuilles du triple tri](images/facteurs-fondamentaux/ff5_table4.png)
+![Table 4 — rendements des portefeuilles du triple tri|424](ff5_table4.png)
 
 *Figure 11. Table 4 — rendements moyens des portefeuilles issus du triple tri taille × B/M × OP et taille × B/M × INV. Chaque cellule contrôle simultanément pour les trois dimensions.*
 
@@ -711,11 +711,11 @@ On trie tous les actifs ainsi, on achète les plus "bon marché", on vend les pl
 
 ### (iv) Résultats — Table I
 
-![Table I — Performance des portefeuilles value et momentum](images/facteurs-fondamentaux/value_momentum_table1.png)
+![Table I — Performance des portefeuilles value et momentum](value_momentum_table1.png)
 
 *Figure 1. Performance des portefeuilles value, momentum et 50/50 sur les actions US (01/1972–07/2011). Rendements annualisés en excès du T-bill.*
 
-![Résumé Table I](images/facteurs-fondamentaux/value_momentum_cards_table1.png)
+![Résumé Table I](value_momentum_cards_table1.png)
 
 Le **4.6 %** et le **t-stat de 3.98** (colonnes P3−P1) et le **5.8 %** avec **t-stat 5.40** (colonne Factor) correspondent au portefeuille 50/50.
 
@@ -735,7 +735,7 @@ Dans une matrice de corrélation classique, la diagonale est toujours égale à 
 
 **Interprétation business.** Cela prouve que la value est un facteur **mondial** ("Everywhere"). Si le chiffre était proche de 0, cela voudrait dire que la value est un phénomène purement local.
 
-![Table II — Matrice de corrélations](images/facteurs-fondamentaux/value_momentum_table2.png)
+![Table II — Matrice de corrélations](value_momentum_table2.png)
 
 *Figure 2. Matrice de corrélations des rendements moyens entre stratégies value et momentum, toutes classes d'actifs confondues. \* = statistiquement significatif.*
 
@@ -763,7 +763,7 @@ La PCA sur les 48 stratégies confirme que le **PC1** explique environ $0.4$ de 
 
 ### (vii) Les facteurs macro n'expliquent rien — Table III
 
-![Table III — Régression sur facteurs macro](images/facteurs-fondamentaux/value_momentum_table3.png)
+![Table III — Régression sur facteurs macro](value_momentum_table3.png)
 
 *Figure 3. Régression des rendements value et momentum sur des facteurs macroéconomiques (PIB, term spread, inflation…). Les t-stats sont proches de 0 dans l'ensemble.*
 
@@ -781,13 +781,13 @@ $$R^{TED}_t = \alpha + \gamma_1 R^{TED}_{t-1} + \gamma_2 R^{TED}_{t-2} + \vareps
 
 Le résidu $\varepsilon_t$ est le **choc de liquidité pur**, débarrassé de toute autocorrélation.
 
-![TED spread historique](images/facteurs-fondamentaux/value_momentum_ted_spread.png)
+![TED spread historique](value_momentum_ted_spread.png)
 
 *Figure 4. TED spread de 1990 à 2011. Le spread est quasi-plat pendant des années, puis explose lors des crises (LTCM 1998, crise financière 2008) avant de redescendre lentement — comportement typique d'un processus autocorrélé.*
 
 Ils font ensuite une PCA sur l'ensemble des mesures de liquidité (TED spread, LIBOR spread, etc.) et gardent le premier composant principal comme proxy unique — la PCA élimine le bruit et retient ce qui est **commun** à toutes ces séries.
 
-![Table IV — Régression sur la liquidité de financement](images/facteurs-fondamentaux/value_momentum_table4.png)
+![Table IV — Régression sur la liquidité de financement](value_momentum_table4.png)
 
 *Figure 5. Régression des rendements value et momentum sur les mesures de liquidité de financement. La value est négativement corrélée aux chocs, le momentum positivement.*
 
@@ -797,7 +797,7 @@ Ils font ensuite une PCA sur l'ensemble des mesures de liquidité (TED spread, L
 - Le momentum est **positivement** corrélé aux mêmes chocs.
 - Le PC de funding liquidity est le driver commun des deux stratégies dans des directions opposées, aussi bien au niveau US que global.
 
-![Figure 1 — Chocs de liquidité historiques](images/facteurs-fondamentaux/value_momentum_figure1.png)
+![Figure 1 — Chocs de liquidité historiques](value_momentum_figure1.png)
 
 *Figure 6. Épisodes historiques de stress de liquidité de financement et leur impact sur les stratégies value et momentum.*
 
@@ -809,7 +809,7 @@ Pour tester leur modèle, les auteurs utilisent les 48 stratégies comme actifs 
 
 Sur chaque graphe, l'axe X est le **rendement prédit** par le modèle et l'axe Y est le **rendement réel observé**. Si le modèle était parfait, tous les points seraient sur la diagonale.
 
-![Figure 2 — Tests de pricing cross-sectionnel](images/facteurs-fondamentaux/value_momentum_figure2.png)
+![Figure 2 — Tests de pricing cross-sectionnel](value_momentum_figure2.png)
 
 *Figure 7. Rendements réels vs rendements prédits pour les 48 portefeuilles value et momentum, sous quatre modèles : CAPM, Fama-French 4 facteurs, Fama-French 6 facteurs, et AMP 3 facteurs.*
 
@@ -913,7 +913,7 @@ Si $p(\text{GRS}) = 0.00$, on rejette $H_0$ : le modèle ne capte pas toute la c
 
 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
 
-![Table 1 Panel A — Sample averages des facteurs par région](images/facteurs-fondamentaux/ff5_international_table1_panel_a.png)
+![Table 1 Panel A — Sample averages des facteurs par région](ff5_international_table1_panel_a.png)
 
 *Figure 1. Table 1, Panel A. Moyennes des primes de risque (annualisées, en %) et t-statistiques pour les quatre régions.*
 
@@ -926,25 +926,25 @@ Résultats saillants :
 
 **Panel B** décompose HML en *small stocks* vs *big stocks*.
 
-<div style="display: flex; flex-direction: column; gap: 0.5rem;">
 
-![Table 1 Panel B — Décomposition HML small vs big](images/facteurs-fondamentaux/ff5_international_table1_panel_b.png)
+
+![Table 1 Panel B — Décomposition HML small vs big](ff5_international_table1_panel_b.png)
 
 *Figure 2. Table 1, Panel B. Décomposition de la prime value selon la taille des entreprises.*
 
-</div>
+
 
 Contrairement à l'intuition habituelle (les anomalies seraient concentrées dans les petites capitalisations), le point estimate de HML est principalement **driven par les big stocks** pour toutes les régions sauf le Japon.
 
 **Panel C** donne les matrices de corrélation des facteurs *entre régions*.
 
-<div style="display: flex; flex-direction: column; gap: 0.5rem;">
 
-![Table 1 Panel C — Corrélations des facteurs entre régions](images/facteurs-fondamentaux/ff5_international_table1_panel_c.png)
+
+![Table 1 Panel C — Corrélations des facteurs entre régions](ff5_international_table1_panel_c.png)
 
 *Figure 3. Table 1, Panel C. Matrices de corrélation des facteurs entre les quatre régions.*
 
-</div>
+
 
 Résultat notable : **la corrélation de RMW entre régions est quasi nulle**. Implication pratique : implémenter une stratégie *long-profitable* indépendamment dans chaque marché produit un portefeuille global dont les composantes sont quasi-orthogonales — c'est une opportunité de diversification quasi gratuite.
 
@@ -956,7 +956,7 @@ Résultat notable : **la corrélation de RMW entre régions est quasi nulle**. I
 
 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
 
-![Table 2 Panel A — Portefeuilles double-triés](images/facteurs-fondamentaux/ff5_international_table2_panel_a.png)
+![Table 2 Panel A — Portefeuilles double-triés](ff5_international_table2_panel_a.png)
 
 *Figure 4. Table 2, Panel A. Rendements moyens des portefeuilles triés sur Size × B/M, Size × OP et Size × Inv pour chaque région.*
 
@@ -972,7 +972,7 @@ Le problème identifié dans FF (2015) persiste à l'international : les **small
 
 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
 
-![Table 3 — Factor regressions](images/facteurs-fondamentaux/ff5_international_table3.png)
+![Table 3 — Factor regressions](ff5_international_table3.png)
 
 *Figure 5. Table 3. Régressions de chaque facteur sur les quatre autres, par région. L'intercept teste la redondance.*
 
@@ -988,7 +988,7 @@ Le résultat est différent à l'international. Pour certains marchés, l'interc
 
 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
 
-![Table 4 — GRS statistics](images/facteurs-fondamentaux/ff5_international_table4.png)
+![Table 4 — GRS statistics](ff5_international_table4.png)
 
 *Figure 6. Table 4. Statistiques GRS et p-values pour le modèle FF3 et le modèle FF5, sur différents ensembles de portefeuilles tests, par région.*
 
@@ -1007,21 +1007,20 @@ Le FF5 **améliore systématiquement le GRS** par rapport au FF3, mais le test r
 
 ### (v) Table 5 — À compléter
 
-<div style="display: flex; flex-direction: column; gap: 0.5rem;">
 
-![Table 5 — partie 1](images/facteurs-fondamentaux/ff5_international_table5.png)
+
+![Table 5 — partie 1](ff5_international_table5.png)
 
 *Figure 7. Table 5, partie 1.*
 
-</div>
 
-<div style="display: flex; flex-direction: column; gap: 0.5rem;">
 
-![Table 5 — partie 2](images/facteurs-fondamentaux/ff5_international_table5_part2.png)
+
+![Table 5 — partie 2](ff5_international_table5_part2.png)
 
 *Figure 8. Table 5, partie 2.*
 
-</div>
+
 
 ---
 
@@ -1062,7 +1061,7 @@ $$\text{Prédit par le CAPM :} \quad E[r_i] = r_f + \beta_i (E[r_m] - r_f)$$
 
 En pratique : les titres à faible $\beta$ génèrent un $\alpha > 0$ (sous-évalués par le CAPM) et les titres à fort $\beta$ génèrent un $\alpha < 0$ (surévalués).
 
-![Flat Security Market Line — Black, Jensen & Scholes (1972)](images/factor-low-risk/volatility_flat_sml.png)
+![[volatility_flat_sml.png]]
 
 *Figure 1. Flat security market line. La droite empirique (bleue) est plus plate que la SML théorique (pointillée). Les titres à faible $\beta$ surperforment le modèle ($\alpha > 0$) et les titres à fort $\beta$ sous-performent ($\alpha < 0$).*
 
@@ -1092,7 +1091,7 @@ $$\hat{\beta}_i = \underbrace{\hat{\rho}_{im}}_{\text{BAC}} \cdot \underbrace{\d
 
 où $\hat{\rho}_{im}$ = corrélation du titre $i$ avec le marché (le titre bouge-t-il en même temps que le marché ?) et $\hat{\sigma}_i / \hat{\sigma}_m$ = volatilité relative (le titre bouge-t-il plus fort en amplitude que le marché ?). Ces deux dimensions seront exploitées séparément par BAC et BAV (section 02).
 
-![Décomposition du bêta en deux dimensions](images/factor-low-risk/volatility_beta_decomposition.png)
+![[volatility_beta_decomposition.png]]
 
 *Figure 2. Décomposition $\hat{\beta}_i = \hat{\rho}_{im} \times (\hat{\sigma}_i / \hat{\sigma}_m)$. La dimension corrélation sera exploitée par BAC (contraintes d'effet de levier) et la dimension volatilité relative par BAV (lottery demand).*
 
@@ -1176,7 +1175,7 @@ Empiriquement, $\hat{\rho}_{im}$ et $\hat{\sigma}_i$ sont positivement corrélé
 
 $$BAB \rightarrow BAC \text{ (isole } \hat{\rho}_{im}) + BAV \text{ (isole } \hat{\sigma}_i/\hat{\sigma}_m)$$
 
-![Schéma BAB décomposé en BAC + BAV](images/factor-low-risk/volatility_bab_decomp_schema.png)
+![[volatility_bab_decomp_schema.png]]
 
 *Figure 3. BAB est décomposé en deux facteurs orthogonaux. BAC isole l'effet corrélation (moteur : contraintes d'effet de levier) et BAV isole l'effet volatilité relative (moteur : lottery demand).*
 
@@ -1206,7 +1205,7 @@ Les 25 portefeuilles issus du double-tri confirment que les deux dimensions cont
 | Corr Q5 (haute) | **0.3** *(1.4)* | 0.1 *(0.2)* | 0.1 *(0.4)* | **−0.3** *(−1.7)* | **−0.5** *(−2.7)* | **−0.8** *(−3.3)* |
 | **LS (vol)** | −0.1 *(−0.5)* | −0.2 *(−1.0)* | −0.2 *(−0.8)* | **−0.4** *(−2.2)* | **−0.6** *(−3.0)* | |
 
-![Table II — CAPM alphas des 25 portefeuilles double-tri](images/factor-low-risk/volatility_table2_doubletri.png)
+![[volatility_table2_doubletri.png]]
 
 *Figure 4. Visualisation de la Table II Panel B. Chaque cellule représente l'alpha CAPM du portefeuille correspondant. La colonne LS (spread corr) est négative partout — les titres à haute corrélation sous-performent même à volatilité constante. La ligne LS (spread vol) est également négative dans les quintiles de haute volatilité.*
 
@@ -1345,7 +1344,7 @@ $$f_t^{*} = \underbrace{\frac{c}{\hat{\sigma}_{t-1}^{2}}}_{S_t} \cdot f_t$$
 
 où $S_t = c / \hat{\sigma}_{t-1}^2$ est le scalaire de gestion, $c$ est une constante choisie pour que $\text{Var}(f_t^*) = \text{Var}(f_t)$ (variance normalisée), et $\hat{\sigma}_{t-1}^2$ est la variance estimée sur les ≈22 jours de trading du mois précédent.
 
-![Comportement du scalaire Sₜ dans le temps](images/factor-low-risk/volatility_vmp_scalaire.png)
+![[volatility_vmp_scalaire.png]]
 
 *Figure 5. Comportement du scalaire $S_t = c / \hat{\sigma}_{t-1}^2$. Quand la volatilité est basse (zone verte), $S_t > 1$ et le facteur est leveragé. Quand la volatilité est haute (zone rouge), $S_t < 1$ et l'exposition est réduite.*
 
@@ -1373,7 +1372,7 @@ Le résultat impressionnant de Moreira & Muir (2017) repose sur une faille : la 
 
 Cederburg et al. estiment tous les paramètres uniquement sur les données passées via une rolling window de 120 mois :
 
-![Procédure rolling window OOS](images/factor-low-risk/volatility_oos_rolling.png)
+![[volatility_oos_rolling.png]]
 
 *Figure 6. Procédure out-of-sample à fenêtre roulante. Les 120 premiers mois servent à estimer $\hat{c}$, $\hat{\alpha}$, $\hat{\beta}$. Ces paramètres sont figés avant de calculer $f_{t+1}^*$. La fenêtre glisse d'un mois à chaque itération.*
 

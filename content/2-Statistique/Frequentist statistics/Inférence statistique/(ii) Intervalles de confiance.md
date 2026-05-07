@@ -298,4 +298,4 @@ Une autre interprétation, plus pratique : imaginons qu'on pèse un échantillon
 
 ![[im4 (1).png|419]]
 
-![[im5 (1).png|431]]
+![[images/2-Statistiques/Frequentist/Inférence statistique/im5 (1).png|431]]

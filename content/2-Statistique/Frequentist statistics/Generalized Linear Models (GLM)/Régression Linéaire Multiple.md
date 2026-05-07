@@ -9,29 +9,27 @@ order: 1
 
 ## I. Le modèle
 
-### A. Vue classique
+### A. Le problème de régression — la solution générale
 
-> [!warning] Modèle de régression linéaire simple
-> On observe $n$ couples $(x_i, y_i)$. On suppose que $Y$ est une fonction linéaire de $X$ plus un bruit :
+Avant de parler de régression *linéaire*, posons le **problème général** : on a deux variables aléatoires $X$ et $Y$, et on cherche à approximer $Y$ par une fonction de $X$. Quelle est la **meilleure** fonction $f(X)$ ?
+
+> [!warning] Le problème de régression
+> On cherche la fonction $f$ qui minimise l'erreur quadratique moyenne :
 > 
-> $$y_i = \alpha + \beta x_i + \varepsilon_i$$
+> $f^* = \arg\min_f E\big[(Y - f(X))^2\big]$
 > 
-> Les $\varepsilon_i$ sont les **résidus** — tout ce que le modèle ne capture pas.
+> **La solution est l'espérance conditionnelle** : $f^*(X) = E(Y \mid X)$.
 
-Géométriquement, chaque résidu est la distance verticale entre le point observé $y_i$ et la valeur prédite $\hat{y}_i = \alpha + \beta x_i$.
+> 💡 **Pourquoi $E(Y|X)$ ?** C'est un théorème général de probabilité, indépendant de la régression linéaire. La meilleure prédiction de $Y$ à partir de $X$ au sens MSE est la moyenne de $Y$ conditionnellement à $X$. Cette fonction $f^*(X)$ s'appelle la **fonction de régression** — c'est l'objet qu'on cherche à approximer en pratique.
 
-![Vue classique de la régression linéaire simple|458](images/2-Statistiques/Frequentist/regression-lineaire/im1.png)
-
-**Figure 1.** Vue classique de la régression linéaire simple. Chaque résidu $\varepsilon_i$ est la distance verticale entre le point observé $y_i$ et la valeur prédite $\hat{y}_i = \alpha + \beta x_i$.
-
-### B. Vue géométrique dans $L^2$
+#### Vue géométrique dans $L^2$
 
 On travaille dans $L^2$, muni du produit scalaire $\langle X, Y \rangle = E(XY)$. Dans cet espace, **les vecteurs sont des variables aléatoires**.
 
 > [!warning] Décomposition par projection orthogonale
 > $E(Y|X)$ est la **projection orthogonale** de $Y$ sur le sous-espace $L^2_X$ des fonctions de $X$. Cela donne une décomposition naturelle de $Y$ en deux parties orthogonales :
 > 
-> $$Y = E(Y|X) + \varepsilon$$
+> $Y = E(Y|X) + \varepsilon$
 > 
 > Le résidu $\varepsilon = Y - E(Y|X)$ est **orthogonal à $L^2_X$** : $E[\varepsilon \cdot f(X)] = 0$ pour toute fonction $f$.
 
@@ -40,103 +38,173 @@ Deux conséquences immédiates :
 - $E(\varepsilon) = 0$ — en prenant $f = 1$
 - $\text{cov}(\varepsilon, X) = 0$ — en prenant $f = X$
 
-> 💡 **L'idée en une phrase.** Ces propriétés ne sont pas des hypothèses qu'on impose : elles **découlent directement de la géométrie**. La régression "à la main" (chercher $\alpha, \beta$ qui minimisent l'erreur quadratique) revient *exactement* à projeter $Y$ orthogonalement sur le sous-espace des fonctions affines de $X$. On retrouvera cette idée partout — dans la dérivation MCO, dans le $R^2$ comme cosinus carré, dans le Pythagore SCT = SCE + SCR.
-
-Quand on restreint $E(Y|X)$ aux fonctions **linéaires**, on obtient : $E(Y|X) = \alpha + \beta X$.
-
 ![Interprétation géométrique dans L²|407](images/2-Statistiques/Frequentist/regression-lineaire/im2.png)
 
-**Figure 2.** Interprétation géométrique dans $L^2$. $E(Y|X)$ est la projection orthogonale de $Y$ sur $L^2_X$. Le résidu $\varepsilon = Y - E(Y|X)$ est orthogonal à tout le sous-espace $L^2_X$.
+**Figure 1.** Interprétation géométrique dans $L^2$. $E(Y|X)$ est la projection orthogonale de $Y$ sur $L^2_X$ (le sous-espace de **toutes** les fonctions de $X$). Le résidu $\varepsilon = Y - E(Y|X)$ est orthogonal à tout le sous-espace $L^2_X$.
 
-### Geometry
+> 💡 **À ce stade, rien n'est encore "linéaire".** $E(Y|X)$ peut être n'importe quelle fonction de $X$ — courbe, polynomiale, en escalier. La régression *linéaire* arrive à la section suivante : on **restreint** la recherche aux fonctions affines.
 
-\textbf{(iii) Geometry.} Estimation of $y$ using OLS regression can be visualized as the orthogonal projection of the vector $y$ onto the column space of $X$. The estimated error term, epsilon, is the orthogonal distance between the projection and the true vector $y$. Figure 1 shows this projection for a $y$ that is regressed on two explanatory variables, $X_1$ and $X_2$.
+### B. Restriction au cas linéaire — les vrais paramètres $\alpha, \beta$
 
-donc en gros qd je pose que $\hat{\beta}=(X^TX)^{-1}X^T y$ - en gros $X^Ty$ est le vecteur des produits scalaires entre chaque colonne de X et $y$. Comment $y$ se projette sur chaque direction $X_j$ individuellement. 
-Et le $(X^TX)^{-1}$ c'est la matrice de Gram des colonnes de $X$ en gros si les colonnes de $X$ sont orthogonales (corrélations nulles) alors $X^TX$ est diagonale sinon je sais pas quoi.
+On restreint la recherche aux **fonctions affines de $X$** : $f(X) = \alpha + \beta X$. C'est le **modèle de régression linéaire** au niveau **population**.
 
-![[geo-1.png|430]]
-### C. Vue probabiliste — OLS comme maximum de vraisemblance
-
-> [!warning] Hypothèse probabiliste
-> On suppose les résidus indépendants et gaussiens :
+> [!warning] Modèle de régression linéaire (population)
+> On suppose que la fonction de régression est affine :
 > 
-> $$\varepsilon_i \sim \mathcal{N}(0, \sigma^2) \quad \text{i.i.d.}$$
+> $Y = \alpha + \beta X + \varepsilon$
 > 
-> Cela revient à modéliser $y_i \mid x_i \sim \mathcal{N}(x_i^T \beta,\ \sigma^2)$.
+> Géométriquement, on projette $Y$ sur le sous-espace 1D des fonctions affines de $X$ (au lieu de tout $L^2_X$ comme en I.A).
 
-La log-vraisemblance des observations s'écrit :
+![[Pasted image 20260507105136.png|408]]
 
-$$\ell(\beta, \sigma^2) = -\frac{n}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^n (y_i - x_i^T \beta)^2$$
+**Figure 2.** Distinction population vs échantillon. La **vraie droite** $y = \alpha + \beta x$ (en bleu) est définie au niveau de la loi de $(X, Y)$ avec $\alpha, \beta$ les vrais paramètres. La **droite estimée** $\hat{y} = \hat{\alpha} + \hat{\beta}x$ (en rouge) est calculée à partir d'un échantillon fini d'observations $(x_i, y_i)$ via MCO. Les deux droites diffèrent légèrement : $\hat{\alpha}, \hat{\beta}$ sont des estimateurs de $\alpha, \beta$, donc aléatoires — ils convergent vers les vrais paramètres quand $n \to \infty$.
 
-Maximiser $\ell$ par rapport à $\beta$ revient à **minimiser** $\sum (y_i - x_i^T \beta)^2$ — c'est exactement le critère OLS.
+#### Calcul des vrais paramètres $\alpha, \beta$
 
-> 💡 **OLS = MLE sous bruit gaussien.** Les moindres carrés ne sont pas un choix arbitraire : sous l'hypothèse de bruit gaussien iid, l'estimateur OLS coïncide avec l'estimateur du maximum de vraisemblance. C'est la justification probabiliste qui complète la justification géométrique de I.B. Trois lectures du même objet :
-> - **Vue classique** : minimiser la somme des carrés des résidus
-> - **Vue géométrique** : projeter $Y$ orthogonalement sur le sous-espace des fonctions linéaires
-> - **Vue probabiliste** : maximiser la vraisemblance sous bruit gaussien
+Les paramètres $\alpha, \beta$ sont définis par les **conditions d'orthogonalité** : le résidu $\varepsilon = Y - \alpha - \beta X$ doit être orthogonal au sous-espace engendré par $1$ et $X$ dans $L^2$.
 
-> [!note]- Lien avec Gauss-Markov
-> Gauss-Markov donne le caractère BLUE de OLS **sans hypothèse gaussienne** — il faut juste H1–H5. L'hypothèse gaussienne supplémentaire apporte deux choses : (1) OLS devient MLE, donc *efficient* parmi tous les estimateurs (pas juste les linéaires), (2) la distribution de $\hat{\beta}$ devient exactement gaussienne, ce qui permet les tests de Student exacts (cf. III.A).
-
-### D. Dérivation des estimateurs MCO
-
-#### Dérivation par orthogonalité (régression simple)
-
-Le résidu $\varepsilon = Y - \alpha - \beta X$ doit être orthogonal au sous-espace linéaire engendré par $1$ et $X$. **MCO** (Moindres Carrés Ordinaires, ou OLS en anglais) trouve $\hat{\alpha}$ et $\hat{\beta}$ en minimisant $\sum(y_i - \hat{y}_i)^2$ — ce qui revient exactement à cette condition d'orthogonalité.
-
-> [!warning] Estimateurs MCO en régression simple
-> $$\boxed{\alpha = E(Y) - \beta E(X)} \qquad \boxed{\beta = \frac{\text{cov}(X,Y)}{V(X)}}$$
+> [!warning] Vrais paramètres de la régression linéaire (population)
+> $\boxed{\alpha = E(Y) - \beta E(X)} \qquad \boxed{\beta = \frac{\text{cov}(X,Y)}{V(X)}}$
 > 
-> La droite passe toujours par le point $\big(E(X), E(Y)\big)$ — $\alpha$ n'est qu'un ajustement de position. $\beta$ mesure combien de la variation de $X$ se transfère à $Y$.
+> **Attention** : ce sont les **vrais paramètres** au niveau de la loi de $(X, Y)$, **pas des estimateurs**. Ils utilisent les vraies espérances et covariances — qu'on ne connaît pas en pratique.
 
-> [!note]- Preuve — dérivation par orthogonalité
+> [!note]- Preuve — par orthogonalité dans $L^2$
 > **Condition 1 :** $\langle \varepsilon, 1 \rangle = 0$
 > 
-> $$E(Y - \alpha - \beta X) = 0 \implies \alpha = E(Y) - \beta E(X)$$
+> $E(Y - \alpha - \beta X) = 0 \implies \alpha = E(Y) - \beta E(X)$
 > 
 > **Condition 2 :** $\langle \varepsilon, X \rangle = 0$
 > 
-> $$E\big[(Y - \alpha - \beta X)X\big] = 0 \implies E(YX) - \alpha E(X) - \beta E(X^2) = 0$$
+> $E\big[(Y - \alpha - \beta X)X\big] = 0 \implies E(YX) - \alpha E(X) - \beta E(X^2) = 0$
 > 
 > On substitue $\alpha = E(Y) - \beta E(X)$ :
 > 
-> $$E(YX) - E(Y)E(X) = \beta\big(E(X^2) - E(X)^2\big)$$
+> $E(YX) - E(Y)E(X) = \beta\big(E(X^2) - E(X)^2\big)$
 > 
 > Or $E(XY) - E(X)E(Y) = \text{cov}(X,Y)$ et $E(X^2) - E(X)^2 = V(X)$, donc :
 > 
-> $$\beta = \frac{\text{cov}(X,Y)}{V(X)}$$
+> $\beta = \frac{\text{cov}(X,Y)}{V(X)}$
 
-#### Dérivation matricielle (régression multiple)
+> 💡 **Lecture des deux formules.** La droite passe toujours par le point $\big(E(X), E(Y)\big)$ — $\alpha$ n'est qu'un ajustement de position. $\beta$ mesure combien de la variation de $X$ se transfère à $Y$, normalisée par la dispersion de $X$.
+
+### C. Estimation sur échantillon — Moindres Carrés Ordinaires (MCO)
+
+En pratique, on **ne connaît pas** la loi de $(X, Y)$ — on dispose seulement d'un **échantillon** de $n$ observations $(x_i, y_i)$. On ne peut pas calculer $E(X)$, $V(X)$, $\text{cov}(X, Y)$ directement, on doit les **estimer**.
+
+> [!warning] Le critère MCO
+> On choisit $\hat{\alpha}, \hat{\beta}$ qui minimisent la somme des carrés des résidus sur l'échantillon :
+> 
+> $(\hat{\alpha}, \hat{\beta}) = \arg\min_{\alpha, \beta} \sum_{i=1}^n (y_i - \alpha - \beta x_i)^2= \arg\min_{\alpha, \beta} \sum_{i=1}^n (\varepsilon_i)^2$
+> 
+> **MCO** = Moindres Carrés Ordinaires (OLS en anglais). C'est l'**estimation empirique** des paramètres $\alpha, \beta$ de la section B.
+
+![[Pasted image 20260507105940.png|362]]
+
+**Figure 3.** Visualisation du critère MCO. Les segments verticaux pointillés rouges représentent les résidus $\varepsilon_i = y_i - \hat{y}_i$ — la distance verticale entre chaque observation $y_i$ et sa valeur prédite $\hat{y}_i = \hat{\alpha} + \hat{\beta}x_i$ sur la droite. MCO choisit $\hat{\alpha}, \hat{\beta}$ qui minimisent **la somme des carrés** de ces segments. Élever au carré pénalise davantage les grands résidus (un résidu deux fois plus grand pèse quatre fois plus dans le critère).
+
+#### Estimateurs des moindre carrés (régression simple)
+
+En remplaçant les espérances et covariances de la section B par leurs **versions empiriques** (sommes au lieu d'intégrales), on obtient :
+
+> [!warning] Estimateurs MCO (régression simple)
+> $\boxed{\hat{\beta} = \frac{\sum_i (x_i - \bar{x})(y_i - \bar{y})}{\sum_i (x_i - \bar{x})^2}} \qquad \boxed{\hat{\alpha} = \bar{y} - \hat{\beta}\bar{x}}$
+> 
+> Ce sont les **estimateurs** des vrais $\alpha, \beta$. Quand $n \to \infty$, par la loi des grands nombres, $\hat{\beta} \to \beta$ et $\hat{\alpha} \to \alpha$.
+
+> 💡 **Le parallèle avec B est exact.** Population : $\beta = \text{cov}(X,Y)/V(X)$, $\alpha = E(Y) - \beta E(X)$. Échantillon : $\hat{\beta} = \widehat{\text{cov}}/\hat{V}$, $\hat{\alpha} = \bar{y} - \hat{\beta}\bar{x}$. Mêmes formules, juste les moments empiriques à la place des vrais.
+
+#### Forme matricielle (régression multiple)
 
 Avec $X \in \mathbb{R}^{n \times (p+1)}$ (la première colonne étant des 1 pour l'intercept), $\beta \in \mathbb{R}^{p+1}$ et $y \in \mathbb{R}^n$, le critère OLS s'écrit :
 
-$$\hat{\beta} = \arg\min_\beta \|y - X\beta\|^2$$
+$\hat{\beta} = \arg\min_\beta \|y - X\beta\|^2$
 
 > [!warning] Estimateur OLS sous forme matricielle
-> $$\boxed{\hat{\beta} = (X^T X)^{-1} X^T y}$$
+> $\boxed{\hat{\beta} = (X^T X)^{-1} X^T y}$
 > 
 > C'est *la* formule à connaître par cœur en entretien. Valable tant que $X^T X$ est inversible (i.e. pas de multicolinéarité parfaite, cf. H5).
 
 > [!note]- Preuve — gradient nul
 > On développe le critère :
 > 
-> $$\|y - X\beta\|^2 = (y - X\beta)^T(y - X\beta) = y^T y - 2\beta^T X^T y + \beta^T X^T X \beta$$
+> $\|y - X\beta\|^2 = (y - X\beta)^T(y - X\beta) = y^T y - 2\beta^T X^T y + \beta^T X^T X \beta$
 > 
 > Le gradient par rapport à $\beta$ :
 > 
-> $$\nabla_\beta \|y - X\beta\|^2 = -2 X^T y + 2 X^T X \beta$$
+> $\nabla_\beta \|y - X\beta\|^2 = -2 X^T y + 2 X^T X \beta$
 > 
 > Annuler le gradient donne les **équations normales** :
 > 
-> $$X^T X \beta = X^T y$$
+> $X^T X \hat{\beta} = X^T y$
 > 
 > Si $X^T X$ est inversible : $\hat{\beta} = (X^T X)^{-1} X^T y$.
 
-> 💡 **Lecture géométrique des équations normales.** $X^T X \hat{\beta} = X^T y$ signifie $X^T (y - X\hat{\beta}) = 0$, soit $X^T \hat{\varepsilon} = 0$ : les résidus sont **orthogonaux aux colonnes de $X$**. C'est exactement la condition d'orthogonalité de I.B, écrite en coordonnées. La géométrie et le calcul disent la même chose.
+#### Vue géométrique dans $\mathbb{R}^n$
+
+
+COURS DE : geometric interpretaiton of linear regression Nipun Batra
+
+
+Attention : on **change d'espace**. La vue $L^2$ de la section A travaillait avec des **variables aléatoires**. Ici on travaille dans $\mathbb{R}^n$ avec des **vecteurs d'observations**.
+
+> 💡 **Deux géométries distinctes.** 
+> - **$L^2$ (population, section A)** : vecteurs = variables aléatoires, sous-espace $L^2_X$ = fonctions de $X$, projection = $E(Y|X)$.
+> - **$\mathbb{R}^n$ (échantillon, ici)** : vecteurs = données observées ($y \in \mathbb{R}^n$, colonnes $X_1, \ldots, X_p \in \mathbb{R}^n$), sous-espace = espace colonne de $X$, projection = $\hat{y} = X\hat{\beta}$.
+> 
+> C'est la même *idée* (projection orthogonale qui minimise une distance) mais dans deux espaces différents.
+
+![[geo-1.png|430]]
+
+**Figure 4.** Estimation OLS comme projection orthogonale dans $\mathbb{R}^n$. Le vecteur $y$ (des $n$ observations) est projeté sur l'espace colonne de $X$ (engendré par les vecteurs-colonnes $X_1, X_2$). Le résidu estimé $\hat{\varepsilon}$ est la distance orthogonale entre $y$ et sa projection $\hat{y} = X\hat{\beta}$.
+
+> [!note]- Lecture détaillée de $\hat{\beta} = (X^T X)^{-1} X^T y$
+> - $X^T y$ est le **vecteur des produits scalaires** entre chaque colonne de $X$ et $y$ : $(X^T y)_j = \langle X_j, y \rangle$. Mesure comment $y$ se projette sur chaque direction $X_j$ individuellement.
+> - $X^T X$ est la **matrice de Gram** des colonnes de $X$ : $(X^T X)_{jk} = \langle X_j, X_k \rangle$. Si les colonnes sont orthogonales (corrélations nulles), $X^T X$ est diagonale et l'inverse devient triviale ; sinon $(X^T X)^{-1}$ corrige les corrélations entre les $X_j$ pour décorréler les coefficients.
+
+> 💡 **Lecture géométrique des équations normales.** $X^T X \hat{\beta} = X^T y$ signifie $X^T (y - X\hat{\beta}) = 0$, soit $X^T \hat{\varepsilon} = 0$ : les résidus estimés sont **orthogonaux aux colonnes de $X$**. C'est l'analogue empirique de la condition $\text{cov}(\varepsilon, X) = 0$ de la section A — projection orthogonale, version échantillon.
 
 > [!note]- La hat matrix $H = X(X^T X)^{-1} X^T$
 > En substituant $\hat{\beta}$, on obtient $\hat{y} = X \hat{\beta} = H y$ avec $H = X(X^T X)^{-1} X^T$. Cette matrice $H$ ("hat matrix" parce qu'elle "met le chapeau" sur $y$) est la **matrice de projection orthogonale** sur l'espace colonne de $X$. Propriétés : symétrique, idempotente ($H^2 = H$), $\text{tr}(H) = p+1$. Elle réapparaîtra dans le calcul du leverage (cf. II.C).
+
+### D. Vue probabiliste — OLS comme maximum de vraisemblance
+
+Les sections B et C ont justifié OLS par la **géométrie** (projection orthogonale). On peut aussi le justifier par la **probabilité** : sous une hypothèse de bruit gaussien, OLS coïncide avec l'estimateur du maximum de vraisemblance (MLE).
+
+> [!warning] Hypothèse probabiliste
+> On suppose les résidus indépendants et gaussiens :
+> 
+> $\varepsilon_i \sim \mathcal{N}(0, \sigma^2) \quad \text{i.i.d.}$
+> 
+> Cela revient à modéliser $y_i \mid x_i \sim \mathcal{N}(x_i^T \beta,\ \sigma^2)$.
+
+La log-vraisemblance des observations s'écrit :
+
+$\ell(\beta, \sigma^2) = -\frac{n}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^n (y_i - x_i^T \beta)^2$
+
+Maximiser $\ell$ par rapport à $\beta$ revient à **minimiser** $\sum (y_i - x_i^T \beta)^2$ — c'est exactement le critère OLS.
+
+![[Pasted image 20260506225347.png]]
+
+
+
+![[Pasted image 20260506225403.png]]
+
+> 💡 **OLS = MLE sous bruit gaussien.** Les moindres carrés ne sont pas un choix arbitraire. Trois lectures du même objet :
+> - **Minimisation** (vue classique) : minimiser la somme des carrés des résidus
+> - **Projection** (vue géométrique) : projeter $y$ orthogonalement sur l'espace colonne de $X$ dans $\mathbb{R}^n$
+> - **Vraisemblance** (vue probabiliste) : maximiser la vraisemblance sous bruit gaussien
+
+> [!note]- Lien avec Gauss-Markov
+> Gauss-Markov donne le caractère BLUE de OLS **sans hypothèse gaussienne** — il faut juste H1–H5. L'hypothèse gaussienne supplémentaire apporte deux choses : (1) OLS devient MLE, donc *efficient* parmi tous les estimateurs (pas juste les linéaires), (2) la distribution de $\hat{\beta}$ devient exactement gaussienne, ce qui permet les tests de Student exacts (cf. III.A).
+
+> [!note]- Récapitulatif des trois niveaux
+> | Niveau | Objet | Espace géométrique | Projection sur |
+> |---|---|---|---|
+> | **A — Général** (population) | $E(Y\|X)$ | $L^2$ | sous-espace de toutes les fonctions de $X$ |
+> | **B — Linéaire** (population) | $\alpha, \beta$ vrais | $L^2$ | sous-espace des fonctions affines de $X$ |
+> | **C — Estimation** (échantillon) | $\hat{\alpha}, \hat{\beta}$ | $\mathbb{R}^n$ | espace colonne de la matrice $X$ |
+> 
+> A et B vivent au niveau **population** (vraies espérances) ; C vit au niveau **échantillon** (sommes empiriques). Ne jamais les confondre — c'est un piège pédagogique classique parce que les formules se ressemblent.
 
 ### E. Interprétation des coefficients
 
@@ -144,9 +212,9 @@ $$\hat{\beta} = \arg\min_\beta \|y - X\beta\|^2$$
 
 $\beta$ se lit ainsi : **si $X$ augmente d'une unité, $Y$ augmente en moyenne de $\beta$ unités**, à valeurs des autres prédicteurs constantes.
 
-![[im1-2 (1).png|377]]
+![[Pasted image 20260507125521.png]]
 
-**Figure 3.** Lecture visuelle de $\beta$ : passer de $x$ à $x+1$ sur l'axe horizontal correspond à un changement vertical de $\beta$ unités sur la droite ajustée.
+**Figure 5.** Interprétation visuelle de $\hat{\beta}_1$ sur Auto (`mpg ~ horsepower`). **À gauche** : vue globale, droite OLS rouge ajustée sur les 392 observations — le rectangle bleu pointillé marque la zone zoomée à droite. **À droite** : zoom sur la droite autour de hp = 100, avec le triangle "rise over run" pour $\Delta\text{hp} = +1$ : un cheval supplémentaire fait baisser la consommation prédite de $\hat{\beta}_1 \approx -0.158$ mpg. Le coefficient OLS est exactement la **pente** géométrique de la droite : $\hat{\beta}_1 = \Delta\widehat{\text{mpg}} / \Delta\text{hp}$.
 
 > 💡 **L'effet pur en régression multiple.** Si le modèle est $Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \varepsilon$, alors $\beta_1$ mesure l'effet de $X_1$ sur $Y$, **une fois l'effet de $X_2$ retiré**. C'est la conséquence directe de la géométrie : MCO projette $Y$ sur le sous-espace engendré par $X_1$ et $X_2$ conjointement. Si $X_1$ et $X_2$ sont orthogonaux dans $L^2$ — c'est-à-dire $\text{cov}(X_1, X_2) = 0$ — alors $\beta_1$ et $\beta_2$ sont exactement les coefficients qu'on obtiendrait en régressant $Y$ sur chacun séparément. L'orthogonalité annule toute interférence entre les variables.
 
@@ -190,34 +258,17 @@ Cas 2 : on pose que $x_i=1$ on a donc $y_i=\beta_0+\beta_1 + \varepsilon_i$ on f
 
 ![[Pasted image 20260505212641.png|619]]
 
-**Figure 4.** Régression sur dummy = comparaison de moyennes. Les deux nuages de points représentent les deux groupes ; les losanges noirs marquent les moyennes empiriques. La droite OLS passe **exactement** par les deux moyennes : $\beta_0$ est la hauteur de la moyenne du groupe A (à $x=0$), et $\beta_1$ est l'écart vertical entre les deux moyennes.
+**Figure 6.** Régression sur dummy = comparaison de moyennes. Les deux nuages de points représentent les deux groupes ; les losanges noirs marquent les moyennes empiriques. La droite OLS passe **exactement** par les deux moyennes : $\beta_0$ est la hauteur de la moyenne du groupe A (à $x=0$), et $\beta_1$ est l'écart vertical entre les deux moyennes.
 
-> 💡 **Régression sur dummy = t-test.** Tester $H_0 : \beta_1 = 0$ via la statistique de Student de la régression revient *exactement* à tester $H_0 : \overline{y}_A = \overline{y}_B$ via un t-test classique de comparaison de moyennes. Les deux approches donnent **la même p-value**. Ce n'est pas une coïncidence : la régression linéaire englobe les comparaisons de moyennes comme cas particulier. C'est le premier exemple d'un fait plus général : *régression sur dummies = ANOVA*.
+> 💡 **À retenir.** Sur des dummies, OLS retrouve mécaniquement les moyennes par groupe — la régression "contient" les comparaisons de moyennes comme cas particulier. (Le lien formel régression ↔ t-test est traité en III.C.)
 
+##### Généralisation à $K$ groupes
 
-pareil ici avoir une table de t test pour vraiment comprendre le rapport entre les deux. 
-
-##### Généralisation à $K$ groupes — le modèle ANOVA
-
-Quand le prédicteur catégoriel a $K$ modalités (par exemple 3 secteurs : Tech, Oil, Other), on généralise naturellement le modèle à deux groupes :
-
-> [!warning] Modèle ANOVA à un facteur
-> $$y_{ij} = \mu + \tau_j + \varepsilon_i, \qquad \varepsilon_i \sim \mathcal{N}(0, \sigma^2)$$
-> 
-> avec $j = 1, \ldots, K$ groupes (populations) et $i = 1, \ldots, n_j$ observations dans chaque groupe.
-> 
-> Chaque observation s'écrit comme la somme de **trois composantes** :
-> - **$\mu$** — le niveau de base (la moyenne globale, ou le niveau de la référence selon la paramétrisation)
-> - **$\tau_j$** — l'effet spécifique du groupe $j$ (écart par rapport au niveau de base)
-> - **$\varepsilon_i$** — le résidu individuel, propre à l'observation
-
-![Décomposition de la variance dans un cas à trois populations A, B et C fictives.|590](https://biodatascience-course.sciviews.org/sdd-umons-2018/10-Variance_files/figure-html/anova1-1.svg)
-
-**Figure 5.** Décomposition de la variance dans le modèle ANOVA à trois groupes. La ligne pointillée noire est la **moyenne globale $\mu$**. Pour chaque observation, l'écart **total** à la moyenne globale se décompose en : (1) un écart **inter-groupes** $\tau_j$ qui mesure la différence entre la moyenne du groupe et la moyenne globale, et (2) un écart **intra-groupe** $\varepsilon_i$ qui mesure la variabilité individuelle au sein du groupe. C'est cette décomposition $\text{total} = \text{inter} + \text{intra}$ qui fonde le test de Fisher en ANOVA.
+Quand le prédicteur catégoriel a $K$ modalités (par exemple 3 origines : USA, Europe, Japon), on généralise naturellement le modèle à deux groupes. Chaque observation $y_{ij}$ (observation $i$ du groupe $j$) s'écrit comme la somme d'un niveau de base + un effet de groupe + un résidu individuel.
 
 > 💡 **Le problème d'identification.** Le modèle a $K + 1$ paramètres ($\mu, \tau_1, \ldots, \tau_K$) mais on n'observe que $K$ moyennes de groupe. Il y a donc **un paramètre de trop** — on peut ajouter une constante $c$ à $\mu$ et la retirer à tous les $\tau_j$ sans changer les prédictions. Pour rendre le modèle identifiable, il faut imposer **une contrainte** sur les $\tau_j$. Selon la contrainte choisie, l'interprétation des coefficients change — mais les **prédictions sont toujours les mêmes**.
 
-##### La paramétrisation par défaut — treatment constraint
+**(i) La paramétrisation par défaut — treatment constraint**
 
 > [!warning] Treatment constraint (par défaut dans Python/R)
 > On fixe **$\tau_1 = 0$** (le premier groupe devient la **catégorie de référence**). Le modèle devient :
@@ -241,11 +292,11 @@ $$\widehat{\text{mpg}} = \beta_0 + \beta_1 \text{hp} + \beta_2 \mathbb{1}_{\text
 > [!note]- Choix de la catégorie de référence
 > Le choix de la catégorie de référence est purement conventionnel — il ne change pas les prédictions, juste l'interprétation des coefficients. Bonne pratique : prendre la catégorie la plus fréquente ou la plus "naturelle" comme référence (par exemple "USA" sur Auto puisque c'est 245 voitures sur 392).
 
-##### Le piège à éviter — dummy variable trap
+**(ii) Le piège à éviter — dummy variable trap**
 
 > 💡 **Le dummy variable trap.** Si on incluait les $K$ indicatrices (USA, Europe, Japon) **sans en retirer une** ET avec un intercept, leur somme vaudrait toujours 1 — exactement la colonne d'intercept. C'est de la **multicolinéarité parfaite** (cf. H5), $X^T X$ devient singulière, OLS ne peut plus tourner. Pour s'en sortir, deux options : soit on retire une catégorie (treatment constraint), soit on retire l'intercept (cf. paramétrisations alternatives ci-dessous).
 
-##### Paramétrisations alternatives
+**(iii) Paramétrisations alternatives**
 
 La treatment constraint n'est pas la seule façon de rendre le modèle identifiable. Deux autres existent, pratiques dans certains contextes.
 
@@ -265,7 +316,7 @@ La treatment constraint n'est pas la seule façon de rendre le modèle identifia
 > - **$\mu$** : **moyenne globale** (la moyenne des moyennes de groupes)
 > - **$\tau_k$** : différence entre la moyenne du groupe $k$ et la **moyenne globale**
 > 
-> *Quand l'utiliser ?* Quand on veut une interprétation "écart à la moyenne globale" plutôt que "écart à un groupe de référence". C'est aussi la paramétrisation "naturelle" pour la décomposition de la variance illustrée Figure 5.
+> *Quand l'utiliser ?* Quand on veut une interprétation "écart à la moyenne globale" plutôt que "écart à un groupe de référence".
 
 > [!example] La sum-to-zero en finance — Barra Industry Factor Model
 > Le modèle Barra utilise **exactement** une sum-to-zero constraint, mais dans sa version **pondérée par capitalisation** :
@@ -279,7 +330,7 @@ La treatment constraint n'est pas la seule façon de rendre le modèle identifia
 > 
 > **L'intuition économique vs treatment constraint.** Si on utilisait une treatment constraint (genre "Tech = référence"), Tech aurait toujours $f_{\text{Tech}} = 0$ par construction — ce qui n'a pas de sens économique (pourquoi Tech serait privilégié ?). Et les autres facteurs se liraient comme "Banque vs Tech" au lieu de "Banque vs marché" — interprétation tordue. La sum-to-zero pondérée met **tous les secteurs sur un pied d'égalité** et fournit la baseline naturelle (le marché) pour interpréter chaque $f_{k,t}$.
 > 
-> > 💡 **Le punch.** En quant equity, *la* paramétrisation des dummies sectorielles est sum-to-zero pondérée par cap, jamais treatment. C'est pour ça qu'on parle de **factor returns** (rendements de facteurs, écarts au marché) et pas de "coefficients" — l'interprétation est *intrinsèque* au facteur, pas relative à un groupe choisi.
+> > 💡 **À retenir.** En quant equity, *la* paramétrisation des dummies sectorielles est sum-to-zero pondérée par cap, jamais treatment. C'est pour ça qu'on parle de **factor returns** (rendements de facteurs, écarts au marché) et pas de "coefficients" — l'interprétation est *intrinsèque* au facteur, pas relative à un groupe choisi.
 
 > [!note]- Récapitulatif — trois lectures du même modèle
 > | Paramétrisation | Contrainte | Interprétation des coefficients |
@@ -290,7 +341,7 @@ La treatment constraint n'est pas la seule façon de rendre le modèle identifia
 > 
 > Les **trois donnent les mêmes prédictions $\hat{y}$** — c'est juste l'étiquette posée sur les coefficients qui change. On choisit selon ce qu'on veut lire directement.
 
-##### Application — cross-section Barra
+**(iv) Application — cross-section Barra**
 
 > [!example] Modèle factoriel sectoriel (sans intercept)
 > Dans un modèle Barra Industry Factor Model, on régresse les rendements des actions à un instant $t$ sur leurs **expositions sectorielles** (dummies one-hot) :
@@ -316,7 +367,7 @@ Ce type de modèle s'appelle un **ANCOVA** (Analysis of Covariance) — il combi
 > - **Continu** (hp) : passer de 100 à 101 chevaux. $\beta_1$ = effet marginal direct, **pente** de la droite.
 > - **Catégoriel** (dummy) : passer de 0 à 1 = **changer de groupe**. $\beta_k$ = écart de moyenne entre groupes, **décalage vertical** de la droite.
 
-##### Lecture géométrique — trois droites parallèles
+**(i) Lecture géométrique — trois droites parallèles**
 
 L'écriture $\widehat{\text{mpg}} = \beta_0 + \beta_1 \text{hp} + \beta_2 \mathbb{1}_{\text{Europe}} + \beta_3 \mathbb{1}_{\text{Japon}}$ se réécrit naturellement comme **trois droites séparées**, une par groupe :
 
@@ -332,7 +383,7 @@ Les **trois droites partagent la même pente $\beta_1$** (l'effet de hp est supp
 
 ![[Pasted image 20260505215212.png]]
 
-**Figure 6.** Modèle ANCOVA `mpg ~ horsepower + origin` ajusté sur Auto. Les trois nuages de points (USA en rouge, Europe en bleu, Japon en vert) sont fittés par **trois droites parallèles** de pente commune $\hat{\beta}_1 = -0.134$. Les flèches verticales noires matérialisent les coefficients des dummies : $\hat{\beta}_{\text{Europe}} = +2.43$ et $\hat{\beta}_{\text{Japon}} = +5.18$ — à puissance égale, une voiture européenne consomme en moyenne 2.43 mpg de plus qu'une USA, et une japonaise 5.18 mpg de plus.
+**Figure 7.** Modèle ANCOVA `mpg ~ horsepower + origin` ajusté sur Auto. Les trois nuages de points (USA en rouge, Europe en bleu, Japon en vert) sont fittés par **trois droites parallèles** de pente commune $\hat{\beta}_1 = -0.134$. Les flèches verticales noires matérialisent les coefficients des dummies : $\hat{\beta}_{\text{Europe}} = +2.43$ et $\hat{\beta}_{\text{Japon}} = +5.18$ — à puissance égale, une voiture européenne consomme en moyenne 2.43 mpg de plus qu'une USA, et une japonaise 5.18 mpg de plus.
 
 > [!example] Lecture concrète des coefficients estimés
 > Sur Auto, les coefficients estimés sont $\hat{\beta}_0 = 35.94$, $\hat{\beta}_1 = -0.134$, $\hat{\beta}_{\text{Europe}} = +2.43$, $\hat{\beta}_{\text{Japon}} = +5.18$
@@ -344,7 +395,7 @@ Les **trois droites partagent la même pente $\beta_1$** (l'effet de hp est supp
 > 
 > *Lecture économique* : à puissance comparable, les voitures japonaises et européennes des années 1970-80 étaient plus économes que les américaines (technologie moteur, poids, aérodynamisme). Le modèle ANCOVA capture ce fait : l'effet "origine" est un **décalage** indépendant de la puissance.
 
-##### Limite du modèle ANCOVA — l'hypothèse de pentes parallèles
+**(ii) Limite du modèle ANCOVA — l'hypothèse de pentes parallèles**
 
 > ⚠️ **Hypothèse implicite forte.** Le modèle suppose que **la pente $\beta_1$ est la même pour tous les groupes**. Autrement dit : un cheval supplémentaire a *exactement* le même impact sur la mpg qu'on soit en USA, Europe ou Japon. Cette hypothèse n'est pas toujours valide — il se peut très bien que l'effet de hp dépende lui-même de l'origine.
 
@@ -364,13 +415,14 @@ Les **trois droites partagent la même pente $\beta_1$** (l'effet de hp est supp
 
 
 ![[Pasted image 20260505220100.png]]
-Figure 7. Modèle avec interactions ```mpg ~ horsepower * origin```.Trois pentes différentes par groupe (au lieu d'une pente commune comme dans la Figure 6). Les coefficients $\beta_4, \beta_5$ mesurent les différences de pente par rapport au groupe de référence USA. Tester leur nullité jointe (test de Fisher) revient à tester l'hypothèse de pentes parallèles de l'ANCOVA.
+
+**Figure 8.** Modèle avec interactions ```mpg ~ horsepower * origin```. Trois pentes différentes par groupe (au lieu d'une pente commune comme dans la Figure 7). Les coefficients $\beta_4, \beta_5$ mesurent les différences de pente par rapport au groupe de référence USA. Tester leur nullité jointe (test de Fisher) revient à tester l'hypothèse de pentes parallèles de l'ANCOVA.
 
 ### F. Standardisation des prédicteurs
 
 Faut-il standardiser (z-score) les prédicteurs avant de fitter une régression ? La réponse dépend de ce qu'on veut faire — mais en pratique en quant, **standardiser les continus par défaut** est la règle qui évite tous les pièges.
 
-#### OLS pur est invariant à la mise à l'échelle
+**(i) OLS pur est invariant à la mise à l'échelle**
 
 > [!warning] Invariance d'OLS
 > Si on multiplie une colonne $X_j$ par une constante $c$, le coefficient $\hat{\beta}_j$ est divisé par $c$, et **les prédictions $\hat{y}$ restent identiques**. Le R², les résidus, et les p-values des tests Student individuels sont aussi invariants.
@@ -384,7 +436,7 @@ Faut-il standardiser (z-score) les prédicteurs avant de fitter une régression 
 
 Conséquence : pour OLS sans régularisation, **standardiser ne change rien au modèle** — on peut techniquement s'en passer. Mais ce n'est pas pour autant qu'il faut éviter de standardiser : dans les 4 cas suivants, c'est obligatoire ou très recommandé.
 
-#### Quand il faut standardiser
+**(ii) Quand il faut standardiser**
 
 > [!warning] Cas 1 — Régularisation (Ridge, Lasso, Elastic Net)
 > Les pénalités $\lambda \sum \beta_j^2$ et $\lambda \sum |\beta_j|$ traitent **tous les coefficients sur un pied d'égalité**. Si `weight` est en kg (coefs $\sim 0.01$) et `revenue` en dollars (coefs $\sim 10^{-7}$), la pénalité écrase les petits coefs et ignore les gros — un résultat **entièrement déterminé par les unités arbitraires des features**, pas par leur importance réelle.
@@ -404,7 +456,7 @@ Conséquence : pour OLS sans régularisation, **standardiser ne change rien au m
 > [!warning] Cas 4 — Optimisation par descente de gradient
 > Pour les méthodes itératives (SGD, Adam, et toute la machinerie deep learning), des features sur des échelles différentes créent des **vallées étroites** dans la loss. La descente oscille au lieu d'aller droit au minimum. Standardiser rend la loss quasi-isotrope → convergence beaucoup plus rapide.
 
-#### La règle pratique
+**(iii) La règle pratique**
 
 > 💡 **Règle par défaut en quant.** Standardiser **toutes les features continues** (z-score : centré, divisé par l'écart-type), laisser **les dummies telles quelles**, l'intercept se gère tout seul. Pour le report final en unités d'origine, dé-standardiser le coef à la main : $\hat{\beta}_{\text{raw}} = \hat{\beta}_{\text{std}} \cdot \sigma_Y / \sigma_{X_j}$.
 
@@ -420,7 +472,7 @@ Conséquence : pour OLS sans régularisation, **standardiser ne change rien au m
 > - $f_{\text{Value},t}$ se lit comme *"rendement d'un portefeuille long les stocks à +1$\sigma$ de Value, short les stocks à $-1\sigma$"* — le z-scoring rend ce factor return comparable à ceux des autres styles (Momentum, Quality, etc.)
 > - $f_{\text{Tech},t}$ se lit comme *"rendement du secteur Tech vs marché en %"* — unité absolue, pas en écarts-types, parce que l'appartenance à un secteur est binaire
 > 
-> > 💡 **Le punch.** Cette différence de traitement (z-score les continus, laisser les dummies) est la raison pour laquelle on peut **comparer entre eux les style factors** ("Momentum a fait +30 bps, Value a fait −20 bps") tout en gardant une **interprétation économique directe** des factor returns sectoriels ("Tech a outperformé de +2%").
+> > 💡 **À retenir.** Cette différence de traitement (z-score les continus, laisser les dummies) est la raison pour laquelle on peut **comparer entre eux les style factors** ("Momentum a fait +30 bps, Value a fait −20 bps") tout en gardant une **interprétation économique directe** des factor returns sectoriels ("Tech a outperformé de +2%").
 
 
 ---
@@ -443,6 +495,8 @@ La régression simple est le cas particulier $p = 1$. Tout ce qui suit s'appliqu
 > - **H3 — Homoscédasticité.** $V(\varepsilon_i) = \sigma^2$ — tous les résidus ont la même variance.
 > - **H4 — Indépendance.** Les $\varepsilon_i$ sont indépendants entre eux — pas d'autocorrélation.
 > - **H5 — Absence de multicolinéarité parfaite.** Les colonnes de $X$ ne sont pas combinaisons linéaires les unes des autres.
+> 
+> On ajoutera plus loin une **6ème hypothèse** (H6, normalité des résidus) qui n'est pas nécessaire pour BLUE mais qui sert pour l'inférence exacte.
 
 > 💡 **Hiérarchie des violations.** Les 5 hypothèses ne sont pas équivalentes en termes de gravité. **H1 et H2** affectent l'estimateur lui-même : si elles sont violées, $\hat{\beta}$ devient **biaisé** — il pointe au mauvais endroit. **H3, H4, H5** affectent seulement la précision et l'inférence : $\hat{\beta}$ reste sans biais, mais les écart-types calculés par OLS sont faux, donc les tests sont invalides. À retenir pour les entretiens : seules H1 et H2 biaisent l'estimateur.
 
@@ -451,7 +505,7 @@ La régression simple est le cas particulier $p = 1$. Tout ce qui suit s'appliqu
 > 
 > ![[Pasted image 20260505183850.png|477]]
 > 
-> **Figure 4.** Scatter plot brut `mpg ~ horsepower`. La relation est clairement décroissante (plus puissant → plus gourmand → moins de mpg) mais visiblement courbée et la dispersion change avec le niveau.
+> **Figure 9.** Scatter plot brut `mpg ~ horsepower`. La relation est clairement décroissante (plus puissant → plus gourmand → moins de mpg) mais visiblement courbée et la dispersion change avec le niveau.
 
 #### H1 — Linéarité
 
@@ -474,7 +528,7 @@ La régression simple est le cas particulier $p = 1$. Tout ce qui suit s'appliqu
 > 
 > ![[Pasted image 20260505184015.png|492]]
 > 
-> **Figure 5.** Residual plot pour `mpg ~ horsepower`. Pour les valeurs prédites faibles ($\hat{y} \in [5, 12]$) et élevées ($\hat{y} \in [28, 35]$), les résidus sont systématiquement positifs ; pour les valeurs moyennes, ils sont négatifs. Cette **structure systématique** (et non aléatoire) signe la non-linéarité.
+> **Figure 10.** Residual plot pour `mpg ~ horsepower`. Pour les valeurs prédites faibles ($\hat{y} \in [5, 12]$) et élevées ($\hat{y} \in [28, 35]$), les résidus sont systématiquement positifs ; pour les valeurs moyennes, ils sont négatifs. Cette **structure systématique** (et non aléatoire) signe la non-linéarité.
 > 
 > **Lecture économique.** La vraie relation entre `horsepower` et `mpg` est convexe (rendements marginaux décroissants : passer de 50 à 100 ch coûte beaucoup, passer de 200 à 250 ch coûte peu). Une droite ne peut pas capturer cette courbure.
 > 
@@ -546,7 +600,7 @@ La régression simple est le cas particulier $p = 1$. Tout ce qui suit s'appliqu
 > 
 > ![[Pasted image 20260505184700.png]]
 > 
-> **Figure 6.** Residual plot avec enveloppe ±2σ local pour `mpg ~ horsepower`. À gauche le modèle linéaire montre courbure + cône. À droite après ajout de $\text{horsepower}^2$ pour corriger H1 : la courbure disparaît mais **le cône reste**.
+> **Figure 11.** Residual plot avec enveloppe ±2σ local pour `mpg ~ horsepower`. À gauche le modèle linéaire montre courbure + cône. À droite après ajout de $\text{horsepower}^2$ pour corriger H1 : la courbure disparaît mais **le cône reste**.
 > 
 > **Le point pédagogique fort.** H1 et H3 sont **deux pathologies indépendantes**. Corriger l'une ne corrige pas l'autre. Sur Auto, après avoir ajouté le terme quadratique, il faut encore traiter l'hétéroscédasticité (par exemple via WLS ou écart-types robustes) si on veut faire de l'inférence valide.
 
@@ -596,15 +650,15 @@ L'hypothèse d'indépendance est violée dès qu'il y a **une structure** qui cr
 > 
 > ![[Pasted image 20260505190506.png]]
 > 
-> **Figure 7.** Boxplot des résidus par origine pour `mpg ~ horsepower`. **Avant** inclusion de l'origine, les médianes sont nettement décalées par groupe — signature classique du clustering.
+> **Figure 12.** Boxplot des résidus par origine pour `mpg ~ horsepower`. **Avant** inclusion de l'origine, les médianes sont nettement décalées par groupe — signature classique du clustering.
 > 
 > **Remède : inclure `origin` dans le modèle.** On passe de $\widehat{\text{mpg}} = \beta_0 + \beta_1 \text{hp}$ à $\widehat{\text{mpg}} = \beta_0 + \beta_1 \text{hp} + \beta_2 \mathbb{1}_{\text{Europe}} + \beta_3 \mathbb{1}_{\text{Japon}}$ (USA = référence, cf. section I.E sur les dummies).
 > 
 > ![[Pasted image 20260505191012.png]]
 > 
-> **Figure 8.** Comparaison avant/après. **Gauche** : sans `origin`, médianes décalées. **Droite** : avec `origin` inclus, les trois boîtes sont recentrées sur 0 — la violation H4 a disparu.
+> **Figure 13.** Comparaison avant/après. **Gauche** : sans `origin`, médianes décalées. **Droite** : avec `origin` inclus, les trois boîtes sont recentrées sur 0 — la violation H4 a disparu.
 > 
-> > 💡 **Le punch.** L'effet "origine" est passé du résidu vers le modèle. La même information a juste migré : $\hat{\beta}_{\text{Japon}} \approx +2$ capture ce que les résidus japonais portaient avant. **La violation H4 par clustering n'est PAS une propriété intrinsèque des données, c'est une propriété du modèle qu'on a choisi.** En incluant la variable de groupe, on l'élimine à la racine.
+> > 💡 **À retenir.** L'effet "origine" est passé du résidu vers le modèle. La même information a juste migré : $\hat{\beta}_{\text{Japon}} \approx +2$ capture ce que les résidus japonais portaient avant. **La violation H4 par clustering n'est PAS une propriété intrinsèque des données, c'est une propriété du modèle qu'on a choisi.** En incluant la variable de groupe, on l'élimine à la racine.
 
 > [!note]- Lien profond H4 ↔ H2
 > Le clustering est en fait **une variable omise déguisée**. "Mes résidus sont clusterisés par groupe" = "j'ai omis une variable de groupe corrélée à $Y$". Inclure la variable revient à la transférer du résidu vers le modèle. Le seul cas où H4 est **structurellement** violée (non réductible à une variable omise) est l'autocorrélation temporelle pure : $\varepsilon_t = \phi \varepsilon_{t-1} + u_t$ ne peut pas être "inclus" dans le modèle puisque $\varepsilon_{t-1}$ est inobservable.
@@ -616,11 +670,11 @@ L'hypothèse d'indépendance est violée dès qu'il y a **une structure** qui cr
 
 **Le problème (cas non parfait).** Même sans être parfaite, une corrélation forte entre prédicteurs cause des problèmes. Si $X_1$ et $X_2$ pointent presque dans la même direction dans $L^2$, projeter $Y$ dessus devient ambigu — une infinité de combinaisons $(\beta_1, \beta_2)$ donnent à peu près la même projection.
 
-> 💡 **Le punch.** Le modèle **sait prédire** mais il **ne sait pas répartir les coefficients**. Conséquence : les variances de $\hat{\beta}_j$ explosent, les coefficients deviennent instables et changent radicalement quand on ajoute/retire d'autres variables corrélées.
+> 💡 **À retenir.** Le modèle **sait prédire** mais il **ne sait pas répartir les coefficients**. Conséquence : les variances de $\hat{\beta}_j$ explosent, les coefficients deviennent instables et changent radicalement quand on ajoute/retire d'autres variables corrélées.
 
 ![Multicolinéarité](images/2-Statistiques/Frequentist/regression-lineaire/im3.png)
 
-**Figure 9.** Multicolinéarité : quand $X_1$ et $X_2$ pointent dans la même direction, projeter $Y$ dessus devient ambigu — les coefficients $\beta_1$ et $\beta_2$ ne sont plus identifiables individuellement.
+**Figure 14.** Multicolinéarité : quand $X_1$ et $X_2$ pointent dans la même direction, projeter $Y$ dessus devient ambigu — les coefficients $\beta_1$ et $\beta_2$ ne sont plus identifiables individuellement.
 
 > [!warning] Diagnostic — le VIF (Variance Inflation Factor)
 > $$\text{VIF}_j = \frac{1}{1 - R^2_j}$$
@@ -636,7 +690,7 @@ L'hypothèse d'indépendance est violée dès qu'il y a **une structure** qui cr
 > 
 > ![[Pasted image 20260505191355.png|438]]
 > 
-> **Figure 10.** Heatmap des corrélations entre prédicteurs sur Auto. Les 4 premières variables (`horsepower`, `weight`, `displacement`, `cylinders`) forment un bloc fortement corrélé (toutes les corrélations $> 0.84$).
+> **Figure 15.** Heatmap des corrélations entre prédicteurs sur Auto. Les 4 premières variables (`horsepower`, `weight`, `displacement`, `cylinders`) forment un bloc fortement corrélé (toutes les corrélations $> 0.84$).
 > 
 > **VIF associés** :
 > 
@@ -660,6 +714,77 @@ L'hypothèse d'indépendance est violée dès qu'il y a **une structure** qui cr
 > 
 > > 💡 **À retenir.** Le modèle 3 prédit `mpg` **aussi bien** que le modèle 1 (mêmes $\hat{y}$ à peu près). Mais les coefficients individuels deviennent ininterprétables. Le modèle prédit bien mais ne sait pas répartir l'effet "grosse caisse" entre les 4 variables corrélées. Si l'objectif est la prédiction, la multicolinéarité n'est pas dramatique. Si l'objectif est l'**interprétation des coefficients**, c'est un vrai problème.
 
+
+#### H6 — Hypothèse de Normalité
+
+Gauss-Markov (H1–H5) ne suppose **pas** la gaussianité — OLS est BLUE sans elle. Mais une 6ème hypothèse implicite circule dans toute la note : on l'a vue en I.C (vue probabiliste, OLS = MLE) et en III.A (distribution exacte de $\hat{\beta}$). Voilà son statut précis.
+
+> [!warning] H6 — Normalité des résidus
+> Les résidus suivent une loi normale : $\varepsilon_i \sim \mathcal{N}(0, \sigma^2)$
+> 
+> Cette hypothèse vient **en supplément** des cinq hypothèses de Gauss-Markov. Elle n'est pas requise pour BLUE, mais devient nécessaire pour avoir des **tests Student et Fisher exacts**.
+
+> 💡 **Quel rôle joue-t-elle vraiment ?**
+> - **Sans H6, avec H1–H5** : OLS reste BLUE (Gauss-Markov), mais les tests Student/Fisher deviennent seulement *asymptotiquement* valides — c'est le TCL qui sauve la mise quand $n$ est grand.
+> - **Avec H6** : $\hat{\beta}$ est **exactement** gaussien à n'importe quelle taille d'échantillon, OLS coïncide avec MLE (cf. I.C), et les tests Student/Fisher sont **exacts** (pas seulement asymptotiques).
+
+> 💡 **Conséquence pratique d'une violation.** Sur **grand échantillon** (n > 30–50 typiquement), H6 n'est pas critique — le TCL rend les tests robustes à la non-normalité. Sur **petit échantillon**, les p-values et IC peuvent être incorrects.
+
+**(a) Diagnostic — quatre outils**
+
+Contrairement aux autres hypothèses, la normalité a des outils dédiés très visuels.
+
+**(i) Le QQ-plot.** On classe les résidus standardisés et on les compare aux quantiles théoriques d'une $\mathcal{N}(0, 1)$. Si les points suivent la **bissectrice**, les résidus sont gaussiens. Déviations classiques :
+- Points qui s'écartent vers le haut à droite et vers le bas à gauche → **queues lourdes** (kurtosis > 3)
+- Courbure en S → **asymétrie** (skewness $\neq$ 0)
+
+**(ii) Le test de Jarque-Bera.** Combine asymétrie (skew) et aplatissement (kurtosis) en une statistique $JB = \frac{n}{6}(S^2 + \frac{(K-3)^2}{4})$. Sous $H_0$ de normalité, $JB \sim \chi^2_2$. Apparaît dans le summary statsmodels sous `Jarque-Bera (JB)` et `Prob(JB)`.
+
+**(iii) Le test omnibus de D'Agostino-Pearson.** Autre combinaison skew + kurtosis avec une normalisation différente. C'est l'`Omnibus` du summary statsmodels.
+
+**(iv) Le test de Shapiro-Wilk.** Le plus puissant pour petit échantillon ($n < 50$). Pas dans le summary statsmodels par défaut, à appeler via `scipy.stats.shapiro`.
+
+> [!note]- Skewness et kurtosis — les indicateurs bruts
+> Le summary statsmodels affiche directement deux mesures de forme :
+> - **Skewness** $S = E[(\frac{\varepsilon - \mu}{\sigma})^3]$ : asymétrie. $S = 0$ pour une gaussienne, $S > 0$ = queue à droite, $S < 0$ = queue à gauche.
+> - **Kurtosis** $K = E[(\frac{\varepsilon - \mu}{\sigma})^4]$ : aplatissement. $K = 3$ pour une gaussienne, $K > 3$ = queues lourdes (leptokurtique), $K < 3$ = queues légères (platikurtique).
+> 
+> JB et Omnibus sont juste des combinaisons formelles de ces deux nombres en un seul test.
+
+**(b) Application sur Auto**
+
+Sur le modèle `mpg ~ horsepower`, le summary affiche :
+- `Skew = 0.49` (devrait être ~0)
+- `Kurtosis = 3.30` (devrait être ~3, OK ici)
+- `Jarque-Bera (JB) = 17.3, Prob(JB) = 0.0002`
+- `Omnibus = 16.4, Prob(Omnibus) < 0.001`
+
+→ on rejette la normalité au seuil 5% sur les deux tests.
+
+> ⚠️ **Causalité — la non-normalité est souvent un *symptôme*, pas le vrai problème.** Sur Auto, la non-normalité observée vient en réalité de la **mauvaise spécification** du modèle (courbure en U, H1 violée). Quand on corrige H1 en ajoutant `horsepower²`, les résidus deviennent beaucoup plus proches d'une gaussienne. **Avant de "corriger H6", toujours vérifier H1 et H2 d'abord.** La normalité est rarement le problème de fond.
+
+**(c) Remèdes**
+
+Si H6 est vraiment violée et qu'on tient à l'inférence exacte :
+- **Grand échantillon** : ne rien faire, le TCL gère
+- **Petit échantillon** : transformation de $Y$ (log, Box-Cox), bootstrap pour les IC, ou tests non-paramétriques
+- **Avant tout** : vérifier H1 et H2 — la non-normalité est souvent un symptôme d'une autre violation
+
+**(d) Récapitulatif H1–H6**
+
+Voilà la hiérarchie complète des hypothèses :
+
+| Hypothèse | Pour quoi est-elle nécessaire ? | Diagnostic |
+|---|---|---|
+| H1 (linéarité) | Estimateur sans biais | residual plot |
+| H2 (exogénéité) | Estimateur sans biais | raisonnement causal |
+| H3 (homoscédasticité) | Variance OLS correcte → tests valides | residual plot (cône) |
+| H4 (indépendance) | Variance OLS correcte → tests valides | Durbin-Watson, boxplot par groupe |
+| H5 (multicolinéarité) | $X^TX$ inversible, $\hat{\beta}$ stables | VIF |
+| **H6 (normalité)** | **Tests Student/Fisher exacts (sinon asymptotiques)** | **QQ-plot, JB, Omnibus, Shapiro-Wilk** |
+
+> 💡 **À retenir.** H1–H5 sont les hypothèses **du modèle** ; H6 est l'hypothèse **pour l'inférence exacte**. Sur grand échantillon, H6 devient optionnelle grâce au TCL.
+
 ### B. BLUE — ce que ça veut dire
 
 > [!warning] Théorème de Gauss-Markov
@@ -670,6 +795,7 @@ L'hypothèse d'indépendance est violée dès qu'il y a **une structure** qui cr
 > - **Best** — parmi tous les estimateurs linéaires non biaisés, MCO a la **variance minimale** : $V(\hat{\beta})$ est la plus petite possible
 
 > 💡 **L'intuition.** On ne peut pas faire mieux que MCO sans soit introduire du biais, soit sortir de la classe des estimateurs linéaires. C'est ce qui justifie qu'OLS soit la méthode de référence — tant que les hypothèses tiennent, aucun autre estimateur linéaire non biaisé n'est plus précis.
+
 
 ### C. Observations influentes
 
@@ -706,7 +832,7 @@ Les hypothèses Gauss-Markov sont des hypothèses sur le **processus** générat
 > 
 > ![[Pasted image 20260505202556.png]]
 > 
-> **Figure 11.** **Gauche** : scatter brut. L'obs 50 (rouge) est un outlier visible au milieu du nuage en hauteur. L'obs 51 (orange) est extrême en X mais sur la droite OLS. **Droite** : plot diagnostic Leverage vs Studentized Residuals. L'obs 50 sort par l'**axe Y** (résidu standardisé > 3) → détecté comme outlier. L'obs 51 sort par l'**axe X** (leverage $h$ au-delà du seuil $3(p+1)/n$) → détecté comme high leverage. Aucun des deux n'est dans un coin (haut-droite ou bas-droite) → ni l'un ni l'autre n'est réellement *influent* sur $\hat{\beta}$.
+> **Figure 16.** **Gauche** : scatter brut. L'obs 50 (rouge) est un outlier visible au milieu du nuage en hauteur. L'obs 51 (orange) est extrême en X mais sur la droite OLS. **Droite** : plot diagnostic Leverage vs Studentized Residuals. L'obs 50 sort par l'**axe Y** (résidu standardisé > 3) → détecté comme outlier. L'obs 51 sort par l'**axe X** (leverage $h$ au-delà du seuil $3(p+1)/n$) → détecté comme high leverage. Aucun des deux n'est dans un coin (haut-droite ou bas-droite) → ni l'un ni l'autre n'est réellement *influent* sur $\hat{\beta}$.
 > 
 > > 💡 **Le plot de droite est universel.** En régression simple ($p=1$), tu peux voir un point extrême en $X$ directement sur le scatter. Mais en régression multiple ($p$ grand), le scatter 2D ne suffit plus — un point peut être extrême dans une **combinaison** des variables sans l'être sur aucune individuellement (genre 1m95 + 60kg). Le plot Leverage vs Residuals reste lisible à n'importe quelle dimension parce que $h_{ii}$ et $r^*_i$ sont des scalaires par observation. C'est le seul outil pour détecter ces points cachés en multi-D.
 
@@ -714,32 +840,52 @@ Les hypothèses Gauss-Markov sont des hypothèses sur le **processus** générat
 
 ## III. Inférence & Tests
 
-### A. Distribution de $\hat{\beta}$
+> Une fois le modèle estimé et diagnostiqué, trois questions se posent naturellement, dans cet ordre :
+> 1. **Le modèle marche-t-il globalement ?** Est-ce qu'il vaut mieux que prédire la moyenne ?
+> 2. **Quels coefficients comptent vraiment ?** Lesquels sont significatifs, individuellement ou jointement ?
+> 3. **Avec quelle précision peut-on prédire ?** Pour une nouvelle observation, quel est l'intervalle d'incertitude ?
+>
+> Mais avant de pouvoir répondre, il faut un **socle théorique** : connaître la distribution de $\hat{\beta}$. C'est ce que fait la section A — sans elle, aucun test n'est possible. Les sections B (qualité globale), C (inférence sur les coefficients) et D (inférence sur les prédictions) s'enchaînent ensuite naturellement.
 
-On ajoute une hypothèse aux cinq de Gauss-Markov : les erreurs sont gaussiennes, $\varepsilon_i \sim \mathcal{N}(0, \sigma^2)$. Alors $\hat{\beta}$ est une combinaison linéaire de variables gaussiennes, donc lui-même gaussien.
+### A. Sous H6 — la distribution de $\hat{\beta}$
 
-> [!warning] Distribution de $\hat{\beta}$ sous bruit gaussien
-> $$\hat{\beta} \sim \mathcal{N}\!\left(\beta,\ \frac{\sigma^2}{S_{XX}}\right)$$
-> 
-> où $S_{XX} = \sum(x_i - \bar{x})^2$ est la dispersion empirique de $X$.
+On se place ici sous l'hypothèse de normalité **H6** (cf. II.A.H6) : les résidus sont gaussiens, $\varepsilon \sim \mathcal{N}(0, \sigma^2 I_n)$. Comme $\hat{\beta} = (X^T X)^{-1} X^T y$ est une **combinaison linéaire** de $y$ — donc des $\varepsilon_i$ — il est lui aussi gaussien.
 
-> [!note]- Rappel — biais et variance d'un estimateur
-> Le **biais** d'un estimateur $\hat{\theta}$ est l'écart entre son espérance et la vraie valeur :
+> [!warning] Distribution de $\hat{\beta}$ sous H6
+> $$\hat{\beta} \sim \mathcal{N}\!\left(\beta,\ \sigma^2 (X^T X)^{-1}\right)$$
 > 
-> $$\text{bias}(\hat{\theta}) = E[\hat{\theta}] - \theta$$
+> $\hat{\beta} \in \mathbb{R}^{p+1}$ est un **vecteur** gaussien, et $\sigma^2 (X^T X)^{-1}$ est sa **matrice de covariance** $(p+1) \times (p+1)$. La variance du $j$-ème coefficient s'obtient sur la diagonale :
 > 
-> La **variance** d'un estimateur mesure sa dispersion autour de son espérance :
-> 
-> $$V(\hat{\theta}) = E\big[(\hat{\theta} - E[\hat{\theta}])^2\big]$$
+> $$V(\hat{\beta}_j) = \sigma^2 \big[(X^T X)^{-1}\big]_{jj}$$
+
+> 💡 **Pourquoi c'est le résultat fondamental.** Connaître la **loi exacte** de $\hat{\beta}$ — pas juste son espérance et sa variance — c'est ce qui débloque toute l'inférence. Une fois $\hat{\beta}$ gaussien, toute fonction de $\hat{\beta}$ a une loi calculable : ratios → Student, sommes de carrés → $\chi^2$, ratios de $\chi^2$ → Fisher. Tous les tests qui suivent (B.2, C.1, C.2) et les intervalles de confiance/prédiction (D) sont des conséquences directes de cette ligne.
 
 > 💡 **Trois choses à lire dans cette distribution.**
-> - **Centré sur $\beta$** : $E[\hat{\beta}] = \beta$, donc $\text{bias}(\hat{\beta}) = 0$ — $\hat{\beta}$ est sans biais.
-> - **Variance $= \sigma^2/S_{XX}$** : plus $X$ est dispersé, plus $\hat{\beta}$ est précis. C'est intuitif : si tous tes $x_i$ sont concentrés au même endroit, tu n'as aucune information sur la pente.
-> - **Variance $\to 0$ quand $n \to \infty$** : $\hat{\beta}$ est convergent.
+> - **Centré sur $\beta$** : $E[\hat{\beta}] = \beta$, donc $\text{bias}(\hat{\beta}) = 0$ — $\hat{\beta}$ est sans biais (résultat déjà connu via Gauss-Markov, cf. II.B).
+> - **La précision dépend de $X^T X$** : plus les colonnes de $X$ sont "grandes" et orthogonales entre elles, plus $(X^T X)^{-1}$ est petite, plus $\hat{\beta}$ est précis. Intuition : un $X$ bien dispersé porte plus d'information sur $\beta$.
+> - **Variance $\to 0$ quand $n \to \infty$** : les éléments de $(X^T X)^{-1}$ décroissent en $1/n$ pour des données i.i.d. → $\hat{\beta}$ est convergent.
 
-### B. Le $R^2$
+> [!note]- Cas particulier — régression simple
+> En régression simple ($p = 1$, un seul prédicteur), la matrice $X^T X$ est $2 \times 2$ et la formule se réduit à :
+> 
+> $\hat{\beta}_1 \sim \mathcal{N}\!\left(\beta_1,\ \frac{\sigma^2}{S_{XX}}\right) \qquad \text{où } S_{XX} = \sum_i (x_i - \bar{x})^2$
+> 
+> $S_{XX}$ est la **dispersion empirique de $X$** (somme des écarts au carré, le numérateur de la variance empirique). Plus $X$ est dispersé, plus $S_{XX}$ est grand, plus $\hat{\beta}_1$ est précis. C'est le cas particulier $p = 1$ de la formule matricielle générale.
 
-#### Définition classique — la décomposition des sommes de carrés
+> [!note]- Lien avec multicolinéarité (H5)
+> Si deux colonnes de $X$ sont presque colinéaires, $X^T X$ est presque singulière → $(X^T X)^{-1}$ a des entrées **énormes** → $V(\hat{\beta}_j)$ explose. C'est exactement le diagnostic via VIF (cf. II.A.H5) : 
+> 
+> $V(\hat{\beta}_j) = \frac{\sigma^2}{S_{X_j X_j}} \cdot \text{VIF}_j$
+> 
+> Le VIF mesure littéralement *de combien la variance de $\hat{\beta}_j$ est gonflée* par rapport au cas où $X_j$ serait orthogonal aux autres prédicteurs.
+
+### B. Qualité globale du modèle
+
+> 💡 **Première question naturelle.** Avant de regarder les coefficients un par un, on veut savoir si le modèle vaut quelque chose **dans son ensemble** : capture-t-il une part substantielle de la variance de $Y$ ? Fait-il mieux qu'un modèle constant qui prédirait simplement $\bar{y}$ ? Deux outils répondent à cette question — un descriptif ($R^2$) et un inférentiel (F-statistic global).
+
+#### B.1 — Le $R^2$
+
+**(i) Définition classique — la décomposition des sommes de carrés**
 
 > [!warning] Décomposition fondamentale
 > $$\underbrace{\sum_i (y_i - \bar{y})^2}_{\text{SST (variance totale de } Y\text{)}} = \underbrace{\sum_i (\hat{y}_i - \bar{y})^2}_{\text{SSE (variance expliquée)}} + \underbrace{\sum_i (y_i - \hat{y}_i)^2}_{\text{SSR (résidus)}}$$
@@ -755,9 +901,10 @@ On ajoute une hypothèse aux cinq de Gauss-Markov : les erreurs sont gaussiennes
 
 
 ![[Pasted image 20260505213127.png|481]]
-Figure Visuellement le $R^2$ va capturer la différence entre la moyenne (aka pas d'information en rouge) et la ligne de régression (en violet) 
 
-#### Lecture géométrique — Pythagore dans $L^2$
+**Figure 17.** Visualisation du $R^2$. Le modèle constant (qui prédit toujours $\bar{y}$, en rouge) capture nulle variance. La droite de régression (en violet) capture une fraction $R^2$ de la variance totale de $Y$ — c'est l'écart entre les deux qu'on rapporte à la variance totale.
+
+**(ii) Lecture géométrique — Pythagore dans $L^2$**
 
 La décomposition SST = SSE + SSR n'est rien d'autre que **Pythagore** appliqué dans $L^2$ après centrage. On retire $\bar{y}$ partout et on obtient le triangle rectangle $\bar{y}, \hat{Y}, Y$.
 
@@ -768,11 +915,11 @@ La décomposition SST = SSE + SSR n'est rien d'autre que **Pythagore** appliqué
 
 ![Pythagore dans L² centré|500](images/2-Statistiques/Frequentist/regression-lineaire/im4.png)
 
-**Figure 12.** Pythagore dans $L^2$ centré. La décomposition $\text{SST} = \text{SSE} + \text{SSR}$ est le théorème de Pythagore appliqué au triangle $\bar{y}, \hat{Y}, Y$. $R^2 = \cos^2\theta$.
+**Figure 18.** Pythagore dans $L^2$ centré. La décomposition $\text{SST} = \text{SSE} + \text{SSR}$ est le théorème de Pythagore appliqué au triangle $\bar{y}, \hat{Y}, Y$. $R^2 = \cos^2\theta$.
 
 > 💡 **Deux lectures du même objet.** $R^2 = \text{SSE}/\text{SST}$ (ratio de sommes de carrés) et $R^2 = \cos^2\theta$ (lecture géométrique) disent exactement la même chose. L'une est calculatoire et apparaît dans tous les outputs de logiciels ; l'autre est conceptuelle et permet de comprendre pourquoi $R^2 \in [0, 1]$ (un cosinus carré est toujours dans cet intervalle).
 
-#### $R^2$ ajusté
+**(iii) $R^2$ ajusté**
 
 > 💡 **Le défaut majeur du $R^2$.** Ajouter une variable au modèle agrandit mécaniquement le sous-espace $L^2_X$ — un espace plus grand capture toujours un peu mieux $Y$, même si la variable ajoutée est du **bruit pur**. Le $R^2$ augmente donc toujours quand on ajoute un prédicteur, **même inutile**. C'est pour ça qu'on ne peut pas comparer deux modèles avec des nombres de prédicteurs différents en regardant juste leur $R^2$ — il faut une version corrigée.
 
@@ -789,53 +936,66 @@ Le **$R^2$ ajusté** corrige ce défaut en pénalisant le nombre de paramètres 
 > - **$R^2$** : pour décrire la qualité d'un modèle fixé. Lecture intuitive ("le modèle explique X% de la variance").
 > - **$\bar{R}^2$** : pour **comparer des modèles** avec des nombres de prédicteurs différents. Comparer $R^2$ entre deux modèles favorise systématiquement le plus complexe — toujours utiliser $\bar{R}^2$ pour la sélection de modèle.
 
-### C. Test de Student sur $\hat{\beta}$
+#### B.2 — Le F-statistic global
 
-**La question.** Est-ce que $X$ a vraiment un effet sur $Y$, ou est-ce que $\hat{\beta} \neq 0$ par chance ? On teste $H_0 : \beta = 0$ contre $H_1 : \beta \neq 0$.
+Le $R^2$ est descriptif — il dit *combien* le modèle explique, pas si cette explication est statistiquement significative. Pour le savoir, on a besoin d'un **test** : c'est le rôle du **F-statistic global**, qui apparaît dans tout summary OLS sous le nom `F-statistic` et `Prob (F-statistic)`.
+
+> [!warning] Test de signification globale du modèle
+> On compare le modèle complet (avec tous ses $p$ prédicteurs) au **modèle constant** ($\hat{y}_i = \bar{y}$, aucun prédicteur). L'hypothèse nulle :
+> 
+> $$H_0 : \beta_1 = \beta_2 = \cdots = \beta_p = 0$$
+> 
+> *("aucun prédicteur n'apporte rien")*. La statistique :
+> 
+> $$F = \frac{R^2/p}{(1-R^2)/(n-p-1)}$$
+> 
+> Sous $H_0$, $F$ suit une loi de Fisher à $(p, n-p-1)$ degrés de liberté. Si $F$ est grand → on rejette $H_0$ → le modèle est globalement informatif.
+
+> 💡 **Lecture en deux mots.** $F$ est un **ratio signal/bruit** au niveau global. Numérateur = part de variance expliquée par les $p$ prédicteurs (par degré de liberté). Dénominateur = variance résiduelle (par degré de liberté). Si signal > bruit → le modèle marche.
+
+> [!note]- Cas particulier d'un test plus général
+> Ce $F$ global n'est pas un objet à part — c'est le **cas particulier** du test de Fisher de modèles emboîtés (cf. C.2) où le modèle restreint est le modèle constant. La mécanique générale (test joint sur $q$ coefficients quelconques) est traitée en C.2.
+
+> 💡 **Attention au piège.** Si le F global rejette $H_0$, ça veut dire **"au moins un prédicteur est utile"**, pas **"tous le sont"**. Pour savoir lesquels, il faut passer aux tests individuels (C.1) ou aux tests joints partiels (C.2). $R^2$ et F global donnent une vue d'ensemble — pas un diagnostic au niveau des coefficients.
+
+### C. Inférence sur les coefficients
+
+> 💡 **Deuxième question naturelle.** Le modèle marche globalement (B). Très bien. Mais **quels prédicteurs comptent vraiment** ? Est-ce que `horsepower` a un effet significatif sur `mpg` ? Et l'`origin` apporte-t-elle quelque chose **au-delà** de ce que `horsepower` capture déjà ? Deux tests pour deux granularités : Student pour un coefficient à la fois (C.1), Fisher pour plusieurs coefficients d'un coup (C.2). Et un récapitulatif pratique en C.3 : comment lire ces tests dans le summary OLS.
+
+#### C.1 — Test de Student sur $\hat{\beta}_j$
+
+**La question.** Est-ce que le prédicteur $X_j$ a vraiment un effet sur $Y$, ou est-ce que $\hat{\beta}_j \neq 0$ par chance ? On teste $H_0 : \beta_j = 0$ contre $H_1 : \beta_j \neq 0$, **un coefficient à la fois**.
 
 > [!warning] Statistique de Student
-> $\sigma^2$ est inconnue en pratique, on l'estime par $\hat{\sigma}^2 = \text{SSR}/(n-2)$. On pose :
+> $\sigma^2$ est inconnue en pratique, on l'estime par $\hat{\sigma}^2 = \text{SSR}/(n - p - 1)$. L'**erreur-type** du coefficient $\hat{\beta}_j$ s'obtient à partir de la diagonale de $(X^T X)^{-1}$ :
 > 
-> $$t = \frac{\hat{\beta}}{\hat{\sigma}/\sqrt{S_{XX}}}$$
+> $\text{se}(\hat{\beta}_j) = \hat{\sigma} \sqrt{\big[(X^T X)^{-1}\big]_{jj}}$
 > 
-> Sous $H_0$, $t$ suit une loi de Student à $n-2$ degrés de liberté. Pour $n$ grand, on retient la règle :
+> La statistique de Student :
 > 
-> $$|t| > 1.96 \implies \text{on rejette } H_0 \text{ au seuil } 5\%$$
-
-> 💡 **La p-value.** C'est la probabilité d'observer un $|t|$ aussi grand si $H_0$ était vraie. Plus elle est petite, plus on est confiant que $\beta \neq 0$. Seuil classique : $p < 0.05$.
-
-> [!warning] Intervalle de confiance sur $\beta$ à 95%
-> $$\hat{\beta} \pm 1.96 \cdot \frac{\hat{\sigma}}{\sqrt{S_{XX}}}$$
+> $t_j = \frac{\hat{\beta}_j}{\text{se}(\hat{\beta}_j)}$
 > 
-> C'est l'ensemble des valeurs de $\beta$ qu'on ne rejetterait pas au seuil 5%. Plus $S_{XX}$ est grand ($X$ dispersé), plus l'intervalle est étroit — plus on est précis.
-
-### D. Prédiction — Intervalle de confiance vs Intervalle de prédiction
-
-On dispose d'un modèle estimé $\hat{y} = \hat{\alpha} + \hat{\beta}x$. Pour une nouvelle valeur $x^*$, on veut quantifier l'incertitude autour de la prédiction $\hat{y}^* = \hat{\alpha} + \hat{\beta}x^*$.
-
-> 💡 **Deux questions très différentes.**
-> - **Où se situe la moyenne de $Y$ en $x^*$ ?** → Intervalle de **confiance** (IC).
-> - **Où va tomber une nouvelle observation individuelle en $x^*$ ?** → Intervalle de **prédiction** (IP).
+> Sous $H_0$, $t_j$ suit une loi de Student à $n - p - 1$ degrés de liberté. Pour $n$ grand, on retient la règle :
 > 
-> La distinction est subtile mais cruciale en pratique : un IC sur la moyenne est beaucoup plus étroit qu'un IP sur une observation individuelle.
+> $|t_j| > 1.96 \implies \text{on rejette } H_0 \text{ au seuil } 5\%$
 
-> [!warning] Intervalle de confiance sur $E(Y \mid X = x^*)$ à 95%
-> $$\hat{y}^* \pm 1.96 \cdot \hat{\sigma}\sqrt{\frac{1}{n} + \frac{(x^* - \bar{x})^2}{S_{XX}}}$$
+> 💡 **La p-value.** C'est la probabilité d'observer un $|t_j|$ aussi grand si $H_0$ était vraie. Plus elle est petite, plus on est confiant que $\beta_j \neq 0$. Seuil classique : $p < 0.05$. C'est la colonne `P>|t|` du summary OLS (cf. C.3).
+
+> [!warning] Intervalle de confiance sur $\beta_j$ à 95%
+> $\hat{\beta}_j \pm 1.96 \cdot \text{se}(\hat{\beta}_j)$
 > 
-> Encadre la **vraie moyenne** $\alpha + \beta x^*$. L'incertitude vient uniquement de l'estimation de $\hat{\alpha}$ et $\hat{\beta}$.
+> C'est l'ensemble des valeurs de $\beta_j$ qu'on ne rejetterait pas au seuil 5%. Plus $\text{se}(\hat{\beta}_j)$ est petite, plus l'intervalle est étroit — plus on est précis. C'est la colonne `[0.025, 0.975]` du summary.
 
-> [!warning] Intervalle de prédiction sur $Y(x^*)$ à 95%
-> $$\hat{y}^* \pm 1.96 \cdot \hat{\sigma}\sqrt{1 + \frac{1}{n} + \frac{(x^* - \bar{x})^2}{S_{XX}}}$$
+> [!note]- Cas particulier — régression simple
+> En régression simple ($p = 1$), $\text{se}(\hat{\beta}_1) = \hat{\sigma}/\sqrt{S_{XX}}$ et la statistique se simplifie en :
 > 
-> Encadre une **nouvelle observation individuelle**. L'incertitude vient de **deux sources** : l'estimation de $\hat{\alpha}$ et $\hat{\beta}$ **plus** le bruit irréductible $\varepsilon^*$.
+> $t = \frac{\hat{\beta}_1}{\hat{\sigma}/\sqrt{S_{XX}}} \sim t_{n-2}$
+> 
+> avec $\hat{\sigma}^2 = \text{SSR}/(n-2)$. C'est ce qu'on rencontre dans la majorité des manuels d'intro — c'est juste la formule générale appliquée au cas $p = 1$.
 
-> 💡 **Le rôle du $+1$.** La seule différence entre les deux formules est le $+1$ sous la racine dans l'IP. Ce $1$ représente la variance du bruit $\varepsilon^*$ — irréductible peu importe la taille de l'échantillon. Même avec $n \to \infty$, on estimerait $\alpha + \beta x^*$ parfaitement, mais une observation individuelle resterait dispersée autour de cette moyenne. **On ne peut pas prédire le bruit.**
+#### C.2 — Test de Fisher — test joint sur plusieurs coefficients
 
-Les deux intervalles s'élargissent aussi quand $x^*$ s'éloigne de $\bar{x}$ — on extrapole loin des données, l'estimation devient moins fiable.
-
-### E. Test de Fisher — test joint sur plusieurs coefficients
-
-**La question.** Le test de Student de III.C teste **un coefficient à la fois**. Mais souvent on veut tester **un groupe de coefficients ensemble**. Exemples typiques :
+**La question.** Le test de Student de C.1 teste **un coefficient à la fois**. Mais souvent on veut tester **un groupe de coefficients ensemble**. Exemples typiques :
 
 - *Mes 4 dummies de secteur (Tech, Oil, Banque, Real Estate vs référence) sont-elles **jointement** significatives ?* — un test pour les 4 d'un coup, pas 4 tests Student séparés.
 - *Ajouter `weight + displacement + cylinders` au modèle `mpg ~ hp` apporte-t-il quelque chose ?* — comparaison entre un modèle restreint et un modèle complet.
@@ -843,7 +1003,7 @@ Les deux intervalles s'élargissent aussi quand $x^*$ s'éloigne de $\bar{x}$ �
 
 > 💡 **Pourquoi pas juste plusieurs tests Student ?** Faire 4 tests Student séparés au seuil 5% donne une probabilité de faux positif **bien supérieure à 5%** sur l'ensemble (problème de tests multiples). Et surtout, ça ne capture pas l'**effet conjoint** : deux coefficients individuellement insignificants peuvent être conjointement très significatifs s'ils sont corrélés. Le test de Fisher répond directement à la bonne question.
 
-#### Cadre — modèle restreint vs modèle complet
+**(i) Cadre — modèle restreint vs modèle complet**
 
 L'idée centrale : on compare deux modèles emboîtés.
 
@@ -855,26 +1015,10 @@ L'idée centrale : on compare deux modèles emboîtés.
 
 Par construction, $\text{SSR}_0 \geq \text{SSR}_1$ : retirer des prédicteurs ne peut qu'augmenter les résidus. La question : **l'augmentation est-elle significative** ?
 
-#### Décomposition de la variance — le fondement géométrique
+**(ii) Statistique de Fisher**
 
-Le test de Fisher repose sur la **décomposition fondamentale** $\text{SST} = \text{SSE} + \text{SSR}$ (cf. III.B). Plus précisément, on décompose la variance expliquée par groupes :
-
-> [!warning] Sommes de carrés inter-groupes / intra-groupes
-> Pour un facteur catégoriel à $K$ groupes (cas ANOVA), avec $\bar{y}_j$ la moyenne du groupe $j$ et $\bar{y}$ la moyenne globale :
+> [!warning] Statistique F (modèles emboîtés)
 > 
-> $$\underbrace{\text{SC}_{\text{inter}} = \sum_{j=1}^K n_j (\bar{y}_j - \bar{y})^2}_{\text{variance expliquée par les groupes}}$$
-> 
-> $$\underbrace{\text{SC}_{\text{intra}} = \sum_{j=1}^K \sum_{i=1}^{n_j} (y_{ij} - \bar{y}_j)^2}_{\text{variance résiduelle}}$$
-> 
-> Et $\text{SC}_{\text{inter}} + \text{SC}_{\text{intra}} = \text{SST}$ (Pythagore).
-
-![Décomposition de la variance dans un cas à trois populations A, B et C fictives.|590](https://biodatascience-course.sciviews.org/sdd-umons-2018/10-Variance_files/figure-html/anova1-1.svg)
-
-**Figure 14.** *(Reprise de la Figure 5.)* Décomposition $\text{total} = \text{inter} + \text{intra}$. Le test de Fisher quantifie statistiquement cette intuition visuelle : si la variance **inter-groupes** (écarts entre moyennes de groupes) domine la variance **intra-groupe** (dispersion individuelle), alors les groupes diffèrent vraiment.
-
-#### Statistique de Fisher
-
-> [!warning] Statistique F
 > $$F = \frac{(\text{SSR}_0 - \text{SSR}_1)/q}{\text{SSR}_1/(n - p - 1)}$$
 > 
 > Sous $H_0$, $F$ suit une **loi de Fisher** à $(q, n-p-1)$ degrés de liberté.
@@ -886,31 +1030,24 @@ Le test de Fisher repose sur la **décomposition fondamentale** $\text{SST} = \t
 
 > 💡 **Interprétation en deux mots.** $F$ est le **ratio signal/bruit**. Numérateur = ce que les $q$ coefficients supplémentaires apportent. Dénominateur = la variance résiduelle de référence. Si signal > bruit (typiquement $F > 4$ pour des seuils usuels), alors les coefficients sont jointement significatifs.
 
-#### Tableau ANOVA — la présentation classique
+> [!note]- Lien avec l'ANOVA classique
+> La formulation ci-dessus (modèles emboîtés via $\text{SSR}_0 - \text{SSR}_1$) est la version **régression** du test de Fisher. Elle est strictement équivalente à la formulation **ANOVA classique** par décomposition $\text{SC}_{\text{tot}} = \text{SC}_{\text{inter}} + \text{SC}_{\text{intra}}$ avec son tableau ANOVA (Source / ddl / SC / CM / F).
+> 
+> Pour la mécanique formelle de la décomposition de variance, le tableau ANOVA standardisé, et le lien Fisher↔Student, voir [[Tests d'hypothèses]] section IV.C. Ici on garde la formulation modèles emboîtés parce qu'elle est la plus naturelle en cadre régression — elle s'applique à n'importe quel test joint de coefficients, pas seulement à un facteur catégoriel.
 
-Dans le cas particulier d'un seul facteur catégoriel à $K$ groupes (ANOVA pure : $H_0$ = "tous les groupes ont la même moyenne"), on présente les calculs sous forme de tableau :
-
-| Source | Degrés de liberté | Somme des carrés | Carré moyen | Statistique F |
-|---|:---:|:---:|:---:|:---:|
-| **Inter-groupes** (facteur) | $K - 1$ | $\text{SC}_{\text{inter}}$ | $\text{CM}_{\text{inter}} = \dfrac{\text{SC}_{\text{inter}}}{K-1}$ | $F = \dfrac{\text{CM}_{\text{inter}}}{\text{CM}_{\text{intra}}}$ |
-| **Intra-groupes** (résidus) | $n - K$ | $\text{SC}_{\text{intra}}$ | $\text{CM}_{\text{intra}} = \dfrac{\text{SC}_{\text{intra}}}{n-K}$ | |
-| **Total** | $n - 1$ | $\text{SST}$ | | |
-
-> 💡 **Le carré moyen est juste "variance par degré de liberté"**. On divise chaque somme de carrés par ses ddl pour obtenir des **estimateurs de variance** comparables. Si la vraie variance inter et intra sont égales (= $H_0$ vraie), alors $F \approx 1$. Dès que $F$ s'éloigne nettement de 1, on rejette $H_0$.
-
-#### Cas particuliers utiles
+**(iii) Cas particuliers utiles**
 
 > [!note]- Cas 1 — Test de signification globale du modèle
 > Quand $M_0$ est le modèle constant ($\hat{y}_i = \bar{y}$, aucun prédicteur) et $M_1$ est le modèle complet avec tous les $p$ prédicteurs, le test de Fisher devient :
 > 
-> $F = \frac{R^2/p}{(1-R^2)/(n-p-1)}$
+> $$F = \frac{R^2/p}{(1-R^2)/(n-p-1)}$$
 > 
 > Ce $F$ apparaît dans tout output `summary()` (R) ou `.summary()` (statsmodels) : "F-statistic" et "Prob (F-statistic)". Il teste $H_0$ : *"aucun prédicteur n'a d'effet"*. Si on rejette, le modèle est globalement informatif.
 
 > [!note]- Cas 2 — Lien avec le test de Student
 > Quand on teste **un seul** coefficient ($q = 1$), Fisher et Student sont équivalents :
 > 
-> $F_{(1, n-p-1)} = t_{(n-p-1)}^2$
+> $$F_{(1, n-p-1)} = t_{(n-p-1)}^2$$
 > 
 > Le test de Student est donc le cas particulier du test de Fisher pour $q = 1$. Fisher est la généralisation à $q$ coefficients simultanés.
 
@@ -926,6 +1063,191 @@ Dans le cas particulier d'un seul facteur catégoriel à $K$ groupes (ANOVA pure
 
 > [!note]- En pratique — `anova()` ou `f_test()`
 > En R : `anova(model_restreint, model_complet)` calcule directement le F et la p-value. En Python avec statsmodels : `model.f_test("origin_Europe = 0, origin_Japon = 0")` ou comparaison de modèles via `anova_lm`. Sur sklearn pas d'équivalent natif — il faut passer par statsmodels pour l'inférence.
+
+#### C.3 — Lecture d'un summary OLS sur Auto
+
+Tout ce qu'on a vu jusqu'ici (R², F global, test de Student, test de Fisher) apparaît dans **un seul tableau standardisé** : le `summary()` produit par n'importe quel logiciel de stats (`statsmodels` en Python, `lm()` + `summary()` en R). Cette sous-section explique comment le lire, sur deux modèles concrets ajustés sur Auto.
+
+##### C.3.a Modèle simple — `mpg ~ horsepower`
+
+On régresse simplement `mpg` sur `horsepower`. Voici l'output complet de `model.summary()` :
+
+```
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                    mpg   R-squared:                       0.606
+Model:                            OLS   Adj. R-squared:                  0.605
+Method:                 Least Squares   F-statistic:                     599.7
+Date:                Wed, 06 May 2026   Prob (F-statistic):           7.03e-81
+Time:                        21:58:50   Log-Likelihood:                -1178.7
+No. Observations:                 392   AIC:                             2361.
+Df Residuals:                     390   BIC:                             2369.
+Df Model:                           1                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept     39.9359      0.717     55.660      0.000      38.525      41.347
+horsepower    -0.1578      0.006    -24.489      0.000      -0.171      -0.145
+==============================================================================
+Omnibus:                       16.432   Durbin-Watson:                   0.920
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):               17.305
+Skew:                           0.492   Prob(JB):                     0.000175
+Kurtosis:                       3.299   Cond. No.                         322.
+==============================================================================
+```
+
+##### Bloc 1 — métadonnées et qualité globale du modèle
+
+- **`R-squared = 0.606`** → le R² de la section B.1 : 60.6% de la variance de `mpg` est expliquée par `horsepower`. Le reste est dans les résidus.
+- **`Adj. R-squared = 0.605`** → R² ajusté, pénalisé par le nombre de prédicteurs. Utile pour comparer entre modèles avec un nombre de prédicteurs différent.
+- **`F-statistic = 599.7`, `Prob (F-statistic) = 7e-81`** → c'est le **F-statistic global** de la section B.2. Il teste $H_0$ : *aucun prédicteur n'a d'effet*. Ici on rejette écrasement — le modèle est globalement informatif.
+- **`No. Observations = 392`** → taille de l'échantillon $n$.
+- **`Df Residuals = 390`** → degrés de liberté résiduels $n - p - 1 = 392 - 1 - 1$.
+- **`Df Model = 1`** → nombre de prédicteurs (hors intercept). Ici juste `horsepower`.
+- **`AIC` / `BIC`** → critères d'information (Akaike / Bayesian) pour comparaison de modèles. Plus petit = meilleur. Pénalisent la complexité comme l'adjusted R².
+
+##### Bloc 2 — tableau des coefficients (le cœur)
+
+Lecture de la ligne `horsepower` :
+
+- **`coef = -0.1578`** → c'est $\hat{\beta}_1$. Chaque cheval supplémentaire fait baisser la mpg de **0.158** mpg en moyenne.
+- **`std err = 0.006`** → erreur-type de l'estimateur, $\hat{\sigma}/\sqrt{S_{XX}}$ (cf. A). Mesure l'incertitude sur $\hat{\beta}_1$.
+- **`t = -24.489`** → c'est la **statistique de Student** (cf. C.1) : `coef / std err` = $-0.1578 / 0.006$. Teste $H_0 : \beta_1 = 0$.
+- **`P>|t| = 0.000`** → **p-value bilatérale** du test de Student. Ici < 0.001 → on rejette $H_0$ très fortement — `horsepower` a un effet significatif sur `mpg`.
+- **`[0.025, 0.975] = [-0.171, -0.145]`** → **intervalle de confiance à 95%** sur $\beta_1$ (cf. C.1). Si 0 n'est pas dedans → significatif au seuil 5%. Ici 0 est très loin de l'intervalle, cohérent avec la p-value écrasante.
+
+##### Bloc 3 — diagnostics sur les résidus
+
+Ces statistiques vérifient les **hypothèses Gauss-Markov** (cf. II.A) :
+
+- **`Omnibus = 16.4`, `Prob(Omnibus) = 0.000`** + **`Jarque-Bera (JB) = 17.3`, `Prob(JB) = 0.0002`** → deux tests de **normalité des résidus**. Ici p < 0.001 dans les deux cas → résidus **non-gaussiens**. Suggestion : modèle mal spécifié (cf. courbure en U vue en II.A.H1).
+- **`Skew = 0.49`** (asymétrie) et **`Kurtosis = 3.30`** (aplatissement) → métriques associées. Sous normalité parfaite : Skew = 0, Kurtosis = 3.
+- **`Durbin-Watson = 0.92`** → test d'**autocorrélation des résidus** (H4). DW ≈ 2 = OK, DW < 1 = forte autocorrélation positive ⚠️. Ici 0.92 → lien avec le clustering par origine vu en II.A.H4.
+- **`Cond. No. = 322`** → **conditionnement** de $X^TX$. > 30 = signal de multicolinéarité ou instabilité numérique (H5). Ici élevé — dû au fait que `horsepower` est centré autour de ~100 plutôt que 0.
+
+##### C.3.b Modèle ANCOVA — `mpg ~ horsepower + origin`
+
+On ajoute la variable catégorielle `origin` (USA, Europe, Japon) au modèle. USA est la référence (cf. I.E sur la treatment constraint). L'output devient :
+
+```
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                    mpg   R-squared:                       0.662
+Model:                            OLS   Adj. R-squared:                  0.659
+Method:                 Least Squares   F-statistic:                     253.4
+Date:                Wed, 06 May 2026   Prob (F-statistic):           4.93e-91
+Time:                        21:58:50   Log-Likelihood:                -1148.5
+No. Observations:                 392   AIC:                             2305.
+Df Residuals:                     388   BIC:                             2321.
+Df Model:                           3                                         
+Covariance Type:            nonrobust                                         
+=======================================================================================
+                          coef    std err          t      P>|t|      [0.025      0.975]
+---------------------------------------------------------------------------------------
+Intercept              35.9441      0.867     41.444      0.000      34.239      37.649
+C(origin)[T.Europe]     2.4253      0.678      3.578      0.000       1.093       3.758
+C(origin)[T.Japon]      5.1764      0.648      7.990      0.000       3.903       6.450
+horsepower             -0.1336      0.007    -19.474      0.000      -0.147      -0.120
+==============================================================================
+Omnibus:                       23.486   Durbin-Watson:                   1.036
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):               25.987
+Skew:                           0.602   Prob(JB):                     2.27e-06
+Kurtosis:                       3.376   Cond. No.                         510.
+==============================================================================
+```
+
+##### Ce qui change avec une catégorielle
+
+- **`Df Model = 3`** au lieu de 1 — maintenant 3 prédicteurs : `horsepower`, dummy Europe, dummy Japon
+- **Une ligne de coefficient par modalité, sauf la référence** — USA est absorbé dans l'intercept
+- **`R²` passe de 0.606 à 0.662** — ajouter `origin` apporte de la variance expliquée
+- **`Adj. R²`** passe de 0.605 à 0.659 — le gain est réel même après pénalisation pour les paramètres ajoutés
+- **`Durbin-Watson`** passe de 0.92 à 1.04 — inclure `origin` réduit le clustering résiduel (cf. II.A.H4)
+
+##### Lecture des coefficients
+
+- **`Intercept = 35.94`** → mpg prédit pour une voiture **USA** à `horsepower = 0`. Pas de sens physique (hp = 0 n'existe pas), mais c'est le **point d'ancrage** de la droite USA.
+- **`C(origin)[T.Europe] = +2.43`** → à puissance égale, une voiture **européenne fait +2.43 mpg de plus qu'une américaine**. C'est le décalage vertical entre la droite Europe et la droite USA (cf. Figure 7 d'ANCOVA en I.E).
+- **`C(origin)[T.Japon] = +5.18`** → à puissance égale, une **japonaise fait +5.18 mpg de plus qu'une américaine**.
+- **`horsepower = -0.1336`** → pente commune aux trois groupes : 1 cheval supplémentaire = -0.134 mpg, indépendamment de l'origine.
+- **Toutes les `P>|t|` sont à 0.000** → chaque effet est individuellement significatif vs référence USA.
+
+##### C.3.c Le piège — p-values individuelles vs test F joint
+
+Si on te demande *"l'origine est-elle significative dans le modèle ?"*, **regarder les p-values des dummies individuellement n'est pas suffisant**. Deux raisons :
+
+1. **Choix arbitraire de la référence** : si on prend Japon comme référence à la place de USA, les coefficients et p-values des dummies changent. Mais l'effet "origine" en tant que variable est le même — ce n'est pas une propriété intrinsèque du facteur.
+2. **Multiple testing** : 2 tests Student au seuil 5% chacun → vraie probabilité de faux positif > 5% sur l'ensemble.
+
+**La bonne question** : *"$\beta_{\text{Europe}} = \beta_{\text{Japon}} = 0$ jointement ?"* — c'est exactement le **test F de modèles emboîtés** (cf. C.2). Il faut le faire **séparément**, il n'apparaît pas dans le summary :
+
+```python
+# Méthode 1 : f_test direct
+model.f_test("C(origin)[T.Europe] = 0, C(origin)[T.Japon] = 0")
+# Output : F=32.24, p=1.1e-13, df=(2, 388)
+
+# Méthode 2 : comparaison modèles emboîtés
+from statsmodels.stats.anova import anova_lm
+anova_lm(model_sans_origin, model_avec_origin)
+# Output :
+#    df_resid     ssr    df_diff   ss_diff       F      Pr(>F)
+# 0    390.0   9385.92    0.0       NaN        NaN       NaN
+# 1    388.0   8048.39    2.0     1337.53    32.24    1.11e-13
+```
+
+Les deux méthodes donnent **le même F = 32.24, p = 1.1e-13**. Conclusion : `origin` apporte **vraiment** quelque chose au-delà de `horsepower`, indépendamment du choix de référence.
+
+> 💡 **À retenir.** Pour un facteur catégoriel à $K$ modalités, le summary affiche $K-1$ tests de Student (un par dummy vs référence). Pour tester *"le facteur est-il globalement significatif ?"*, il faut un **test F joint sur les $K-1$ dummies en même temps** — à faire à la main via `f_test()` ou `anova_lm()`. C'est *exactement* le test F de modèles emboîtés de C.2.
+
+##### C.3.d Workflow de lecture en 30 secondes
+
+Devant un summary OLS quelconque, mon workflow mental :
+
+1. **Le modèle marche-t-il globalement ?** → R², F-stat (`Prob (F-statistic)`)
+2. **Quels prédicteurs sont significatifs individuellement ?** → colonne `P>|t|` du tableau de coefficients
+3. **Quels sont les effets concrets ?** → colonne `coef` avec son unité métier
+4. **Catégorielles** → si présentes, faire un test F joint **séparément** via `f_test()`
+5. **Hypothèses Gauss-Markov** → bloc du bas : Durbin-Watson ≈ 2 ? Omnibus/JB > 0.05 ? Cond. No. < 30 ?
+
+### D. Inférence sur les prédictions
+
+> 💡 **Troisième question naturelle.** Le modèle marche globalement (B), on sait quels coefficients comptent (C). Reste la question pratique : **avec quelle précision peut-on prédire** ? Pour une nouvelle valeur $x^*$, $\hat{y}^* = \hat{\alpha} + \hat{\beta}x^*$ donne une prédiction ponctuelle — mais pas son incertitude. Et il y a un piège : *l'incertitude sur la moyenne de $Y$ en $x^*$* (D.1) et *l'incertitude sur une nouvelle observation individuelle en $x^*$* (D.2) sont deux choses différentes. La distinction est subtile mais cruciale.
+
+#### D.1 — Intervalle de confiance vs Intervalle de prédiction
+
+On dispose d'un modèle estimé $\hat{y} = \hat{\alpha} + \hat{\beta}x$. Pour une nouvelle valeur $x^*$, on veut quantifier l'incertitude autour de la prédiction $\hat{y}^* = \hat{\alpha} + \hat{\beta}x^*$.
+
+> 💡 **Deux questions très différentes.**
+> - **Où se situe la moyenne de $Y$ en $x^*$ ?** → Intervalle de **confiance** (IC).
+> - **Où va tomber une nouvelle observation individuelle en $x^*$ ?** → Intervalle de **prédiction** (IP).
+> 
+> La distinction est subtile mais cruciale en pratique : un IC sur la moyenne est beaucoup plus étroit qu'un IP sur une observation individuelle.
+
+> [!warning] Intervalle de confiance sur $E(Y \mid X = x^*)$ à 95%
+> $$\hat{y}^* \pm 1.96 \cdot \hat{\sigma}\sqrt{\frac{1}{n} + \frac{(x^* - \bar{x})^2}{S_{XX}}}$$
+> 
+> Encadre la **vraie moyenne** $\alpha + \beta x^*$. L'incertitude vient uniquement de l'estimation de $\hat{\alpha}$ et $\hat{\beta}$.
+
+> [!warning] Intervalle de prédiction sur $Y(x^*)$ à 95%
+> 
+> $$\hat{y}^* \pm 1.96 \cdot \hat{\sigma}\sqrt{1 + \frac{1}{n} + \frac{(x^* - \bar{x})^2}{S_{XX}}}$$
+> 
+> Encadre une **nouvelle observation individuelle**. L'incertitude vient de **deux sources** : l'estimation de $\hat{\alpha}$ et $\hat{\beta}$ **plus** le bruit irréductible $\varepsilon^*$.
+
+> 💡 **Le rôle du $+1$.** La seule différence entre les deux formules est le $+1$ sous la racine dans l'IP. Ce $1$ représente la variance du bruit $\varepsilon^*$ — irréductible peu importe la taille de l'échantillon. Même avec $n \to \infty$, on estimerait $\alpha + \beta x^*$ parfaitement, mais une observation individuelle resterait dispersée autour de cette moyenne. **On ne peut pas prédire le bruit.**
+
+Les deux intervalles s'élargissent aussi quand $x^*$ s'éloigne de $\bar{x}$ — on extrapole loin des données, l'estimation devient moins fiable.
+
+> [!danger] En pratique — ces formules sont rarement utilisées
+> Les formules ci-dessus reposent sur **H1–H6** (linéarité, homoscédasticité, indépendance, normalité). Dès qu'une hypothèse pète — et en pratique au moins une pète toujours — **l'IP est mal calibré** : un IP "à 95%" qui couvre en réalité 80% des observations est pire que pas d'IP du tout.
+> 
+> Ce qu'on fait à la place :
+> - **Bootstrap** — on ré-échantillonne 1000 fois et on lit les quantiles empiriques de $\hat{y}^*$. Robuste, distribution-free, marche même en non-linéaire.
+> - **Conformal prediction** — approche moderne (ML) qui donne des **garanties de couverture** sans hypothèse sur la loi des résidus. Devenu standard en deep learning quand on veut quantifier l'incertitude prédictive.
+> - **Quantile regression** — on régresse directement les quantiles 5% et 95% de $Y$ au lieu de la moyenne, sans supposer la symétrie ni la normalité.
+> 
+> Les formules classiques restent utiles pour : (1) reporting académique avec bandes grises sur un fit, (2) entretiens "théorie de la régression", (3) intuition du rôle du $+1$ et de l'extrapolation. Pour de la vraie prédiction sous incertitude en production — bootstrap ou conformal.
 
 ---
 
@@ -1072,9 +1394,84 @@ où $S$ et $s$ sont fixés et $\gamma$ est le nouveau vecteur de paramètres lib
 > [!note]- M-estimateurs et IRLS
 > Robust LS s'inscrit dans la famille des **M-estimateurs** (Huber 1964). En pratique on les calcule par **IRLS** (Iteratively Reweighted Least Squares) : on fait un OLS, on calcule les résidus, on assigne des poids inverses (grands résidus → petits poids), on refait WLS avec ces poids, on itère jusqu'à convergence. Concrètement, c'est WLS où les poids sont **adaptatifs** au lieu d'être fixés a priori.
 
+### F. Quantile Regression
+
+> [!warning] Quand utiliser Quantile Regression ?
+> Quand on s'intéresse à **autre chose que la moyenne** de $Y \mid X$ : les queues, la médiane, la dispersion conditionnelle, ou plus généralement la **distribution entière** de $Y$ sachant $X$. C'est aussi la réponse propre quand l'hétéroscédasticité est forte et que les hypothèses Gauss-Markov sont fragiles.
+
+**(i) L'idée centrale — changer de cible**
+
+OLS estime $E(Y \mid X)$ : la **moyenne conditionnelle**. Quantile Regression (QR) estime $Q_\tau(Y \mid X)$ : le **quantile $\tau$** de la distribution conditionnelle, pour n'importe quel $\tau \in (0, 1)$ choisi.
+
+- $\tau = 0.5$ → médiane conditionnelle (= LAD, cas particulier de Robust LS, cf. IV.E)
+- $\tau = 0.05$ → queue basse (la VaR à 5% en finance)
+- $\tau = 0.95$ → queue haute
+- En estimant plusieurs $\tau$ simultanément, on reconstitue la **distribution conditionnelle entière** de $Y \mid X$
+
+**(ii) La pinball loss — l'astuce qui rend tout possible**
+
+Le miracle de QR est qu'on peut estimer un quantile sans hypothèse sur la loi de $Y$, juste en changeant la fonction de perte.
+
+> [!warning] Pinball loss (check function)
+> $$\hat{\beta}_\tau = \arg\min_\beta \sum_{i=1}^n \rho_\tau(y_i - x_i^T \beta)$$
+> 
+> avec
+> $$\rho_\tau(r) = \begin{cases} \tau \cdot r & \text{si } r \geq 0 \\ (\tau - 1) \cdot r & \text{si } r < 0 \end{cases} = r \cdot (\tau - \mathbb{1}_{r < 0})$$
+> 
+> Cette perte pénalise **asymétriquement** les résidus positifs et négatifs avec poids $\tau$ et $1-\tau$. Pour $\tau = 0.5$, la perte est symétrique → on retrouve $|r|/2$, soit la médiane (LAD).
+
+> 💡 **Pourquoi ça marche.** Minimiser $E[\rho_\tau(Y - q)]$ par rapport à $q$ donne **exactement** $q = Q_\tau(Y)$. C'est la version asymétrique du résultat *"minimiser l'erreur quadratique donne la moyenne, minimiser l'erreur absolue donne la médiane"*. La pinball loss généralise à n'importe quel quantile.
+
+> [!note]- Pas de solution fermée — résolution par programmation linéaire
+> Contrairement à OLS, la pinball loss n'est pas différentiable en 0. Pas de formule type $(X^TX)^{-1}X^Ty$. Mais le problème se reformule comme un **programme linéaire** (Koenker & Bassett 1978) qu'on résout par simplexe ou méthode intérieure. En pratique : `statsmodels.regression.quantile_regression.QuantReg` en Python, package `quantreg` en R.
+
+**(iii) Lien avec les autres variantes d'OLS**
+
+QR n'est pas isolée dans cette section IV. Le tableau de IV.A se complète naturellement :
+
+| Variante | Cible estimée | Fonction de perte |
+|---|---|---|
+| **OLS** | $E(Y \mid X)$ — moyenne | $\rho(r) = r^2$ |
+| **Robust LS (Huber)** | intermédiaire moyenne/médiane | quadratique puis linéaire |
+| **LAD** ($\tau = 0.5$) | $\text{Med}(Y \mid X)$ — médiane | $\rho(r) = \lvert r \rvert$ |
+| **Quantile Regression** | $Q_\tau(Y \mid X)$ — quantile $\tau$ | $\rho_\tau(r) = r(\tau - \mathbb{1}_{r<0})$ |
+
+QR est donc la **généralisation naturelle** : OLS, LAD, et Robust LS sont tous des cas particuliers (ou cousins) du même jeu — changer la fonction de perte change la cible estimée.
+
+**(iv) Visualisation — OLS vs QR**
+
+![[qr_motivation.png]]
+
+**Figure 20.** OLS vs Quantile Regression sur des données simulées `salaire ~ éducation` où le rendement de l'éducation **dépend du quantile** (talent latent qui module la pente individuelle). **Gauche** : OLS estime une seule pente $\hat{\beta}_{\text{OLS}} = 3.0$ k€/an — *"un an d'études rapporte +3 k€ en moyenne"*. **Droite** : QR à trois quantiles révèle que la pente passe de **+1.5 k€/an** pour les bas salaires ($\tau = 0.10$) à **+4.6 k€/an** pour les hauts salaires ($\tau = 0.90$) — un **facteur 3×** d'écart entièrement masqué par la moyenne. La médiane verte ($\tau = 0.5$) coïncide avec OLS, ce qui est attendu : sur cette simulation symétrique, moyenne et médiane se rejoignent. L'**éventail des droites** est la signature visuelle de l'hétérogénéité de l'effet — là où OLS écrase tout en un seul nombre.
+
+> 💡 **A retenir.** Le rendement de l'éducation **n'est pas une constante** — il dépend de où on est dans la distribution. OLS te donne *un* nombre. QR te donne *une fonction de $\tau$*. C'est strictement plus d'information, sans hypothèse supplémentaire.
+
+**(v) Cas applicatifs**
+
+> [!example] Trois usages typiques de la Quantile Regression
+> 
+> **1. Effets hétérogènes — quand l'effet de $X$ dépend du quantile**
+> 
+> *Exemple canonique* : rendement de l'éducation sur le salaire (figure ci-dessus). OLS te donne *"+X k€ par an d'études en moyenne"* ; QR révèle que les hauts salaires bénéficient bien plus d'une année supplémentaire que les bas salaires. Même logique pour : impact d'un traitement médical (effets différents sur les patients fragiles vs robustes), effet du temps de sommeil sur la performance cognitive, effet d'une politique économique (les pauvres et les riches ne réagissent pas pareil).
+> 
+> **2. Prédiction sous incertitude — vrais intervalles de prédiction sans hypothèse de loi**
+> 
+> Reprend le problème du callout `[!danger]` en III.D.1 : les IP classiques reposent sur H1–H6 et sont mal calibrés dès qu'une hypothèse pète. **QR donne directement un IP empirique** : on régresse $\tau = 0.025$ et $\tau = 0.975$ et on obtient un IP à 95% sans supposer la normalité ni l'homoscédasticité. C'est l'alternative propre, et c'est devenu standard en deep learning sous le nom de **conformal prediction** dans sa version moderne.
+> 
+> **3. Robustesse — cas particulier $\tau = 0.5$**
+> 
+> Quand $\tau = 0.5$, QR estime la médiane conditionnelle (= LAD, cf. IV.E). Insensible aux outliers, fonctionne sur des distributions à queues lourdes. C'est le pont naturel entre QR et Robust LS.
+> 
+> **4. Finance — modélisation directe de la queue**
+> 
+> En quant equity / risk management : la **VaR conditionnelle** à 5% c'est exactement $Q_{0.05}(R_t \mid \text{facteurs}_t)$. QR permet de modéliser comment des facteurs (VIX, momentum, taille) influencent **la queue gauche** des rendements — pas la moyenne. La littérature CAViaR (Engle & Manganelli 2004) en est l'application directe. Même logique pour le stress-testing : voir comment la dispersion conditionnelle s'étale en régime de stress.
+
+> [!note]- Extension non-linéaire — Quantile Regression Forests
+> Pour des relations non-linéaires entre $X$ et les quantiles de $Y$, l'analogue forestier existe : **Quantile Regression Forests** (Meinshausen 2006). On garde la structure des Random Forests mais on retient toute la distribution empirique de $Y$ dans chaque feuille au lieu de la moyenne. Très utilisé dans les contextes ML modernes pour la quantification d'incertitude.
+
 ---
 
-## V. Régularisation
+## V. Régularisation (seulement pour la prédiction)
 
 ### A. Principe
 
@@ -1083,6 +1480,22 @@ La multicolinéarité fait exploser la variance de $\hat{\beta}$ — les coeffic
 $$\mathcal{L}(\theta) = \frac{1}{m}\sum_{i=1}^m \left(h_\theta(x^{(i)}) - y^{(i)}\right)^2$$
 
 > 💡 **L'idée en une phrase.** On ne change pas la nature du modèle — on garde la régression linéaire. On ajoute juste une **pénalité** sur la taille des coefficients. Plus $\lambda$ est grand, plus on contraint les coefficients à être petits. Au prix d'un léger biais, on gagne énormément en variance.
+
+> [!danger] Pourquoi "seulement pour la prédiction" ?
+> La régularisation **casse l'interprétation des coefficients**. C'est un trade-off conscient : on accepte un biais pour gagner en variance prédictive. Quatre conséquences :
+> 
+> 1. **$\hat{\beta}_{\text{Ridge}}$ est biaisé** : $E[\hat{\beta}_{\text{Ridge}}] \neq \beta$. Le coefficient ne pointe plus vers le vrai effet causal — il est **shrinké vers 0** par construction.
+> 2. **L'interprétation ceteris paribus disparait.** $\hat{\beta}_j = 0.3$ ne se lit plus *"+1 unité de $X_j$ → +0.3 unité de $Y$ à autres variables fixées"*, mais *"l'effet après contraction par la pénalité"* — sans lecture métier directe.
+> 3. **Les tests Student/Fisher du Section III ne s'appliquent plus.** La distribution de $\hat{\beta}_{\text{Ridge}}$ n'est plus centrée sur $\beta$, donc les p-values du `summary()` n'ont plus de sens probabiliste valide.
+> 4. **Les coefficients dépendent de $\lambda$.** Pas un coefficient unique mais une **trajectoire** $\hat{\beta}(\lambda)$. Lequel reporter ? À $\lambda$ optimal par CV ? À $\lambda = 0$ ? Pas de bonne réponse.
+> 
+> **Pour Lasso, c'est encore pire** : si Lasso met $\hat{\beta}_j = 0$, **ça ne veut pas dire que $\beta_j = 0$ dans la réalité**. Ça veut juste dire que dans cet échantillon, avec ce $\lambda$, Lasso a choisi de ne pas la garder. Avec un autre $\lambda$ ou un autre tirage, la sélection peut changer radicalement.
+> 
+> **Règle pratique :**
+> - **Prédiction out-of-sample** → Ridge/Lasso, no problem. C'est leur terrain.
+> - **Inférence / interprétation causale** → **OLS pur**, jamais régularisé. Si multicolinéarité bloque, on retire des variables ou on utilise des instruments (cf. II.A.H2).
+> 
+> > 💡 **Si tu veux vraiment les deux** — régulariser ET faire de l'inférence — il existe des cadres modernes : **post-selection inference** (Lee et al. 2016), **debiased Lasso** (van de Geer et al. 2014), **double machine learning** (Chernozhukov et al. 2018). Standard en économétrie causale moderne quand on a beaucoup de prédicteurs. Hors-scope pour cette note, mais bon à mentionner en entretien.
 
 ### B. Ridge — pénalité L2
 
@@ -1113,7 +1526,7 @@ La solution régularisée est le premier point de contact entre les ellipses de 
 
 ![Géométrie Ridge vs Lasso](images/2-Statistiques/Frequentist/regression-lineaire/im5.png)
 
-**Figure 13.** Géométrie Ridge vs Lasso. À gauche, la contrainte sphérique de Ridge provoque une tangence hors des axes : les coefficients sont contractés mais non nuls. À droite, la contrainte losange de Lasso provoque une tangence sur un coin : certains coefficients sont exactement nuls.
+**Figure 19.** Géométrie Ridge vs Lasso. À gauche, la contrainte sphérique de Ridge provoque une tangence hors des axes : les coefficients sont contractés mais non nuls. À droite, la contrainte losange de Lasso provoque une tangence sur un coin : certains coefficients sont exactement nuls.
 
 - **Ridge** : tangence rarement sur un axe → $\theta_j \neq 0$, coefficients contractés vers zéro.
 - **Lasso** : coins sur les axes → $\theta_j = 0$ exactement. **Lasso fait de la sélection de variables automatique.**

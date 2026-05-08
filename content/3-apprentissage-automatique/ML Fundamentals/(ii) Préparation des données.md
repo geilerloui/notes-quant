@@ -51,15 +51,16 @@ Les features catégorielles doivent être transformées en numérique.
 
 ---
 
-## 3. Feature engineering vs feature selection
+## 3. Feature engineering, extraction, selection
 
-Deux problèmes inverses qu'on confond souvent.
+Trois problèmes distincts qu'on confond souvent. Le mot **feature extraction** a en plus deux acceptions différentes selon le contexte (génération automatique vs compression), qu'on détaille en 3.2.
 
-| | Feature engineering | Feature selection |
-| :--- | :--- | :--- |
-| Question | "Quelles features je **crée** à partir des données brutes ?" | "Parmi mes 1000 candidats, lesquelles je **garde** ?" |
-| Nature | **Artisanat** : dépend du domaine, du problème, de l'intuition métier | Relativement **systématique** : Lasso, importance des arbres, méthodes statistiques |
-| Quand ça compte | Toujours, surtout pour les modèles linéaires | Quand $p \gg n$ ou pour l'interprétabilité |
+| | Feature engineering | Feature extraction | Feature selection |
+| :--- | :--- | :--- | :--- |
+| Question | "Quelles features je **crée** à la main à partir des données brutes ?" | "Comment je **transforme automatiquement** les données brutes en features ?" | "Parmi mes $p$ candidats, lesquelles je **garde** ?" |
+| Nature | **Artisanat** : dépend du domaine, du problème, de l'intuition métier | **Algorithmique** : transformation systématique sans intervention métier | Relativement **systématique** : Lasso, importance des arbres, méthodes statistiques |
+| Effet sur $p$ | Augmente $p$ (en général de quelques unités) | Soit explose $p$ (génération automatique type tsfresh), soit réduit $p$ (compression type PCA) | Réduit $p$ |
+| Quand ça compte | Toujours, surtout pour les modèles linéaires | Données à structure (séries temporelles, image, texte, signal) | $p \gg n$ ou besoin d'interprétabilité |
 
 ### 3.1 Feature engineering
 
@@ -73,7 +74,67 @@ Quelques idées génériques :
 
 C'est de l'artisanat. Il n'y a pas de méthode systématique — l'essentiel vient de la connaissance métier.
 
-### 3.2 Feature selection
+### 3.2 Feature extraction
+
+Le terme recouvre **deux opérations très différentes** dans la littérature, ce qui crée beaucoup de confusion. Les deux ont en commun de transformer automatiquement les données, mais l'une augmente la dimension et l'autre la réduit.
+
+#### 3.2.1 Génération automatique de features (sens "tsfresh")
+
+L'idée : à partir de données brutes structurées (typiquement une série temporelle, mais aussi des images, du texte, des graphes), **calculer automatiquement un grand catalogue de features descriptives** — sans aucune intuition métier, en appliquant tout ce qu'on sait calculer.
+
+**Exemple typique : tsfresh pour les séries temporelles.** À partir d'un signal $(x_1, \dots, x_T)$, la librairie calcule ~750 features par défaut :
+- Statistiques de base : moyenne, variance, skewness, kurtosis, min, max, médiane
+- Mesures de complexité : entropie (Shannon, sample, approximate), nombre de changements de signe
+- Autocorrélations et corrélations partielles à différents lags
+- Coefficients de Fourier (FFT) et d'ondelettes
+- Tests statistiques (Augmented Dickey-Fuller pour la stationnarité, etc.)
+- Comportements spécifiques : nombre de pics, longueur de la plus longue séquence croissante, etc.
+
+> **Pourquoi cette approche.** Quand on n'a pas d'expertise métier ou qu'on travaille sur beaucoup de signaux hétérogènes, on ne sait pas a priori quelles statistiques sont pertinentes. Plutôt que deviner, on calcule tout, puis on filtre.
+
+**Pipeline standard.** Génération massive → feature selection statistique (cf. 3.3) → modèle. Le papier tsfresh (Christ et al. 2018) propose justement un test FRESH (statistique) pour filtrer les features non pertinentes, en contrôlant le FDR via Benjamini-Yekutieli.
+
+**Autres exemples du même esprit.**
+- **`featuretools`** : Deep Feature Synthesis sur des bases relationnelles (calcule des agrégations à plusieurs niveaux : `MEAN(orders.AMOUNT)`, `STD(orders.products.PRICE)`, etc.).
+- **HOG, SIFT, SURF** : descripteurs d'images calculés systématiquement avant l'ère du deep learning.
+- **MFCC** : coefficients cepstraux pour l'audio, pipeline standard avant les CNN/transformers acoustiques.
+
+> **Le piège évident.** Cette approche explose $p$ — tsfresh peut transformer 100 séries temporelles en un dataset $100 \times 750$. Sans feature selection rigoureuse derrière, c'est la garantie d'overfit et de bruit. Le couple **génération massive + selection sévère** est non négociable.
+
+> **Lien avec le deep learning.** Les CNN, transformers, etc. apprennent eux-mêmes ces représentations à partir des données brutes (images, séquences, texte). Historiquement, le deep learning a remplacé ces pipelines extraction+modèle par un seul modèle bout-en-bout. Mais sur les petits datasets de séries temporelles tabulaires, tsfresh + gradient boosting reste très compétitif et bien plus rapide qu'un réseau récurrent.
+
+#### 3.2.2 Compression / dimension reduction (sens "PCA")
+
+L'idée inverse : passer de $X \in \mathbb{R}^p$ à $Z = f(X) \in \mathbb{R}^k$ avec $k \ll p$, où $Z$ concentre l'information et écarte le bruit. Contrairement à la *selection*, on ne garde pas un sous-ensemble des features originales — on en construit de **nouvelles** par combinaison.
+
+**Méthodes linéaires non supervisées.**
+- **PCA** : projette sur les directions de variance maximale. Hypothèse implicite : variance = information. Marche bien quand les features sont corrélées.
+- **ICA** : cherche des composantes statistiquement indépendantes (pas seulement décorrélées). Utile pour la séparation de sources (EEG, audio).
+- **NMF** : décomposition $X \approx WH$ avec $W, H \geq 0$. Donne des composantes additives, plus interprétables que PCA (ex : topics dans du texte).
+
+**Méthodes linéaires supervisées.**
+- **LDA (Fisher)** : cherche les directions qui maximisent la séparation entre classes.
+- **PLS** : variante supervisée de PCA qui utilise $Y$ pour orienter les composantes. Standard en chimiométrie.
+
+**Méthodes non linéaires.**
+- **Kernel PCA** : PCA dans un espace transformé via un noyau. Capte des structures non linéaires.
+- **t-SNE, UMAP** : préservent la structure locale (voisinages). Surtout utiles pour la **visualisation** en 2D/3D, pas comme features pour un modèle aval (instables, pas de transformation déterministe sur de nouvelles données pour t-SNE).
+- **Autoencoders** : NN qui apprend une représentation compressée $Z$ minimisant $\|X - g(f(X))\|^2$. Généralisation non linéaire de PCA.
+
+> **Piège classique.** PCA est non supervisée : rien ne garantit que les directions de variance maximale soient celles qui discriminent $Y$. Si on a un label, LDA ou PLS sont souvent préférables.
+
+#### 3.2.3 Vue d'ensemble
+
+| | Génération (3.2.1) | Compression (3.2.2) |
+| :--- | :--- | :--- |
+| Effet sur $p$ | $p \uparrow \uparrow$ (de 1 à 750) | $p \downarrow$ (de 1000 à 50) |
+| Exemples | tsfresh, featuretools, HOG, MFCC | PCA, autoencoders, UMAP |
+| Suite logique | **selection** (3.3) pour filtrer | modèle directement |
+| Quand l'utiliser | Données brutes structurées sans expertise métier | Données déjà tabulaires avec features très corrélées |
+
+> **Les deux peuvent se chaîner.** Pipeline réaliste sur des séries temporelles : signal brut → tsfresh (3.2.1) → 750 features → selection statistique (3.3) → 50 features → PCA optionnelle (3.2.2) → modèle.
+
+### 3.3 Feature selection
 
 Trois familles classiques :
 
@@ -87,3 +148,4 @@ Trois familles classiques :
 > - $p \gg n$ extrême (génomique, $p \sim 10^4$, $n \sim 10^2$)
 > - Contrainte d'**interprétabilité** (medical, credit scoring : on veut peu de features pour pouvoir expliquer)
 > - Coût de collecte/calcul élevé en production
+> - **Couplage avec génération automatique** (tsfresh, featuretools) : c'est l'étape qui rend l'approche viable

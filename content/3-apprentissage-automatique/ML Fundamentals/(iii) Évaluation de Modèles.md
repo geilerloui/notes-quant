@@ -259,4 +259,4 @@ On compare 4 politiques sur les 1000 clients du dataset :
 
 Au seuil optimal, le modèle refuse 462 bons clients à tort (66 % des bons !) mais ne laisse passer que 17 défauts sur 300 (sensibilité de 94 %). C'est volontairement très restrictif : rater un défaut coûte 5× plus que refuser un bon, donc on **achète** des FP pour minimiser les FN.
 
-> **Punchline.** Le bon seuil n'est pas un problème mathématique mais un problème **métier**. Le modèle estime des PD ; les coûts dictent la coupure. Sans la matrice de coût, n'importe quel data scientist dirait "ce modèle refuse 66 % des bons clients, il est nul". Avec la matrice de coût, c'est le **bon** modèle.
+> **A retenir.** Le bon seuil n'est pas un problème mathématique mais un problème **métier**. Le modèle estime des PD ; les coûts dictent la coupure. Sans la matrice de coût, n'importe quel data scientist dirait "ce modèle refuse 66 % des bons clients, il est nul". Avec la matrice de coût, c'est le **bon** modèle.

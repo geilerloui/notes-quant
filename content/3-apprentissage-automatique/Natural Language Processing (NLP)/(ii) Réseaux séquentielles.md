@@ -262,7 +262,7 @@ Contrôle quelles parties de l'état de cellule sont exposées comme état cach�
 $$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$
 $$a_t = o_t \odot \tanh(C_t)$$
 
-![[im13.png]]
+![[images/3-Apprentissage automatique/PGM/Représentation/im13.png]]
 
 ![[im12.png|306]]
 
@@ -282,7 +282,7 @@ $$a_t = o_t \odot \tanh(C_t)$$
 ![[images/2-Statistiques/Frequentist/Inférence statistique/im11.png|275]]
 
 cc
-![[im14.png]]
+![[images/3-Apprentissage automatique/PGM/Représentation/im14.png]]
 
 GRU utilise seulement **deux portes** :
 
@@ -361,7 +361,7 @@ JAI PERDU LAIMAGE
 
 **Rappel** : Un modèle de langage classique estime la probabilité d'une phrase :
 
-![[im7 (1).png]]
+![[images/3-Apprentissage automatique/PGM/Introduction/im7 (1).png]]
 
 **Seq2seq** : La traduction automatique fonctionne différemment :
 

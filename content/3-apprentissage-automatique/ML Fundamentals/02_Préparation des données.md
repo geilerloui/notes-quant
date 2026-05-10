@@ -68,6 +68,9 @@ Remarque: ON peut noter qu'on a utilisé la cible pour construire notre feature 
 ![[Pasted image 20260510172537.png|173]]
 
 
+si t'a envie y'a aussi k-fold target encoding : https://www.youtube.com/watch?v=589nCGeWG1w
+
+
 
 
 

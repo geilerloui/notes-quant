@@ -433,6 +433,125 @@ Récapitulatif des hyperparamètres de `GradientBoostingRegressor` (scikit-learn
 ## VI. LightGBM - Ke et al 2017 Microsoft
 
 
+
+https://www.youtube.com/watch?v=A2Xf8YgFdko
+
+
+
 ## VII. CatBoost Prokorenkova 2018 Yandex
 
+il rappelle que target encoding est pas ouf car on fait du leakage; modèle efficace on training data mais pas testing data. Donc on a parlé de k-fold target encoding pour réduire le leakage. Après si tu lis le manuscript Catboost ils disent que si tu as que une seule catégorie eg tt le monde a "favorite color" qui est a blue - bon pas très claire mais en gros le mec te dit que la tu vois bien que classe 1 c'est favorite color = 0.33 sinon c'est 0.5 donc on a un méga leakage
 
+![[Pasted image 20260510215629.png|225]]
+![[Pasted image 20260510215847.png|229]]
+
+
+il dit que c un exemple débile qui devrait pas se produire car si ta favorite color = blue pr tt le monde ben tu mets tt le monde a 1 et c tout. Mais les mecs qui ont fait le papier de catboost eux se sont dit que ça fait pas sens donc ils vont trouver une façon pr résoudre ce pb. Catboost = categorical boosting, 
+
+catboost évite le leakge en etranine chaque row data as it it were fed recursively in the algorithm. 
+Par exemple au lieu d'utiliser an overall mean it uses a user defined prior that in the examples I saw was set to 0.05 aussi le dénominateur on rajoute +1 lutot qu'un weight
+
+$$
+\begin{aligned}
+& \text { CatBoost } \\
+& \text { Encoding }
+\end{aligned}=\frac{\text { OptionCount }+0.05}{n+1}
+$$$n=$ Number of rows that have already been seen that have the same value for Favorite Color
+
+il dit ligne 1 j'ai 0+0.05/(0+1) = 0.05
+il dit ligne 2 = 0+0.05/(0+1)=0.05
+il dit ligne 3 = 0+0.05/(0+1)=0.05
+il dit ligne 4 = 1+0.05/(1+1)=0.525
+
+
+![[Pasted image 20260510220326.png|220]]
+
+![[Pasted image 20260510220248.png|225]]
+
+et c'est comme ça comme catboost perform target encoding - on dit Ordered Target encoding.
+
+![[Pasted image 20260510220404.png|228]]
+
+je pense le trucr qui est pas expliqué c'est comme tu fais sur le validation/test set ? 
+
+#### Using trees
+
+
+Gross différence par rapport à avant maintenant (y) est continu et pas catégorielle. il dit en gros on va définir deux bins déjà et ensuite on pourra utiliser notre ordered target encoding qu'on a vu
+
+![[Pasted image 20260510220626.png|173]]
+
+
+![[Pasted image 20260510220818.png|181]]
+
+Une fois qu'on a fait le preprocessing du ordered target encoding on vire la colonne Bin # et on rajoute deux colonnes supplémentaires : Predictions et Residuals = y - \hat{y} mais vu que \hat{y} est est à zero au début on a égalité entre y et residuals
+
+![[Pasted image 20260510220907.png|315]]
+
+Puis on va définir un arbre au début il prenne la colonne X il la sort par ordre et on calcule la moyenne des deux valeurs successives : 
+
+![[Pasted image 20260510221118.png|388]]
+
+
+Après cest un peu random les mecs te mettent les residuals dans chacune des feuilles et ils calculenet la moyenne ce qu'ils appellent Leaf output
+
+
+
+![[Pasted image 20260510221243.png|313]]
+ok
+![[Pasted image 20260510221339.png|352]]
+
+puis pour mesurer si la prédiction est bonne il calcule cosinus(residuals, leaf output)
+
+
+![[Pasted image 20260510221449.png|250]]
+
+et 
+![[Pasted image 20260510221508.png|242]]
+
+conclusion on choisit le second car il a une cosinus plus élevé
+
+apres je sais pas ce qu'il raconte: it doesnt make a lot of sense to include leaf output values taht are not based on data in the cosine similairty calculation. So in practice when you have a lot of data, catbost simply ignores the first bunch of rows when calculating the cosine similarity
+
+une fois qu'on a fait le choix on va updater les predictions 
+
+new prediction = prediction + (learning rate x leaf output) ici lr=0.1
+
+il dit on a une amélioration faible mais c'est toujours mieux que de prédire que tout le monde a height=0 qui est ce qu'on prédisait au tout début.
+
+puis en gros il te dit que apres maintenant qu'on a choisi l'arbre on va pouvoir update la colonne Predictions et donc aussi les residuals  et comme on a fait précédemement on remets Favorite color pas en mode ordered target encoding
+
+![[Pasted image 20260510221913.png|508]]
+
+
+on refait le orderd target encoding en ayant remodifier les bins
+
+
+![[Pasted image 20260510222152.png|525]]
+
+et on refait le sorting on onbtient un seuil a 0.29
+![[Pasted image 20260510222222.png|371]]
+
+
+
+oué l'arbre
+![[Pasted image 20260510222249.png|364]]
+
+et la table
+![[Pasted image 20260510222313.png|361]]
+
+ensuite prédiction
+![[Pasted image 20260510222419.png]]
+
+et ensuite on add up les values des trees : c'est très mauvaois mais c'est que des moini arbres 
+
+![[Pasted image 20260510222451.png|448]]
+
+
+
+il dit que catboost builds oblivious or symmetric decision trees - a symmetric = uses the exact the same threshold for the same node in the same level eg both node uses the same threshold age <12 
+
+![[Pasted image 20260510222552.png|280]]
+y'a deux raisons : 
+* ça empire les prédictions de l'arbres
+* remember teh whole idea of gradient boostin si to combine a bunch of weak learners to make decisions and symmetric decision trees are just a weaker type of learner

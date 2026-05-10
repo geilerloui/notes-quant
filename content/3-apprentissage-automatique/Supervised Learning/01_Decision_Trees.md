@@ -15,7 +15,7 @@ L'algorithme de construction (CART, Breiman 1984) est essentiellement le même :
 > [!example] Fil rouge : diagnostic grippe
 > Pour ancrer chaque définition, on utilisera tout au long de la section un dataset de **diagnostic grippe** (flu) à 10 patients, avec trois symptômes binaires (Fatigue, Fièvre, Toux) et une étiquette cible Grippe (oui/non). On veut construire un arbre de décision qui prédit la grippe à partir des symptômes. Cet exemple suffit à illustrer toute la mécanique de CART : impureté, splits, élagage, feature importance.
 
-**Rappel** (cf [[(i) Fondation]] §I.B.3 et §I.C.2). En classification on cherche $\hat f : \mathcal{X} \to \{1, \ldots, K\}$ qui minimise le taux d'erreur empirique. Trois familles de modèles existent : génératifs, discriminatifs, et *discriminant functions*. Les arbres de décision sont des **discriminant functions** : ils prédisent directement une classe, sans probabilité intermédiaire.
+**Rappel** (cf [[01_Fondation]] §I.B.3 et §I.C.2). En classification on cherche $\hat f : \mathcal{X} \to \{1, \ldots, K\}$ qui minimise le taux d'erreur empirique. Trois familles de modèles existent : génératifs, discriminatifs, et *discriminant functions*. Les arbres de décision sont des **discriminant functions** : ils prédisent directement une classe, sans probabilité intermédiaire.
 
 Concrètement, un arbre découpe l'espace $\mathcal{X}$ en régions disjointes $R_1, \ldots, R_J$ (les feuilles), et associe à chaque feuille une classe. Tout se joue donc en deux temps :
 
@@ -302,7 +302,7 @@ La structure est rigoureusement la même qu'en classification :
 
 ### 1. Décision dans une feuille
 
-En régression, la cible $y \in \mathbb{R}$. Pour une feuille $R_j$ contenant un certain nombre d'observations, le choix naturel de prédiction est la **moyenne** des valeurs $y_i$ qui y tombent — c'est ce qui minimise la MSE dans la feuille (cf [[(i) Fondation]] §I.B.1, l'espérance conditionnelle est le minimiseur de la MSE).
+En régression, la cible $y \in \mathbb{R}$. Pour une feuille $R_j$ contenant un certain nombre d'observations, le choix naturel de prédiction est la **moyenne** des valeurs $y_i$ qui y tombent — c'est ce qui minimise la MSE dans la feuille (cf [[01_Fondation]] §I.B.1, l'espérance conditionnelle est le minimiseur de la MSE).
 
 > [!warning] Définition — Règle de décision dans une feuille (régression)
 > Pour toute feuille $R_j$ contenant $|R_j|$ observations, on assigne la valeur

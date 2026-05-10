@@ -4,7 +4,7 @@ order: 3
 ---
 # Cross-impact
 
-> Les modèles de market impact présentés dans [[(ii) Market Impact - Modèles et calibration|note ii]] traitent **un actif isolé** : impact de mes ordres sur **mon** prix, sans considérer les autres actifs. Cette hypothèse "vase clos" est inadaptée dès qu'on **trade un basket** d'actifs corrélés. En vendant 100M$ d'Apple, je ne fais pas que bouger AAPL — je bouge aussi Microsoft, Google, Nvidia, parce que ces stocks partagent des facteurs de risque communs (tech, momentum, growth…). Le **cross-impact** est précisément la modélisation de ces effets croisés. Cette note présente d'abord la construction la plus naturelle — passer par un **modèle factoriel** (de type Barra) pour projeter l'impact dans l'espace des facteurs, puis le redistribuer aux autres actifs via leurs expositions — puis présentera dans une seconde section un algorithme alternatif. Référence canonique : Tomas, Mastromatteo, Benzaquen (2022), *How to build a cross-impact model from first principles*.
+> Les modèles de market impact présentés dans [[02_Market Impact - Modèles et calibration|note ii]] traitent **un actif isolé** : impact de mes ordres sur **mon** prix, sans considérer les autres actifs. Cette hypothèse "vase clos" est inadaptée dès qu'on **trade un basket** d'actifs corrélés. En vendant 100M$ d'Apple, je ne fais pas que bouger AAPL — je bouge aussi Microsoft, Google, Nvidia, parce que ces stocks partagent des facteurs de risque communs (tech, momentum, growth…). Le **cross-impact** est précisément la modélisation de ces effets croisés. Cette note présente d'abord la construction la plus naturelle — passer par un **modèle factoriel** (de type Barra) pour projeter l'impact dans l'espace des facteurs, puis le redistribuer aux autres actifs via leurs expositions — puis présentera dans une seconde section un algorithme alternatif. Référence canonique : Tomas, Mastromatteo, Benzaquen (2022), *How to build a cross-impact model from first principles*.
 
 ## I. Pourquoi le cross-impact ?
 
@@ -25,7 +25,7 @@ La décomposition naturelle du coût total est :
 
 $$\boxed{\;\text{Coût total} = \underbrace{\sum_{i} c_{\text{self}}^{i}}_{\text{self-impact (}\textit{vase clos}\text{)}} + \underbrace{\sum_{i} c_{\text{cross}}^{i}}_{\text{cross-impact (interactions)}}\;}$$
 
-Le self-impact est calculé stock par stock par les modèles de [[(ii) Market Impact - Modèles et calibration|note ii]] (square-root, Almgren). Le cross-impact $c_{\text{cross}}^{i}$ capture **l'impact additionnel** sur le stock $i$ provoqué par les trades simultanés sur les **autres** stocks $j \neq i$ — via les facteurs communs.
+Le self-impact est calculé stock par stock par les modèles de [[02_Market Impact - Modèles et calibration|note ii]] (square-root, Almgren). Le cross-impact $c_{\text{cross}}^{i}$ capture **l'impact additionnel** sur le stock $i$ provoqué par les trades simultanés sur les **autres** stocks $j \neq i$ — via les facteurs communs.
 
 > [!note]- Pourquoi pas de spread cost dans le cross-impact ?
 > Le spread cost est un coût d'**exécution** : tu le payes parce que tu traverses le bid-ask sur **ton** ordre. Il n'y a pas de mécanisme par lequel mon ordre sur AAPL me ferait payer le spread de MSFT — ces sont deux exécutions séparées avec leurs spreads propres. Le cross-impact, lui, est un effet de **prix** : mon ordre sur AAPL déforme le prix d'équilibre de MSFT via les facteurs communs. Le coût additionnel sur MSFT vient de cette déformation, pas d'un coût de transaction.

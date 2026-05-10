@@ -4,7 +4,7 @@ order: 1
 ---
 # TCA — Fondamentaux : coûts et mesures
 
-> La **Transaction Cost Analysis (TCA)** est l'analyse des coûts payés par un investisseur pour exécuter ses ordres sur le marché. C'est un sujet central pour les gérants institutionnels parce que les coûts d'exécution rongent directement la performance : un alpha de 50 bps peut être complètement effacé par 30 bps de coûts mal maîtrisés. Cette note pose les bases : comment décomposer un coût total, comment le mesurer en bps, quels benchmarks d'exécution utiliser, et la tension fondamentale entre trader vite (impact élevé) et trader lentement (risque de marché). La modélisation du market impact lui-même — le coût caché le plus important — est traitée dans [[(ii) Market Impact - Modèles et calibration]].
+> La **Transaction Cost Analysis (TCA)** est l'analyse des coûts payés par un investisseur pour exécuter ses ordres sur le marché. C'est un sujet central pour les gérants institutionnels parce que les coûts d'exécution rongent directement la performance : un alpha de 50 bps peut être complètement effacé par 30 bps de coûts mal maîtrisés. Cette note pose les bases : comment décomposer un coût total, comment le mesurer en bps, quels benchmarks d'exécution utiliser, et la tension fondamentale entre trader vite (impact élevé) et trader lentement (risque de marché). La modélisation du market impact lui-même — le coût caché le plus important — est traitée dans [[02_Market Impact - Modèles et calibration]].
 
 
 # Faut rajouter un truc 
@@ -54,7 +54,7 @@ Mathématiquement, sur un ordre exécuté :
 
 $$\text{coût indirect} = \underbrace{\text{spread cost}}_{\text{traverser bid-ask}} + \underbrace{\text{realized impact}}_{\text{déplacer le prix}} + \underbrace{\varepsilon}_{\text{bruit marché + volatilité}}$$
 
-avec $\text{realized impact} = \text{temporary} + \text{permanent}$ (cf. [[(ii) Market Impact - Modèles et calibration|note ii]] pour la décomposition complète).
+avec $\text{realized impact} = \text{temporary} + \text{permanent}$ (cf. [[02_Market Impact - Modèles et calibration|note ii]] pour la décomposition complète).
 
 > 💡 **Lecture pratique du bruit $\varepsilon$.** Pendant ton exécution, le marché bouge naturellement — ni à cause de toi, ni de manière prévisible. Si tu achètes pendant que le marché monte (drift favorable), $\varepsilon < 0$ ; si tu achètes pendant qu'il descend, $\varepsilon > 0$. Sur un grand nombre d'ordres, ces effets se compensent, mais sur un ordre donné ils peuvent dominer le coût observé. C'est pour ça qu'on parle de *realized impact ≈ market impact théorique + ε* : la mesure brute mélange ton effet et celui du marché.
 
@@ -104,7 +104,7 @@ $$\frac{\bar{S} - S_0}{S_0} = \underbrace{\frac{\bar{S} - S_T^{\text{rétro}}}{S
 > 
 > En entretien : le piège classique est de dire que tout le tcost est du MI. C'est faux — il faut savoir séparer ta contribution du contexte de marché.
 
-> 💡 **Le problème fondamental de la mesure.** $S_T^{\text{rétro}}$ n'est **pas observable** : on ne peut pas voir le prix qu'aurait eu l'actif sans notre ordre. C'est ce qui motive toute la modélisation du market impact dans [[(ii) Market Impact - Modèles et calibration|note ii]] — on ne peut pas mesurer le MI directement, on est obligé de le **modéliser**.
+> 💡 **Le problème fondamental de la mesure.** $S_T^{\text{rétro}}$ n'est **pas observable** : on ne peut pas voir le prix qu'aurait eu l'actif sans notre ordre. C'est ce qui motive toute la modélisation du market impact dans [[02_Market Impact - Modèles et calibration|note ii]] — on ne peut pas mesurer le MI directement, on est obligé de le **modéliser**.
 
 ## III. Benchmarks d'exécution
 
@@ -168,7 +168,7 @@ Pour un ordre donné, le trader fait face à un **arbitrage fondamental** entre 
 
 ![[Pasted image 20260504145303.png]]
 
-**Figure 1.** En abscisse, la durée d'exécution (order interval). En ordonnée, le coût en bps. La courbe **market impact** décroît avec la durée (tradar plus lentement réduit l'impact). La courbe **timing risk** croît avec la durée (plus on étale, plus on s'expose à la volatilité du marché). Le coût total est la somme — il atteint un minimum à une durée optimale, qui est l'objectif des algos d'**optimal execution** (Almgren-Chriss, cf. [[(ii) Market Impact - Modèles et calibration|note ii]]).
+**Figure 1.** En abscisse, la durée d'exécution (order interval). En ordonnée, le coût en bps. La courbe **market impact** décroît avec la durée (tradar plus lentement réduit l'impact). La courbe **timing risk** croît avec la durée (plus on étale, plus on s'expose à la volatilité du marché). Le coût total est la somme — il atteint un minimum à une durée optimale, qui est l'objectif des algos d'**optimal execution** (Almgren-Chriss, cf. [[02_Market Impact - Modèles et calibration|note ii]]).
 
 > 💡 **Le pivot conceptuel.** Le trader's dilemma est *la* tension qui structure tout l'algotrading. L'optimisation d'exécution (Almgren-Chriss) consiste à trouver le point optimal sur cette courbe en U, pour un profil d'aversion au risque donné. Plus le trader est averse au risque, plus il préférera trader vite (privilégier la certitude au prix d'un MI plus élevé) ; moins il l'est, plus il étalera.
 
@@ -221,12 +221,12 @@ C'est une lecture **relative** : on compare les stocks entre eux pour identifier
 
 ### C. Cas applicatifs
 
-La lecture relative motive plusieurs cas applicatifs concrets, traités dans [[(ii) Market Impact - Modèles et calibration|note ii]] :
+La lecture relative motive plusieurs cas applicatifs concrets, traités dans [[02_Market Impact - Modèles et calibration|note ii]] :
 
 - **Max delta par stock** : pour un budget de coût $c^*$ donné, déterminer la taille maximale tradable. Ça revient à *inverser* le modèle de MI.
 - **Stress test vol/volume** : étudier comment le coût évolue quand la volatilité ou le volume changent (en cas de stress de marché).
 - **Reporting de portefeuille** : agréger des métriques par actif (gross delta, %ADV, distributions par bucket) pour identifier les concentrations de risque liquidité.
-- **Cross-impact** (cf. [[(iii) Cross-impact|note iii]]) : sur un basket d'actifs corrélés, le coût de trader plusieurs noms ensemble n'est pas la somme des coûts individuels — il faut tenir compte des corrélations.
+- **Cross-impact** (cf. [[03_Cross-impact|note iii]]) : sur un basket d'actifs corrélés, le coût de trader plusieurs noms ensemble n'est pas la somme des coûts individuels — il faut tenir compte des corrélations.
 
 ---
 

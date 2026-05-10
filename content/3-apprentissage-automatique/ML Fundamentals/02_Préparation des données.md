@@ -28,6 +28,49 @@ Les features catégorielles doivent être transformées en numérique.
 
 > **Lien avec data leakage.** Tout transformer (scaler, target encoder, etc.) doit être **fitté sur le train uniquement** et appliqué au test. En sklearn : utiliser `Pipeline` rend cette discipline automatique.
 
+
+One-hot encoding : 
+
+
+| Initial Table                             | One-hot encoded "Favorite Color" Feature  |
+| ----------------------------------------- | ----------------------------------------- |
+| ![[Pasted image 20260510171259.png\|197]] | ![[Pasted image 20260510171355.png\|262]] |
+
+Label encoding : Une limite de ce modèle c'est que les nombres qu'on a choisi son arbitraire et ta des algorithmes de machine learning will treat the order of the numbers as if they might mean something, and that can cause problems.
+
+
+| Initial Table                             | Label encoding "Favorite Color" Feature   |
+| ----------------------------------------- | ----------------------------------------- |
+| ![[Pasted image 20260510171259.png\|197]] | ![[Pasted image 20260510171523.png\|196]] |
+
+
+Target encoding : On va assigner à chaque label de "Favorite color" une valeur qui est proportionnelle à la cible. Pour "Blue" on a deux "No" et un seul "Yes" donc on va encoder 1/3=0.33; pour "Red" uniquement un seul "No" donc on assigne 0 etc.
+
+Because we used the Target, the thing we want to predict, to determinite what values to replace the discrete options, this method is called Target Encoding.
+
+| Initial Table                             | Target encoding "Favorite Color" Feature  |
+| ----------------------------------------- | ----------------------------------------- |
+| ![[Pasted image 20260510171259.png\|197]] | ![[Pasted image 20260510171843.png\|200]] |
+
+Un des problèmes de cette méthode est que less data supports the value we replaced Red with, we have less confidence that we replaced Red with the best value then we have for Blue and Green. So in order to deal with this Target Encoding is usually done using a Weighted Mean. Le mec te dit ça s'appelle aussi Bayesian Mean Encoding
+
+Sinon on peut utiliser le weighted Mean
+
+$$
+\text { Weighted Mean }=\frac{n \times \text { Option Mean }+m \times \text { Overall Mean }}{n+m}
+$$
+$n=$ Weight for Option Mean (usually the number of rows)
+$m=$ Weight for Overall Mean (user defined)
+
+
+Remarque: ON peut noter qu'on a utilisé la cible pour construire notre feature data leakage results in models taht work great with training data, but not so well with testing data. In other words, data leakage results in models that are overfit. La good news est qu'il y'a plusieurs mtéhode qui permettent de réduire ce data leakage so that you can use Target Encoding without overfitting your model.
+
+![[Pasted image 20260510172537.png|173]]
+
+
+
+
+
 ---
 
 ## 2. Valeurs manquantes

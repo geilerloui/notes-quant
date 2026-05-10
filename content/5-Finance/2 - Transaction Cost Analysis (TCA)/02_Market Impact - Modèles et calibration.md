@@ -4,7 +4,7 @@ order: 2
 ---
 # Market Impact — Modèles et calibration
 
-> Cette note suit la chronologie historique de la modélisation du market impact (MI). On part du **problème de mesure** : on ne peut pas observer directement le coût qu'on a soi-même provoqué — il faut donc modéliser. On dérive d'abord la **square-root law** (loi en racine carrée), longtemps standard de l'industrie, puis on présente sa **critique empirique** (Zarinelli et al. 2015) qui motive des décompositions plus fines (impact en fonction de la participation rate **et** de la duration). On formalise ensuite le **modèle d'Almgren et al. (2005)** qui sépare proprement les composantes temporary et permanent, et on détaille sa **calibration empirique**. La note se termine sur les **considérations data** et **cas applicatifs** (max delta, stress tests, reporting), et annonce les limites qui motivent le **cross-impact** (cf. [[(iii) Cross-impact|note iii]]).
+> Cette note suit la chronologie historique de la modélisation du market impact (MI). On part du **problème de mesure** : on ne peut pas observer directement le coût qu'on a soi-même provoqué — il faut donc modéliser. On dérive d'abord la **square-root law** (loi en racine carrée), longtemps standard de l'industrie, puis on présente sa **critique empirique** (Zarinelli et al. 2015) qui motive des décompositions plus fines (impact en fonction de la participation rate **et** de la duration). On formalise ensuite le **modèle d'Almgren et al. (2005)** qui sépare proprement les composantes temporary et permanent, et on détaille sa **calibration empirique**. La note se termine sur les **considérations data** et **cas applicatifs** (max delta, stress tests, reporting), et annonce les limites qui motivent le **cross-impact** (cf. [[03_Cross-impact|note iii]]).
 
 ## I. Le problème de mesure : pourquoi modéliser ?
 
@@ -378,7 +378,7 @@ Toutes les formules de cette note traitent **un actif isolé** : impact de mes o
 - Sur un **basket** corrélé (ex. 30 stocks tech qu'on liquide ensemble), le coût total n'est pas la somme des coûts individuels — il y a des effets de **cross-impact** (mes ventes sur Apple bougent aussi le prix de Microsoft via la corrélation).
 - L'environnement de marché n'est pas neutre : d'autres agents tradent simultanément, et leurs ordres interagissent avec les miens. Le modèle "vase clos" ignore complètement ces interactions.
 
-C'est précisément ce que cherchent à capturer les modèles de **cross-impact**, traités dans [[(iii) Cross-impact|note iii]].
+C'est précisément ce que cherchent à capturer les modèles de **cross-impact**, traités dans [[03_Cross-impact|note iii]].
 
 ---
 

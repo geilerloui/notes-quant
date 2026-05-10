@@ -228,9 +228,309 @@ def fig_rough_vol():
     print("✓ Fig 4 : rough volatility")
 
 
+# =========================================================================
+# Figure 5 : Formule de l'aire de Green (cas classique régulier)
+# =========================================================================
+def fig_area_classical():
+    """Pédagogie : montrer la formule A = (1/2) ∮ (x dy - y dx) sur une ellipse."""
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5))
+
+    a, b = 2.0, 1.2
+    t = np.linspace(0, 2*np.pi, 500)
+    x = a * np.cos(t)
+    y = b * np.sin(t)
+
+    # === Panneau gauche : la boucle avec son aire colorée ===
+    ax = axes[0]
+    ax.fill(x, y, color="#3498db", alpha=0.25, label=fr"Aire $= \pi a b = {np.pi*a*b:.2f}$")
+    ax.plot(x, y, color="#2c3e50", lw=2, label="Chemin fermé (ellipse)")
+
+    for t_arrow in np.linspace(0, 2*np.pi, 12, endpoint=False):
+        xa = a * np.cos(t_arrow)
+        ya = b * np.sin(t_arrow)
+        dxa = -a * np.sin(t_arrow) * 0.15
+        dya = b * np.cos(t_arrow) * 0.15
+        ax.annotate("", xy=(xa+dxa, ya+dya), xytext=(xa, ya),
+                    arrowprops=dict(arrowstyle="->", color="#c0392b", lw=1.4))
+
+    ax.scatter([0], [0], color="black", s=40, zorder=5, label="Origine")
+    ax.set_xlabel("$x$")
+    ax.set_ylabel("$y$")
+    ax.set_aspect("equal")
+    ax.set_title(r"Aire d'une boucle : $A = \frac{1}{2}\oint(x\,dy - y\,dx)$",
+                 fontsize=11)
+    ax.legend(loc="upper right", fontsize=9)
+    ax.grid(True, alpha=0.3)
+
+    # === Panneau droit : décomposition de la formule ===
+    ax = axes[1]
+    n_disc = 200
+    t_d = np.linspace(0, 2*np.pi, n_disc + 1)
+    x_d = a * np.cos(t_d)
+    y_d = b * np.sin(t_d)
+    dx_d = np.diff(x_d)
+    dy_d = np.diff(y_d)
+
+    x_mid = 0.5 * (x_d[:-1] + x_d[1:])
+    y_mid = 0.5 * (y_d[:-1] + y_d[1:])
+
+    contrib_xdy = x_mid * dy_d
+    contrib_ydx = y_mid * dx_d
+    half_area = 0.5 * np.sum(contrib_xdy - contrib_ydx)
+
+    cum_xdy = np.concatenate([[0], np.cumsum(contrib_xdy)])
+    cum_ydx = np.concatenate([[0], np.cumsum(contrib_ydx)])
+    cum_diff = 0.5 * (cum_xdy - cum_ydx)
+
+    ax.plot(t_d, cum_xdy, color="#2980b9", lw=1.8, label=r"$\int_0^t x\,dy$")
+    ax.plot(t_d, cum_ydx, color="#c0392b", lw=1.8, label=r"$\int_0^t y\,dx$")
+    ax.plot(t_d, cum_diff, color="#27ae60", lw=2.5,
+            label=fr"$\frac{{1}}{{2}}(\int x\,dy - \int y\,dx) \to {half_area:.2f}$")
+    ax.axhline(np.pi*a*b, color="black", linestyle=":", lw=1.5, alpha=0.6,
+               label=fr"Aire vraie $\pi ab = {np.pi*a*b:.2f}$")
+    ax.set_xlabel("$t$ (paramètre)")
+    ax.set_ylabel("intégrale partielle")
+    ax.set_title("Construction de l'aire par intégration le long du chemin",
+                 fontsize=11)
+    ax.legend(loc="lower left", fontsize=9)
+
+    fig.suptitle(
+        r"Avant de définir l'aire de Lévy : rappel de la formule de Green pour un chemin lisse",
+        fontsize=12, fontweight="bold", y=1.00
+    )
+    fig.tight_layout()
+    fig.savefig(OUT / "fig5_area_classical.png", bbox_inches="tight")
+    plt.close(fig)
+    print("✓ Fig 5 : aire classique")
+
+
+# =========================================================================
+# Figure 6 : Aire de Lévy - 2 chemins 2D
+# =========================================================================
+def fig_levy_area():
+    """L'image-clef : 2 chemins 2D qui ont trajectoire similaire mais
+    aires de Lévy très différentes."""
+    fig, axes = plt.subplots(1, 2, figsize=(13, 6))
+
+    n = 1000
+    T = 1.0
+    t = np.linspace(0, T, n)
+
+    rng = np.random.default_rng(42)
+    noise_A_x = 0.15 * np.sin(8 * np.pi * t) + 0.05 * rng.standard_normal(n)
+    noise_A_y = -0.15 * np.sin(8 * np.pi * t) + 0.05 * rng.standard_normal(n)
+    X_A = 2 * t + noise_A_x
+    Y_A = 1 * t + noise_A_y
+
+    radius = 0.25
+    theta_B = 6 * np.pi * t
+    X_B = 2 * t + radius * np.cos(theta_B)
+    Y_B = 1 * t + radius * np.sin(theta_B)
+
+    def levy_area(X, Y):
+        X_c = X - X[0]
+        Y_c = Y - Y[0]
+        dX = np.diff(X_c)
+        dY = np.diff(Y_c)
+        X_mid = 0.5 * (X_c[:-1] + X_c[1:])
+        Y_mid = 0.5 * (Y_c[:-1] + Y_c[1:])
+        return 0.5 * np.sum(X_mid * dY - Y_mid * dX)
+
+    area_A = levy_area(X_A, Y_A)
+    area_B = levy_area(X_B, Y_B)
+
+    ax = axes[0]
+    ax.plot(X_A, Y_A, color="#2c3e50", lw=1.2, alpha=0.7)
+    ax.scatter([X_A[0]], [Y_A[0]], color="green", s=80, zorder=5, label="Départ")
+    ax.scatter([X_A[-1]], [Y_A[-1]], color="red", s=80, zorder=5, label="Arrivée")
+    ax.plot([X_A[0], X_A[-1]], [Y_A[0], Y_A[-1]], color="gray",
+            linestyle="--", lw=1, alpha=0.5)
+    ax.set_xlabel("$X^1$")
+    ax.set_ylabel("$X^2$")
+    ax.set_title(fr"Chemin A — aire de Lévy $\approx {area_A:+.3f}$ (faible)",
+                 fontsize=11)
+    ax.legend(loc="upper left", fontsize=9)
+    ax.set_aspect("equal")
+    ax.grid(True, alpha=0.3)
+
+    ax = axes[1]
+    ax.plot(X_B, Y_B, color="#c0392b", lw=1.2, alpha=0.7)
+    ax.scatter([X_B[0]], [Y_B[0]], color="green", s=80, zorder=5, label="Départ")
+    ax.scatter([X_B[-1]], [Y_B[-1]], color="red", s=80, zorder=5, label="Arrivée")
+    ax.plot([X_B[0], X_B[-1]], [Y_B[0], Y_B[-1]], color="gray",
+            linestyle="--", lw=1, alpha=0.5)
+    ax.set_xlabel("$X^1$")
+    ax.set_ylabel("$X^2$")
+    ax.set_title(fr"Chemin B — aire de Lévy $\approx {area_B:+.3f}$ (élevée, spirale CCW)",
+                 fontsize=11)
+    ax.legend(loc="upper left", fontsize=9)
+    ax.set_aspect("equal")
+    ax.grid(True, alpha=0.3)
+
+    fig.suptitle(
+        r"Deux chemins 2D : trajectoire similaire (même départ et arrivée), aires de Lévy très différentes",
+        fontsize=12, fontweight="bold", y=1.00
+    )
+    fig.tight_layout()
+    fig.savefig(OUT / "fig6_levy_area.png", bbox_inches="tight")
+    plt.close(fig)
+    print("✓ Fig 6 : Lévy area")
+
+
+# =========================================================================
+# Figure 7 : Décomposition en triangles, deux chemins comparés
+# =========================================================================
+def fig_triangles():
+    """Visualisation explicite des petits triangles balayés."""
+    from matplotlib.patches import Polygon
+
+    def signed_triangle_area(p_start, p_a, p_b):
+        v1 = p_a - p_start
+        v2 = p_b - p_start
+        return 0.5 * (v1[0] * v2[1] - v1[1] * v2[0])
+
+    fig, axes = plt.subplots(1, 2, figsize=(13.5, 6.5))
+
+    n = 8
+    t = np.linspace(0, 1, n)
+
+    rng = np.random.default_rng(42)
+    X_A = 2 * t + 0.15 * np.sin(5 * np.pi * t)
+    Y_A = 1 * t - 0.15 * np.sin(5 * np.pi * t)
+
+    radius = 0.3
+    theta_B = 3 * np.pi * t
+    X_B = 2 * t + radius * np.cos(theta_B) - radius
+    Y_B = 1 * t + radius * np.sin(theta_B)
+
+    for idx, (X, Y, title_chemin, color_main) in enumerate([
+        (X_A, Y_A, "Chemin A — quasi droit", "#2c3e50"),
+        (X_B, Y_B, "Chemin B — spirale CCW", "#c0392b"),
+    ]):
+        ax = axes[idx]
+
+        X_s = np.array([X[0], Y[0]])
+        triangles = []
+        signed_areas = []
+        for k in range(n - 1):
+            p_a = np.array([X[k], Y[k]])
+            p_b = np.array([X[k + 1], Y[k + 1]])
+            triangles.append((X_s, p_a, p_b))
+            signed_areas.append(signed_triangle_area(X_s, p_a, p_b))
+
+        total_area = sum(signed_areas)
+
+        for tri, area in zip(triangles, signed_areas):
+            poly = Polygon(np.array(tri), closed=True,
+                           facecolor=("#27ae60" if area > 0 else "#e67e22"),
+                           alpha=0.35, edgecolor="black", linewidth=0.5)
+            ax.add_patch(poly)
+
+        ax.plot(X, Y, color=color_main, lw=1.8, alpha=0.9, zorder=3)
+
+        for k in range(n):
+            ax.plot([X[0], X[k]], [Y[0], Y[k]],
+                    color="gray", lw=0.7, alpha=0.5, linestyle="--", zorder=2)
+
+        ax.scatter(X, Y, color=color_main, s=50, zorder=5,
+                   edgecolor="white", linewidth=1.2)
+        ax.scatter([X[0]], [Y[0]], color="green", s=180, zorder=6,
+                   edgecolor="black", linewidth=1.5, marker="*",
+                   label=r"$X_s$ (départ)")
+        ax.scatter([X[-1]], [Y[-1]], color="red", s=120, zorder=6,
+                   edgecolor="black", linewidth=1.5, marker="s",
+                   label=r"$X_t$ (arrivée)")
+
+        ax.set_xlabel(r"$X^1$")
+        ax.set_ylabel(r"$X^2$")
+        ax.set_title(
+            fr"{title_chemin} — somme des aires triangles $\approx {total_area:+.3f}$",
+            fontsize=11
+        )
+        ax.legend(loc="upper left", fontsize=9)
+        ax.set_aspect("equal")
+        ax.grid(True, alpha=0.3)
+        ax.margins(0.15)
+
+    fig.suptitle(
+        r"Aire de Lévy = somme des aires signées des petits triangles ($X_s$, $X_r$, $X_{r+1}$)",
+        fontsize=12, fontweight="bold", y=1.00
+    )
+    fig.tight_layout()
+    fig.savefig(OUT / "fig7_triangles.png", bbox_inches="tight")
+    plt.close(fig)
+    print("✓ Fig 7 : décomposition en triangles")
+
+
+# =========================================================================
+# Figure 8 : Cumul de l'aire de Lévy au fil du temps
+# =========================================================================
+def fig_levy_cumulative():
+    """Aire de Lévy cumulée A(s,r) pour r dans [s, t]."""
+    fig, axes = plt.subplots(1, 2, figsize=(13.5, 5))
+
+    n = 1000
+    t = np.linspace(0, 1, n)
+
+    rng = np.random.default_rng(42)
+    noise_A_x = 0.15 * np.sin(8 * np.pi * t) + 0.05 * rng.standard_normal(n)
+    noise_A_y = -0.15 * np.sin(8 * np.pi * t) + 0.05 * rng.standard_normal(n)
+    X_A = 2 * t + noise_A_x
+    Y_A = 1 * t + noise_A_y
+
+    radius = 0.25
+    theta_B = 6 * np.pi * t
+    X_B = 2 * t + radius * np.cos(theta_B)
+    Y_B = 1 * t + radius * np.sin(theta_B)
+
+    def cumulative_levy_area(X, Y):
+        X_c = X - X[0]
+        Y_c = Y - Y[0]
+        dX = np.diff(X_c)
+        dY = np.diff(Y_c)
+        X_mid = 0.5 * (X_c[:-1] + X_c[1:])
+        Y_mid = 0.5 * (Y_c[:-1] + Y_c[1:])
+        contribs = 0.5 * (X_mid * dY - Y_mid * dX)
+        return np.concatenate([[0], np.cumsum(contribs)])
+
+    cum_A = cumulative_levy_area(X_A, Y_A)
+    cum_B = cumulative_levy_area(X_B, Y_B)
+
+    ax = axes[0]
+    ax.plot(t, cum_A, color="#2c3e50", lw=1.5, label="Chemin A (presque droit)")
+    ax.axhline(0, color="black", lw=0.5, alpha=0.5)
+    ax.set_xlabel("$r$ (variable d'intégration)")
+    ax.set_ylabel(r"$A_{s,r}$ (aire de Lévy cumulée)")
+    ax.set_title(r"Chemin A : oscille autour de 0 — final $\approx 0$", fontsize=11)
+    ax.legend(fontsize=9)
+    ax.grid(True, alpha=0.3)
+
+    ax = axes[1]
+    ax.plot(t, cum_B, color="#c0392b", lw=1.5, label="Chemin B (spirale CCW)")
+    ax.axhline(0, color="black", lw=0.5, alpha=0.5)
+    ax.set_xlabel("$r$ (variable d'intégration)")
+    ax.set_ylabel(r"$A_{s,r}$ (aire de Lévy cumulée)")
+    ax.set_title(fr"Chemin B : croît monotone — final $\approx {cum_B[-1]:+.3f}$", fontsize=11)
+    ax.legend(fontsize=9)
+    ax.grid(True, alpha=0.3)
+
+    fig.suptitle(
+        r"L'aire de Lévy se construit progressivement le long du chemin",
+        fontsize=12, fontweight="bold", y=1.00
+    )
+    fig.tight_layout()
+    fig.savefig(OUT / "fig8_levy_cumulative.png", bbox_inches="tight")
+    plt.close(fig)
+    print("✓ Fig 8 : aire cumulative")
+
+
 if __name__ == "__main__":
     fig_compare_H()
     fig_self_similarity()
     fig_quadratic_variation()
     fig_rough_vol()
+    fig_area_classical()
+    fig_levy_area()
+    fig_triangles()
+    fig_levy_cumulative()
     print(f"\nFigures sauvegardées dans {OUT}")

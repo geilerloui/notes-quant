@@ -5,7 +5,7 @@ title: Multi-agents (RL)
 
 > Quand plusieurs agents interagissent dans le même environnement, on quitte le cadre MDP classique : chaque agent doit prendre en compte les actions des autres. Le cadre formel s'appelle **stochastic game** (ou **Markov game**) — c'est l'analogue multi-agent du MDP. Cette note couvre la généralisation du Q-learning aux jeux stochastiques (zero-sum, general-sum), les concepts d'équilibre (Nash, correlated), et les valeurs coco pour les jeux coopératifs-compétitifs.
 
-> Pré-requis : [[RL Tabulaire]] (MDP, Bellman, Q-learning, value iteration), notions de théorie des jeux (Nash equilibrium).
+> Pré-requis : [[01_RL Tabulaire]] (MDP, Bellman, Q-learning, value iteration), notions de théorie des jeux (Nash equilibrium).
 
 > 💡 **L'analogie centrale** :
 >

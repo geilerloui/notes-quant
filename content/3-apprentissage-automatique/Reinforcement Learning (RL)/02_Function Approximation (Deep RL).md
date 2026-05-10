@@ -5,7 +5,7 @@ title: Function Approximation (Deep RL)
 
 > Quand l'espace d'états devient trop grand pour être stocké en table de lookup (jeux Atari avec image en pixels, robotique avec capteurs continus), on remplace les fonctions $V(s)$ et $Q(s, a)$ par des **approximateurs paramétriques** — typiquement des réseaux de neurones. C'est le passage du **RL tabulaire** au **Deep RL**.
 
-> Pré-requis : [[RL Tabulaire]] (MDP, Bellman, MC, TD(0), Q-learning, SARSA).
+> Pré-requis : [[01_RL Tabulaire]] (MDP, Bellman, MC, TD(0), Q-learning, SARSA).
 
 > 💡 **Trois familles d'approches** suivies dans cette note :
 > - **I. Value-Based (VFA)** — on apprend $\hat V$ ou $\hat Q$ paramétrés, on extrait la policy.

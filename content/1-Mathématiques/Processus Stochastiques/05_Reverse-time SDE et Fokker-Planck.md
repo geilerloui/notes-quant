@@ -190,3 +190,5 @@ Progression complète du sujet :
 4. [[04_Dynamique de Langevin]] — sampling et lien score-based ML
 5. **[[05_Reverse-time SDE et Fokker-Planck]]** — (cette note) EDP de l'évolution de la densité et inversion du temps
 6. [[06_Rough Paths]] — au-delà des semi-martingales (Lyons 1998)
+7. [[07_Contrôle Stochastique]] — HJB, Merton, optimal execution, lien RL
+8. [[08_Volterra Signatures]] — (placeholder) extension signature pour mémoire longue

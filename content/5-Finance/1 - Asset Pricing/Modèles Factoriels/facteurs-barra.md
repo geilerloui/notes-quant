@@ -86,7 +86,7 @@ C'est-à-dire que **chaque factor return est le rendement d'un portefeuille de l
 
 ### Application : cross-impact
 
-Le waterfall est utilisé de façon similaire dans le calcul du cross-impact d'un basket multi-régions — voir [[(iii) Cross-impact|note Cross-impact]] pour les détails de l'algorithme et de la non-comparabilité des facteurs inter-régions.
+Le waterfall est utilisé de façon similaire dans le calcul du cross-impact d'un basket multi-régions — voir [[03_Cross-impact|note Cross-impact]] pour les détails de l'algorithme et de la non-comparabilité des facteurs inter-régions.
 
 ## 1.4 Comparaison de portefeuilles dans un univers fixé
 
@@ -782,7 +782,7 @@ On pourrait être tenté d'utiliser le modèle global pour tout, ce qui donnerai
 
 ### Lien avec le cross-impact
 
-Le même mécanisme waterfall est utilisé pour le cross-impact d'un basket multi-régions : voir [[(iii) Cross-impact|note Cross-impact §IV]] pour le détail. La logique est la même : non-comparabilité des facteurs inter-régions → décomposition par bloc régional.
+Le même mécanisme waterfall est utilisé pour le cross-impact d'un basket multi-régions : voir [[03_Cross-impact|note Cross-impact §IV]] pour le détail. La logique est la même : non-comparabilité des facteurs inter-régions → décomposition par bloc régional.
 
 ## 6.7 Optimisation de portefeuille type Markowitz avec Barra
 

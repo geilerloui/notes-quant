@@ -5,7 +5,7 @@ title: Graph Neural Networks
 
 > Cette note couvre les **Graph Neural Networks (GNN)** : comment généraliser les CNN à des graphes arbitraires. On part du framework de base (locality + aggregation + composition), on voit les architectures principales (vanilla GCN, GraphSAGE, GAT, GIN), les **limitations** des GNN classiques (test d'isomorphisme WL, robustesse adversarial), et trois **applications industrielles** (PinSAGE pour la reco, DECAGON pour les graphes hétérogènes, génération goal-directed de molécules).
 
-> 💡 **Position dans le cours.** Suite logique de [[Graph Representation Learning]] : là on apprenait des embeddings *task-independent* via random walks ; ici on apprend des représentations **end-to-end** intégrées dans une architecture deep learning, qu'on entraîne directement pour la tâche cible.
+> 💡 **Position dans le cours.** Suite logique de [[03_Graph Representation Learning]] : là on apprenait des embeddings *task-independent* via random walks ; ici on apprend des représentations **end-to-end** intégrées dans une architecture deep learning, qu'on entraîne directement pour la tâche cible.
 
 > ⚠️ **Note sur la qualité.** La première moitié de cette note (Introduction, Basics, GraphSAGE, GAT, Limitations + WL) est mise au propre depuis mes notes du cours Stanford CS224W (Leskovec). La seconde moitié (PinSAGE, DECAGON, génération) provient de notes de slides bien plus brutes — j'ai tenté de les structurer du mieux possible mais les images manquent et certains points restent télégraphiques.
 
@@ -168,7 +168,7 @@ avec $\tilde A = D^{-1/2} A D^{-1/2}$ (normalisation symétrique). En **rouge** 
 > [!warning] (a) Unsupervised — "nœuds similaires ont des embeddings similaires"
 > $$\mathcal{L} = \sum_{z_u, z_v} \text{CE}(y_{u,v}, \text{DEC}(z_u, z_v))$$
 >
-> où $y_{u,v} = 1$ si $u$ et $v$ sont similaires, CE = cross entropy, DEC = decoder (ex: produit scalaire). La similarité peut venir de [[Graph Representation Learning|random walks]] (node2vec, DeepWalk), de la factorisation matricielle, ou de proximité dans le graphe.
+> où $y_{u,v} = 1$ si $u$ et $v$ sont similaires, CE = cross entropy, DEC = decoder (ex: produit scalaire). La similarité peut venir de [[03_Graph Representation Learning|random walks]] (node2vec, DeepWalk), de la factorisation matricielle, ou de proximité dans le graphe.
 
 > [!warning] (b) Supervised — entraîner directement pour une tâche
 > Par exemple node classification.

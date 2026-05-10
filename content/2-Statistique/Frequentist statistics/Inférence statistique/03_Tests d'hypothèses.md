@@ -5,7 +5,7 @@ order: 3
 
 # Tests d'hypothèses
 
-> Cette note couvre les tests d'hypothèses statistiques : pourquoi en faire, comment les construire, et les principaux tests paramétriques (Z-test, T-test, ANOVA, ANCOVA). Le fil rouge est le dataset `Auto` (ISLR), qu'on retrouve aussi dans la note [[Régression Linéaire Multiple]].
+> Cette note couvre les tests d'hypothèses statistiques : pourquoi en faire, comment les construire, et les principaux tests paramétriques (Z-test, T-test, ANOVA, ANCOVA). Le fil rouge est le dataset `Auto` (ISLR), qu'on retrouve aussi dans la note [[01_Régression Linéaire Multiple]].
 
 ## 0. Pourquoi tester ?
 
@@ -576,7 +576,7 @@ Le T-test et le test de Fisher ne sont pas deux outils indépendants. Pour $k = 
 
 > ⚠️ **Limite 2 — hypothèse d'homoscédasticité.** L'ANOVA classique suppose **même variance** dans tous les groupes ($\sigma^2$ commun). Si les variances diffèrent fortement, on utilise l'**ANOVA de Welch** (équivalent du T-test de Welch en multi-groupes), ou des tests non-paramétriques comme **Kruskal-Wallis**.
 
-> 💡 **Lien avec la régression linéaire.** L'ANOVA peut s'écrire comme une **régression linéaire sur des variables dummy** : on régresse $y$ sur des indicatrices de groupe ($\mathbb{1}_{\text{Europe}}, \mathbb{1}_{\text{Japon}}$ avec USA = référence) et on teste la nullité jointe de leurs coefficients via un **test F de modèles emboîtés**. Voir [[Régression Linéaire Multiple]] section III.E pour cette perspective et le test joint en cadre régression.
+> 💡 **Lien avec la régression linéaire.** L'ANOVA peut s'écrire comme une **régression linéaire sur des variables dummy** : on régresse $y$ sur des indicatrices de groupe ($\mathbb{1}_{\text{Europe}}, \mathbb{1}_{\text{Japon}}$ avec USA = référence) et on teste la nullité jointe de leurs coefficients via un **test F de modèles emboîtés**. Voir [[01_Régression Linéaire Multiple]] section III.E pour cette perspective et le test joint en cadre régression.
 
 ### D. ANCOVA (ANalysis of COVAriance) — ANOVA avec covariables
 
@@ -604,4 +604,4 @@ L'ANCOVA répond à cette question : *"après avoir contrôlé pour le poids, re
 > 
 > **Conclusion** : même après avoir contrôlé pour le poids, l'origine a un effet **résiduel significatif** sur la mpg. La différence entre Japon, USA, et Europe ne s'explique pas uniquement par les différences de poids — il y a aussi un effet "design / efficacité moteur" propre à l'origine.
 
-> 💡 **Pourquoi c'est utile.** L'ANCOVA permet d'isoler l'effet d'un facteur catégoriel **toutes choses égales par ailleurs** sur une covariable continue. C'est très proche d'une régression linéaire avec interactions — d'ailleurs en pratique on utilise souvent directement la régression (notes [[Régression Linéaire Multiple]]). L'ANCOVA est juste le **vocabulaire historique** pour ce type d'analyse.
+> 💡 **Pourquoi c'est utile.** L'ANCOVA permet d'isoler l'effet d'un facteur catégoriel **toutes choses égales par ailleurs** sur une covariable continue. C'est très proche d'une régression linéaire avec interactions — d'ailleurs en pratique on utilise souvent directement la régression (notes [[01_Régression Linéaire Multiple]]). L'ANCOVA est juste le **vocabulaire historique** pour ce type d'analyse.

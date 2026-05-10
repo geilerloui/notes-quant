@@ -5,7 +5,7 @@ title: Word Embeddings - NLP
 
 > Cette note couvre les **représentations vectorielles de mots** (word embeddings) — comment passer d'un texte brut à des vecteurs que des modèles peuvent traiter. On suit la progression historique : one-hot (naïf) → représentations distributionnelles (co-occurrence + reweighting + LSA) → représentations *prediction-based* (Word2Vec et ses variantes), avec un mot sur GloVe et l'évaluation.
 
-> 💡 **Position dans la zoologie NLP.** Les word embeddings statiques (Word2Vec, GloVe) ont été remplacés en pratique par les **représentations contextuelles** (BERT, GPT) traitées dans [[(iii) Représentations contextuelles]]. Mais comprendre Word2Vec reste indispensable : c'est la grammaire commune, et beaucoup d'idées (skip-gram, negative sampling, NCE) sont reprises sous d'autres noms en deep learning moderne.
+> 💡 **Position dans la zoologie NLP.** Les word embeddings statiques (Word2Vec, GloVe) ont été remplacés en pratique par les **représentations contextuelles** (BERT, GPT) traitées dans [[03_Représentations contextuelles]]. Mais comprendre Word2Vec reste indispensable : c'est la grammaire commune, et beaucoup d'idées (skip-gram, negative sampling, NCE) sont reprises sous d'autres noms en deep learning moderne.
 
 Bibliographie principale :
 - [Demystifying neural networks in skip-gram (blog très clair)](https://aegis4048.github.io/demystifying_neural_network_in_skip_gram_language_modeling)

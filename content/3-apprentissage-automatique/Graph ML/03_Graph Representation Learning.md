@@ -5,7 +5,7 @@ title: Graph Representation Learning
 
 > Cette note couvre l'**apprentissage de représentations de nœuds et de graphes** : passer d'un graphe brut à des **embeddings vectoriels** qu'on peut ensuite utiliser dans n'importe quel pipeline ML standard (classification, clustering, link prediction). On voit le framework général **encoder/decoder**, les méthodes par **random walks** (DeepWalk, node2vec), une application aux **knowledge graphs** (TransE), et enfin l'embedding de **graphes entiers**.
 
-> 💡 **Position dans le cours.** Suite logique de [[Message Passing]] : là on faisait de la classification de nœuds *à la main* (relational, iterative, BP). Ici on **apprend une représentation** une fois pour toutes, indépendamment d'une tâche. Les embeddings résultants peuvent ensuite servir pour **n'importe quelle** tâche downstream.
+> 💡 **Position dans le cours.** Suite logique de [[02_Message Passing]] : là on faisait de la classification de nœuds *à la main* (relational, iterative, BP). Ici on **apprend une représentation** une fois pour toutes, indépendamment d'une tâche. Les embeddings résultants peuvent ensuite servir pour **n'importe quelle** tâche downstream.
 
 ---
 
@@ -153,7 +153,7 @@ On paramétrise $P(v \mid \mathbf{z}_u)$ par un softmax :
 
 > 💡 **Problème.** La double somme sur les nœuds donne une complexité $O(|V|^2)$. Le coupable : le **terme de normalisation** du softmax. Peut-on l'approcher ?
 
-#### A.3 Negative Sampling (cf. [[(i) Word Embeddings]])
+#### A.3 Negative Sampling (cf. [[01_Word Embeddings]])
 
 Au lieu de normaliser sur tous les nœuds, on normalise contre $k$ "**negative samples**" $n_i$ tirés au hasard :
 
@@ -166,7 +166,7 @@ où $P_V$ est une distribution sur les nœuds.
 - **Plus $k$ est grand**, plus le biais sur les events négatifs augmente.
 - En pratique : $k = 5$ à $20$.
 
-> 💡 **Lien direct avec Word2Vec.** C'est exactement le même negative sampling que dans [[(i) Word Embeddings]] section IV.B — le graphe joue le rôle du corpus, les random walks le rôle des phrases, les nœuds le rôle des mots.
+> 💡 **Lien direct avec Word2Vec.** C'est exactement le même negative sampling que dans [[01_Word Embeddings]] section IV.B — le graphe joue le rôle du corpus, les random walks le rôle des phrases, les nœuds le rôle des mots.
 
 #### A.4 Stochastic Gradient Descent
 

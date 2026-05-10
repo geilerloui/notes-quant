@@ -9,7 +9,7 @@ order: 0
 
 ## I. Motivation — pourquoi a-t-on besoin de GLM ?
 
-Le modèle linéaire gaussien (cf. [[Régression Linéaire Multiple]]) repose sur **deux hypothèses fortes** :
+Le modèle linéaire gaussien (cf. [[01_Régression Linéaire Multiple]]) repose sur **deux hypothèses fortes** :
 
 > [!warning] Les deux hypothèses du modèle linéaire gaussien
 > 1. **Random component** : $Y \mid X = x \sim \mathcal{N}(\mu(x), \sigma^2)$ — la cible est continue et gaussienne
@@ -191,7 +191,7 @@ C'est ce tableau qui **dicte les choix par défaut** de toutes les libraires sta
 Contrairement à la régression linéaire (où $\hat{\beta} = (X^TX)^{-1}X^Ty$ est explicite), **la plupart des GLM n'ont pas de solution analytique** pour le MLE. On doit utiliser un **algorithme itératif**.
 
 > [!warning] IRLS (Iteratively Reweighted Least Squares)
-> L'algorithme standard pour fitter un GLM est l'**IRLS**. L'idée est élégante : à chaque itération, on linéarise localement le modèle autour de l'estimation courante $\hat{\beta}^{(k)}$ et on résout un **problème de WLS** (Weighted Least Squares, cf. [[Régression Linéaire Multiple]] section IV.B). Les poids dépendent de la variance prédite par le modèle courant, et on itère jusqu'à convergence.
+> L'algorithme standard pour fitter un GLM est l'**IRLS**. L'idée est élégante : à chaque itération, on linéarise localement le modèle autour de l'estimation courante $\hat{\beta}^{(k)}$ et on résout un **problème de WLS** (Weighted Least Squares, cf. [[01_Régression Linéaire Multiple]] section IV.B). Les poids dépendent de la variance prédite par le modèle courant, et on itère jusqu'à convergence.
 > 
 > $$\hat{\beta}^{(k+1)} = (X^T W^{(k)} X)^{-1} X^T W^{(k)} z^{(k)}$$
 > 
@@ -232,13 +232,13 @@ En régression linéaire, le R² est central. En GLM, il n'a **pas d'équivalent
 > 
 > La deviance joue le rôle du SSR (sum of squared residuals) en GLM : plus elle est petite, mieux c'est. Différence de deviance entre deux modèles emboîtés = statistique du LRT (asymptotiquement $\chi^2$).
 
-Pour avoir un analogue normalisé du R², on utilise des **pseudo-R²** (McFadden, Cox-Snell, Nagelkerke) ou, pour la classification, des métriques discriminatives comme **AUC-ROC**, **KS**, **Gini coefficient** (cf. [[Régression logistique]]).
+Pour avoir un analogue normalisé du R², on utilise des **pseudo-R²** (McFadden, Cox-Snell, Nagelkerke) ou, pour la classification, des métriques discriminatives comme **AUC-ROC**, **KS**, **Gini coefficient** (cf. [[02_Régression logistique]]).
 
 ## VIII. Exemples d'applications
 
 Le framework GLM est partout dès qu'on sort du cadre gaussien :
 
-- **Classification binaire** (Bernoulli + logit) : prédire si un email est un spam, si un patient développera une maladie, si un client va faire défaut sur son prêt → c'est la **régression logistique** (cf. [[Régression logistique]]).
+- **Classification binaire** (Bernoulli + logit) : prédire si un email est un spam, si un patient développera une maladie, si un client va faire défaut sur son prêt → c'est la **régression logistique** (cf. [[02_Régression logistique]]).
 - **Modélisation de comptages** (Poisson + log) : nombre de clics sur une publicité, nombre d'accidents par jour, nombre de pannes d'une machine, nombre d'événements dans une fenêtre temporelle.
 - **Modélisation de durées et de montants** (Gamma + reciprocal/log) : durée entre deux événements, taille des sinistres en assurance, temps de séjour à l'hôpital, prix.
 - **Proportions agrégées** (Binomiale + logit) : taux de succès sur des groupes (par exemple taux de conversion par segment, taux de réussite par classe d'élèves).
@@ -248,8 +248,8 @@ Le framework GLM est partout dès qu'on sort du cadre gaussien :
 
 #### Liens avec d'autres notes
 
-- [[Régression Linéaire Multiple]] — cas particulier identité link + Gauss
-- [[Régression logistique]] — cas particulier logit link + Bernoulli
+- [[01_Régression Linéaire Multiple]] — cas particulier identité link + Gauss
+- [[02_Régression logistique]] — cas particulier logit link + Bernoulli
 - [[Maximum de vraisemblance|MLE]] — le cadre d'estimation général sur lequel repose tout GLM
 - [[Famille exponentielle]] — la classe de distributions sous-jacente
 

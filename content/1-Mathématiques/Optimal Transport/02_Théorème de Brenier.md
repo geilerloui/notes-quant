@@ -83,7 +83,7 @@ D'où l'expression explicite :
 
 $$\boxed{T(x) = G^{-1}(F(x))}$$
 
-![[brenier_1d_cdf.png|650]]
+![[brenier_1d_cdf.png|402]]
 *Construction de la map optimale en 1D via les CDFs. On lit l'altitude $u = F(x)$ sur la courbe rouge ($F$ = CDF de $\mu$), puis on redescend sur la courbe bleue ($G$ = CDF de $\nu$) pour trouver le point $T(x) = G^{-1}(u)$.*
 
 > [!example] Exemple : deux gaussiennes
@@ -130,7 +130,7 @@ $$\langle x_2 - x_1, \, y_2 - y_1 \rangle \geq 0$$
 
 C'est-à-dire que les vecteurs $\vec{x_1 x_2}$ et $\vec{y_1 y_2}$ font un **angle aigu** (produit scalaire positif).
 
-![[brenier_cyclical_monotone.png|500]]
+![[brenier_cyclical_monotone.png]]
 *Cyclical monotonicity en dimension supérieure, cas $N=2$. Les vecteurs $\vec{x_1 x_2}$ (rouge, dans le domaine source) et $\vec{y_1 y_2}$ (bleu, dans le domaine cible) doivent faire un angle aigu. Géométriquement : la map ne peut pas "tordre" la masse, elle peut seulement la déplacer dans des directions cohérentes.*
 
 C'est la généralisation directe de la monotonie 1D ($x_1 < x_2 \Rightarrow y_1 \leq y_2$, qui est équivalent à $(x_2 - x_1)(y_2 - y_1) \geq 0$).

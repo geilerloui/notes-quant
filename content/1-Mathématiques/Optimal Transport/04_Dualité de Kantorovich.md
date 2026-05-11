@@ -73,6 +73,9 @@ $$\underbrace{\int \varphi \, d\mu}_{\text{ce qu'il paie aux sources}} + \underb
 
 Le commerçant cherche à **maximiser** son profit (côté dual). Le théorème de dualité forte dit que ce profit maximal est **exactement égal** au coût minimal de transport.
 
+![[kantorovich_duality_economic.png|342]]
+*Interprétation économique de la dualité. Pour transporter une unité de masse de $x$ vers $y$, le transporteur a deux options : **A** payer directement $c(x, y)$, ou **B** passer par un commerçant qui achète en $x$ à $\varphi(x)$ et revend en $y$ à $\psi(y)$ (coût net $\varphi(x) + \psi(y)$). Pour que l'option B soit envisageable, on doit avoir $\varphi(x) + \psi(y) \leq c(x, y)$. Le commerçant maximise son profit sous cette contrainte, et la **dualité forte** assure que ce profit maximal = coût minimal de transport.*
+
 ### Preuve heuristique
 
 > [!note]- Esquisse de preuve
@@ -133,6 +136,9 @@ C'est une formule **incroyablement utile** :
 - Elle ne fait intervenir **qu'une seule fonction** $\varphi$ (au lieu de deux dans le dual général, ou d'un couplage 2D dans le primal)
 - Elle s'exprime comme une **espérance** sous chaque distribution, ce qui se parallélise très bien
 - Les estimateurs **convergent** quand on remplace les vraies distributions par des échantillons (loi des grands nombres)
+
+![[kantorovich_rubinstein_1lip.png]]
+*Illustration de Kantorovich-Rubinstein. La fonction 1-Lipschitz optimale $\varphi$ (verte) est **positive** sur le support de $\mu$ (rouge) et **négative** sur le support de $\nu$ (bleu), avec **pente $|\varphi'| = 1$** entre les deux (contrainte saturée). Pour deux gaussiennes centrées en $\pm 3$, on trouve $\mathbb{E}_\mu[\varphi] \approx +3$, $\mathbb{E}_\nu[\varphi] \approx -3$, donc $W_1 \approx 6$ — exactement la distance entre les centres, comme attendu.*
 
 ### Calcul effectif
 

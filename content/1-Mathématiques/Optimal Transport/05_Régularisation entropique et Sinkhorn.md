@@ -74,6 +74,9 @@ Le paramètre $\varepsilon$ contrôle un **trade-off** :
 
 C'est ce **lissage** qui rend le problème numériquement tractable et qui permet la backprop (la solution dépend de $\mathbf{a}, \mathbf{b}, \mathbf{C}$ de manière différentiable).
 
+![[sinkhorn_epsilon_tradeoff.png]]
+*Effet du paramètre $\varepsilon$ sur la matrice de transport $\mathbf{P}^*$, pour la même paire de distributions. **À gauche** ($\varepsilon = 0.05$, petit) : $\mathbf{P}^*$ est quasi-diagonale et sparse, on retrouve le LP exact. **Au milieu** ($\varepsilon = 0.5$, modéré) : solution lisse et différentiable — c'est le régime utilisé en pratique. **À droite** ($\varepsilon = 5$, grand) : la régularisation domine et $\mathbf{P}^*$ tend vers le couplage indépendant $\mathbf{a}\mathbf{b}^\top$ (la matrice de produit tensoriel), qui n'utilise plus l'information de coût.*
+
 ## II. La forme de la solution
 
 ### Dérivation via Lagrangien
@@ -110,6 +113,9 @@ ou, en notation matricielle :
 $$\mathbf{P}^* = \text{diag}(\mathbf{u}) \, \mathbf{K} \, \text{diag}(\mathbf{v})$$
 
 **Tout l'optimum est encodé dans deux vecteurs $\mathbf{u}, \mathbf{v}$**. La matrice $\mathbf{K} = e^{-\mathbf{C}/\varepsilon}$ est fixée (elle ne dépend que des données), et la solution $\mathbf{P}^*$ se factorise par **pondération en ligne** ($\mathbf{u}$) et **en colonne** ($\mathbf{v}$).
+
+![[sinkhorn_factorization.png]]
+*Exemple concret de factorisation. À partir des marginales $\mathbf{a}$ (gauche, rouge) et $\mathbf{b}$ (haut, bleu), on construit la matrice de coût $\mathbf{C}$ (gris) puis le noyau $\mathbf{K} = e^{-\mathbf{C}/\varepsilon}$ (orange). Sinkhorn calcule les facteurs $\mathbf{u}, \mathbf{v}$ et la matrice optimale $\mathbf{P}^*$ (vert) qui est concentrée sur la "diagonale" — le transport optimal apparie les percentiles entre source et cible.*
 
 ### Les contraintes de marginales redeviennent simples
 

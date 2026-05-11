@@ -143,6 +143,9 @@ $$\|f - g\|_{L^2} = O(s) \quad \text{et} \quad W_2(f, g) = O(s)$$
 
 Les deux distances **convergent au même rythme**. Pas de différence notable pour les profils proches.
 
+![[wasserstein_vs_l2_close.png]]
+*Pour deux gaussiennes proches (translation $s$ petite), $W_2$ (vert) et $\|f-g\|_{L^2}$ (rouge) partent linéairement à zéro **avec la même pente initiale**. Aucune différence notable entre les deux distances dans ce régime.*
+
 ### Propriété 2 : Profils éloignés → Wasserstein voit, $L^p$ ne voit plus rien
 
 Maintenant prenons $f$ et $g$ deux densités à **supports disjoints** (par exemple deux gaussiennes très éloignées).
@@ -157,6 +160,9 @@ $$W_2(f, g) = O(s)$$
 
 (toujours proportionnel à la distance entre les supports)
 
+![[wasserstein_vs_l2_far.png]]
+*Pour des profils éloignés, $W_2$ (vert) continue de croître linéairement avec $s$ — il "voit" la distance entre les supports. À l'opposé, $\|f-g\|_{L^2}$ (rouge) **sature** à une constante dès que les supports deviennent disjoints. **Conséquence directe** : un modèle entraîné par gradient sur $L^2$ se retrouve avec un gradient nul quand les distributions sont disjointes, alors que le gradient de $W_2$ pointe toujours dans la bonne direction. C'est la motivation des WGAN.*
+
 **Conséquence majeure pour le ML** : si on entraîne un modèle par descente de gradient sur $\|f_\theta - g\|_{L^2}$, et que $f_\theta$ et $g$ sont initialement très loin, le gradient est **nul ou non-informatif**. Avec Wasserstein, le gradient pointe toujours dans la bonne direction, peu importe la distance.
 
 C'est précisément la motivation des **WGAN** : remplacer le critère de Jensen-Shannon (qui sature quand les distributions sont disjointes) par $W_1$ (qui ne sature jamais).
@@ -170,6 +176,9 @@ $$\|f - g\|_{L^2} = O(1) \quad \text{(le bruit ne s'efface pas)}$$
 $$W_2(f, g) = O(1/k) \quad \text{(le bruit devient invisible quand $k \to \infty$)}$$
 
 Plus le bruit est haute fréquence, plus Wasserstein l'ignore. C'est crucial pour des applications réelles où les données sont bruitées.
+
+![[wasserstein_vs_l2_noise.png]]
+*Comparaison entre $f$ lisse (rouge) et $g$ modulée par une oscillation haute fréquence (bleu). À droite, en log-log : $W_2$ (vert) décroît en $1/k$ — le bruit "disparaît" à haute fréquence — alors que $\|f-g\|_{L^2}$ (rouge) reste constant en $O(1)$. Pour Wasserstein, deux densités qui ne diffèrent que par des oscillations rapides sont vues comme **quasi-identiques** ; pour $L^2$ elles restent à distance fixe.*
 
 ### Propriété 4 : Convexité
 

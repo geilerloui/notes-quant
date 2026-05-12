@@ -18,6 +18,71 @@ Le transport optimal est un outil **transversal**, utilisé dans plusieurs domai
 
 Cette note couvre les applications **principales** dans les trois premiers domaines, avec une emphase particulière sur la finance (où OT a explosé depuis 2015) et le ML moderne. Le point commun : à chaque fois, c'est **Sinkhorn** (note 05) qui fait tourner la machinerie en pratique.
 
+## 0. Quand a-t-on besoin de $P$ vs juste $W_p$ ?
+
+Avant de plonger dans les applications, il faut clarifier **une distinction fondamentale** qui structure tout ce qui suit. En sortie d'un solveur de transport optimal, on peut récupérer deux choses (cf. note 03) :
+
+- **Le plan de transport $P$** (le couplage optimal $\gamma^*$) : "qui va où"
+- **Le scalaire $W_p$** (la valeur du coût optimal) : "à quel point c'est loin"
+
+**Selon l'application, on veut l'un, l'autre, ou les deux.** Et c'est ce qui décide de **quel outil** utiliser.
+
+### Cas A : On veut juste $W_p$ (scalaire)
+
+Quand on a besoin d'une **mesure de distance différentiable** entre distributions, sans s'intéresser à où va chaque point. C'est typique des applications "loss function" en ML :
+
+| Application | Pourquoi on veut juste $W_p$ |
+| :--- | :--- |
+| **WGAN** | Loss pour entraîner un générateur ; on dérive par rapport aux paramètres $\theta$ |
+| **Calibration de modèles** | Minimiser une "distance" entre distribution prédite et distribution cible |
+| **Two-sample testing** | "Ces deux datasets viennent-ils de la même distribution ?" → on compare $W_p$ à un seuil |
+| **DRO Wasserstein** | Définir une boule de rayon $\varepsilon$ autour d'une distribution nominale |
+| **Wasserstein autoencoders** | Régularisation du latent space |
+
+**Outil typique** : la **dualité de Kantorovich** (note 04). Pour $W_1$, on cherche **une seule fonction** $\varphi$ 1-Lipschitz via Kantorovich-Rubinstein. C'est ce qu'utilise WGAN. Pas besoin du plan, on ne le forme jamais.
+
+### Cas B : On veut le plan $P$ (couplage)
+
+Quand on a besoin de **savoir où va chaque point** : la question scientifique est "qui correspond à quoi". Là, $W_p$ tout seul ne sert à rien :
+
+| Application | Pourquoi on a besoin de $P$ |
+| :--- | :--- |
+| **Domain adaptation** | Transférer les labels du source vers le target : pour chaque point cible $y_j$, on doit savoir de quel point source $x_i$ il "vient" (lecture de $P_{ij}$) |
+| **Color transfer** | Pour chaque pixel de couleur $c_A$ dans l'image, on doit savoir vers quelle couleur $c_B$ il est envoyé |
+| **Image morphing** | Pour interpoler entre $A$ et $B$, il faut savoir où chaque pixel de $A$ atterrit dans $B$ (map de Brenier) |
+| **Shape matching, registration** | Apparier des points d'un nuage à l'autre (recalage IRM, single-cell biology) |
+| **Point cloud matching** | Quelle cellule à $t = 0$ correspond à quelle cellule à $t = 1$ |
+| **Wasserstein barycenters** | Indirectement : il faut les plans entre $\mu_k$ et le barycentre courant à chaque itération |
+
+**Outil typique** : **Sinkhorn** (note 05). Il calcule $P^*_\varepsilon$ (un plan régularisé) en $O(n^2)$ par itération, est différentiable, et donne le plan en sortie. C'est devenu le workhorse de l'OT computationnelle en ML depuis 2013.
+
+**Important** : pour ces applications, la dualité K-R **ne suffit pas**. Elle te donnerait juste "les deux distributions sont à distance 3.7" — totalement inutile pour transférer des labels ou interpoler une image. Il faut vraiment former le plan $P$.
+
+### Cas C : On veut les deux (rare mais existe)
+
+Dans certains cas, on s'intéresse aux deux simultanément :
+
+| Application | Pourquoi les deux |
+| :--- | :--- |
+| **Sinkhorn divergences comme loss** (Genevay-Cuturi 2018) | On utilise la valeur du coût Sinkhorn comme loss différentiable (cas A), mais $P^*_\varepsilon$ est calculé en passant (cas B). Alternative à WGAN sans réseau critique |
+| **Analyse exploratoire** | On veut quantifier la dissimilarité ($W_p$) ET comprendre la correspondance ($P$) |
+
+### Récap : quel outil pour quel besoin
+
+| Besoin | Outil | Coût | Output |
+| :--- | :--- | :--- | :--- |
+| Juste $W_1$ (scalaire) différentiable | Dualité K-R (note 04) | $O(n)$ par évaluation de $\varphi$ | $W_1$ + fonction $\varphi$ |
+| Le plan $P$ régularisé | Sinkhorn (note 05) | $O(n^2)$ par itération | $P^*_\varepsilon$ + coût ≈ $W_p^p$ |
+| Le plan $P$ exact | Simplex LP / hongrois | $O(n^3)$ | $P^*$ + coût $W_p^p$ |
+| $W_2$ entre gaussiennes | Formule fermée (Bures) | $O(d^3)$ ($d$ = dimension) | $W_2$ + map $T$ affine |
+
+> [!note]- Pourquoi cette confusion est légitime quand on découvre OT par WGAN
+> Beaucoup de gens découvrent OT à travers WGAN, qui est l'application "phare" en ML. Et WGAN n'a **besoin que du scalaire $W_1$** : la dualité K-R suffit, on ne forme jamais $P$. D'où la question naturelle "à quoi sert Sinkhorn alors ?".
+> 
+> La réponse : **WGAN n'est qu'une application parmi d'autres**. Toutes les applis qui demandent une **correspondance point à point** (color transfer, domain adaptation, morphing, biology) ont besoin du plan $P$, et là Sinkhorn devient indispensable. La diversité des applis OT en ML va bien au-delà du seul WGAN.
+
+Avec cette grille en tête, on peut maintenant lire les applications spécifiques.
+
 ## I. Wasserstein barycenters
 
 ### Le problème

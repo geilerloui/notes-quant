@@ -58,6 +58,87 @@ Le problème de Kantorovich est exactement de cette forme (LP) : la matrice de t
 
 Deux fonctions $\varphi : \Omega_s \to \mathbb{R}$ et $\psi : \Omega_t \to \mathbb{R}$, vivant chacune sur un seul espace, dont la **somme** est dominée par le coût. On les appelle **potentiels de Kantorovich**.
 
+### Visualisation : LP primal et LP dual côte à côte
+
+La façon la plus claire de saisir la dualité, c'est de **visualiser concrètement** comment se construisent les matrices et vecteurs du LP primal, et de voir ce que devient cette structure dans le LP dual.
+
+#### Setup du primal
+
+On part de deux distributions discrètes $P_r$ et $P_\theta$ (notation équivalente à $\mu$ et $\nu$ — c'est le vocabulaire qu'utilise WGAN) reliées par un plan de transport $\gamma$ :
+
+![[images/1-Mathématiques/Optimal transport/im1.png|273]]
+*Plan de transport $\gamma$ entre deux distributions discrètes. Chaque élément $\gamma(x_i, y_j)$ donne la masse transportée de $x_i$ vers $y_j$.*
+
+Pour mettre ça sous forme LP standard, on **vectorise** la matrice $\gamma \in \mathbb{R}^{n \times n}$ : on empile ses colonnes les unes sur les autres pour obtenir un vecteur de taille $n^2$. Même chose pour la matrice de coût. On obtient :
+
+- $x \in \mathbb{R}^{n^2}$ : le plan de transport vectorisé (les variables à trouver)
+- $c \in \mathbb{R}^{n^2}$ : les coûts vectorisés (donnés)
+- $A \in \mathbb{R}^{2n \times n^2}$ : la matrice des contraintes de marginales
+- $b \in \mathbb{R}^{2n}$ : les marginales empilées
+
+Le LP primal s'écrit alors :
+
+$$\min_x \, c^\top x \quad \text{s.c.} \quad Ax = b, \quad x \geq 0$$
+
+**En mots** : on minimise le coût total $c^\top x = \sum_{ij} c_{ij} \gamma_{ij}$, sous les contraintes que le plan de transport ait les bonnes marginales $P_r$ et $P_\theta$.
+
+![[images/1-Mathématiques/Optimal transport/im2 (1).png]]
+*Schéma matriciel du LP primal. À gauche : le vecteur $x$ des variables (chaque entrée est un $\gamma(x_i, y_j)$). On multiplie la matrice $A^\top$ par $x$ (le schéma utilise $A^\top$ par souci de lisibilité) pour obtenir le vecteur de contraintes $b$. **Lecture clé** : la première colonne de $A^\top$ multipliée par $x$ donne $\sum_i \gamma(x_1, y_i)$, c'est-à-dire la masse totale qui part du point $x_1$ — ce qui doit égaler $P_r(x_1)$. Les colonnes de $A^\top$ encodent donc directement les contraintes de marginales.*
+
+#### Limites du primal
+
+Trois problèmes apparaissent en pratique avec cette formulation primale :
+
+1. **Explosion de la dimension** : si les supports de $r$ et $\theta$ ont taille $n$, le LP a $n^2$ variables. Pour $n = 1000$ (taille modeste), on a déjà $10^6$ variables.
+2. **On veut souvent juste $W_p$, pas $\gamma^*$** : comme discuté en note 03, dans beaucoup d'applis ML on s'intéresse au **scalaire** $W_p$, pas au plan de transport. Le primal calcule les deux mais c'est "inutilement riche".
+3. **Le gradient par rapport à $\theta$** : dans WGAN, on veut dériver $W_1$ par rapport aux paramètres $\theta$ d'un modèle génératif. Or dans le primal, $\theta$ apparaît dans les **contraintes** (via $b$ et le quadrant gauche de $A^\top$), ce qui rend la différentiation peu naturelle.
+
+La **solution** à ces trois problèmes : passer au LP dual.
+
+#### Setup du dual
+
+Dans le dual, on n'a plus besoin de regarder l'espace produit $\Omega_s \times \Omega_t$ (de dimension $n^2$). On travaille uniquement sur l'espace de base (dimension $2n$, une variable par contrainte du primal) :
+
+![[images/1-Mathématiques/Optimal transport/im3 (2).png]]
+*Schéma matriciel du LP dual. Le vecteur $y$ de variables duales contient deux fonctions : $f$ (sur le support de $P_r$) et $g$ (sur le support de $P_\theta$). La contrainte $A^\top y \leq c$ donne, ligne par ligne, $f(x_i) + g(x_j) \leq d(x_i, x_j)$ pour toute paire $(i, j)$.*
+
+**Lecture de la contrainte.** Si on regarde la première colonne de $A$, on obtient :
+
+$$f(x_1) + g(x_1) \leq D_{1, 1}$$
+
+Et plus généralement, pour toute paire $(i, j)$ :
+
+$$f(x_i) + g(x_j) \leq D_{i, j} = d(x_i, x_j)$$
+
+C'est exactement la **contrainte de compatibilité** $\varphi(x) + \psi(y) \leq c(x, y)$ vue plus haut, avec $f = \varphi$ et $g = \psi$.
+
+**Lecture de l'objectif.** Le vecteur $b$ contient les probabilités $P_r$ et $P_\theta$, donc $b^\top y$ donne :
+
+$$b^\top y = \sum_i f(x_i) P_r(x_i) + \sum_j g(x_j) P_\theta(x_j) = \int f \, dr + \int g \, d\theta$$
+
+On retrouve l'objectif dual $\int \varphi \, d\mu + \int \psi \, d\nu$.
+
+#### Ce qu'on a gagné
+
+| | Primal | Dual |
+| :--- | :--- | :--- |
+| Nombre de variables | $n^2$ (plan de transport vectorisé) | $2n$ (deux fonctions $f, g$) |
+| Espace de travail | Produit $\Omega_s \times \Omega_t$ | Espaces $\Omega_s$ et $\Omega_t$ séparément |
+| Que cherche-t-on ? | Une matrice $\gamma$ | Deux fonctions $f, g$ |
+| Compatible avec backprop ? | Difficile ($\theta$ dans les contraintes) | Oui ($\theta$ dans l'objectif via $b$) |
+
+Passer du primal au dual, c'est passer de **"trouver une matrice $n \times n$"** à **"trouver deux vecteurs de taille $n$"**. C'est ce gain qui rend l'approche dualisée cruciale en grande dimension.
+
+#### Re-lecture de l'interprétation économique
+
+Maintenant qu'on a vu la structure LP, on peut relire l'interprétation économique avec un exemple concret. Imagine des **boulangeries** qui produisent des croissants (distribution $r$, marginale source) et des **hôtels** qui les consomment (distribution $\theta$, marginale cible). Le transport d'une boulangerie vers un hôtel a un coût fixe $d(x, y)$.
+
+- $f(x)$ = prix de vente du croissant à la boulangerie $x$ → la boulangerie veut **maximiser** $f$
+- $g(y)$ = prix d'achat du croissant à l'hôtel $y$ → l'hôtel veut **minimiser** son coût total
+- Contrainte : $f(x) + g(y) \leq d(x, y)$ — "l'écart de prix entre achat et vente ne peut pas dépasser le coût de transport", sinon les acteurs n'auraient aucun intérêt à commercer
+
+**L'apport conceptuel clé** : avant on avait une optimisation sur une **loi jointe** (objet 2D complexe), maintenant on a une optimisation sur **deux fonctions sur l'espace de base**. C'est là toute la valeur du passage au dual.
+
 ### Intuition économique
 
 L'interprétation classique est en termes de **transporteur** versus **commerçant** :
@@ -73,7 +154,7 @@ $$\underbrace{\int \varphi \, d\mu}_{\text{ce qu'il paie aux sources}} + \underb
 
 Le commerçant cherche à **maximiser** son profit (côté dual). Le théorème de dualité forte dit que ce profit maximal est **exactement égal** au coût minimal de transport.
 
-![[kantorovich_duality_economic.png|342]]
+![[kantorovich_duality_economic.png|450]]
 *Interprétation économique de la dualité. Pour transporter une unité de masse de $x$ vers $y$, le transporteur a deux options : **A** payer directement $c(x, y)$, ou **B** passer par un commerçant qui achète en $x$ à $\varphi(x)$ et revend en $y$ à $\psi(y)$ (coût net $\varphi(x) + \psi(y)$). Pour que l'option B soit envisageable, on doit avoir $\varphi(x) + \psi(y) \leq c(x, y)$. Le commerçant maximise son profit sous cette contrainte, et la **dualité forte** assure que ce profit maximal = coût minimal de transport.*
 
 ### Preuve heuristique

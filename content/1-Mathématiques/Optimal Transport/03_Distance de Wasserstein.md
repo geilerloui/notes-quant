@@ -21,6 +21,61 @@ Cette note construit la distance de Wasserstein, montre que c'est bien une **mé
 
 ## I. Définition
 
+### Kantorovich vs Wasserstein : argmin vs min
+
+Avant de définir Wasserstein, il faut bien comprendre **ce que c'est par rapport à Kantorovich** — c'est subtil parce que ce ne sont **pas deux problèmes différents**.
+
+**Wasserstein est un sous-produit de Kantorovich résolu**. Quand tu résouds le problème de Kantorovich, tu obtiens en fait **deux choses** :
+
+| Sortie de Kantorovich résolu | Quoi ? | C'est l'analogue de... |
+| :--- | :--- | :--- |
+| $\gamma^*$ | Le **couplage optimal** (la matrice de transport) | l'**argmin** d'un problème d'optim |
+| $\int c(x,y) \, d\gamma^*$ | La **valeur optimale du coût** (un scalaire) | le **min** d'un problème d'optim |
+
+Et **Wasserstein**, c'est juste la racine $p$-ième de la deuxième ligne :
+
+$$W_p(\mu, \nu) = \left( \int c(x,y) \, d\gamma^* \right)^{1/p}$$
+
+C'est-à-dire : **résoudre Kantorovich te donne tout** (le plan $\gamma^*$ ET son coût), et Wasserstein c'est juste le scalaire $(\text{coût})^{1/p}$ qu'on extrait du résultat.
+
+#### Une comparaison plus juste : argmin vs min
+
+L'analogie correcte vient de l'optimisation classique. Quand tu résouds $\min_x f(x)$ s.c. $x \in C$ :
+
+- **Argmin** : $x^* = \arg\min f$ (l'argument où le minimum est atteint)
+- **Min** : $f^* = f(x^*)$ (la valeur de $f$ en cet argument)
+
+Tu obtiens **les deux en même temps** quand tu résouds. C'est pas "deux problèmes différents", c'est juste deux façons de lire le même résultat.
+
+**Pareil pour Kantorovich** :
+- Le **couplage optimal $\gamma^*$** = argmin ("comment transporter")
+- La **valeur $W_p^p$** = min ("quel est le coût minimal")
+
+Quand tu lances un solveur LP pour Kantorovich, tu obtiens les deux. Wasserstein, c'est juste le nom qu'on donne au scalaire (élevé à $1/p$).
+
+#### Mais alors pourquoi en faire une note séparée ?
+
+Deux raisons :
+
+1. **Le scalaire $W_p$ a des propriétés mathématiques propres qu'on peut étudier sans toucher à $\gamma^*$** : c'est une **vraie distance** (symétrie, inégalité triangulaire), il définit un **espace métrique** $\mathcal{P}_p(\mathbb{R}^n)$, et pour $p=2$ une **structure riemannienne** (note 07). On peut faire toute une géométrie sur les distributions sans jamais regarder les couplages.
+
+2. **En pratique, on a parfois des moyens de calculer $W_p$ sans passer par $\gamma^*$** :
+   - La **dualité** (note 04) donne $W_1$ via $\sup_{\|f\|_{\text{Lip}} \leq 1} \mathbb{E}_\mu[f] - \mathbb{E}_\nu[f]$ : on cherche **une seule fonction** $f$, pas une matrice de transport
+   - **Sinkhorn** (note 05) calcule un $W_p$ régularisé par itérations rapides, sans former $\gamma^*$ explicitement
+   - Dans le **cas gaussien**, on a une formule fermée pour $W_2$ avec uniquement les moyennes et covariances, sans passer par $\gamma^*$
+
+**Donc** : $W_p$ "existe" comme objet autonome, même si conceptuellement il vient de Kantorovich résolu.
+
+#### En résumé ML
+
+Dans les usages ML typiques :
+
+- **Loss WGAN, domain adaptation, calibration** : on a besoin du **scalaire** $W_p$, pas du couplage. Ça tombe bien parce que la dualité et Sinkhorn nous le donnent rapidement.
+- **Image morphing, point cloud matching, optimal transport sur GPU** : on a besoin du **couplage** $\gamma^*$ pour savoir où va chaque pixel/point. Là il faut vraiment résoudre Kantorovich entièrement.
+
+> [!note]- À retenir
+> Résoudre Kantorovich produit **un couple** $(\gamma^*, \text{coût}^*)$. Wasserstein, c'est $(\text{coût}^*)^{1/p}$. Selon ce qu'on veut faire en aval, on s'intéresse à $\gamma^*$, à $W_p$, ou aux deux. La note d'aujourd'hui se concentre sur les **propriétés mathématiques de $W_p$ comme scalaire** — ce qui justifie de le traiter comme un objet en soi.
+
 ### La distance de Wasserstein-$p$
 
 À partir du problème de Kantorovich avec coût $c(x, y) = \|x - y\|^p$ (pour $p \geq 1$), on définit :

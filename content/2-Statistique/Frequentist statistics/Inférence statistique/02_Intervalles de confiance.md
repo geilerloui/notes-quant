@@ -292,7 +292,7 @@ $$\lim_{n \to \infty} \mathbb{P}(\lambda \in [0.12, 0.20]) \ge 0.95 \quad ? \qua
 > [!warning] Interprétation fréquentiste correcte
 > Si on **répétait** cette expérience (collecter 64 observations), alors $\lambda$ serait dans l'IC résultant environ $95\%$ du temps.
 
-![[im3 (2).png]]
+![[images/1-Mathématiques/Optimal transport/im3 (2).png]]
 
 Une autre interprétation, plus pratique : imaginons qu'on pèse un échantillon de souris femelles d'une population, on calcule leur moyenne. Puis on considère un grand nombre d'échantillons tirés par bootstrap sur lesquels on calcule leurs moyennes.
 

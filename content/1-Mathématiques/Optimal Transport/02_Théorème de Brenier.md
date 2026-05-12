@@ -24,7 +24,7 @@ Ce résultat est central parce qu'il relie le transport optimal à la théorie c
 4. Le théorème de **Rockafellar** : cycliquement monotone $\Leftrightarrow$ gradient d'une fonction convexe
 5. Le théorème de **Brenier** comme synthèse
 
-## I. Le cas 1D : la map optimale est monotone
+## I. Le cas 1D : la map optimale "T" est monotone
 
 On se place en dimension 1, avec $\mu, \nu$ deux distributions de densités $f, g$ "assez régulières". On veut résoudre le problème de Monge pour le coût quadratique :
 
@@ -62,10 +62,46 @@ Intuitivement : si la map optimale "croisait" deux points (envoyer un point de g
 > $$\Rightarrow (x_2 - x_1)(y_2 - y_1) \geq 0$$
 > 
 > Donc $x_1 < x_2 \Rightarrow y_1 \leq y_2$. La map est croissante.
+> 
+> ![[images/1-Mathématiques/Optimal transport/im6.png|326]]
+> *Illustration de la preuve par permutation : si la map "croise" (envoie $x_1$ à droite et $x_2$ à gauche alors que $x_1 < x_2$), on peut **échanger** les destinations pour diminuer le coût total. La map optimale ne croise donc jamais — elle est monotone croissante.*
 
 **Interprétation géométrique.** Sur la droite réelle, "transporter optimalement" $\mu$ vers $\nu$ revient à les **trier ensemble** : le $k$-ième percentile de $\mu$ va sur le $k$-ième percentile de $\nu$.
 
-## II. Construction explicite via les CDFs
+> [!warning] Attention au piège : $T$ agit point par point, pas par "morceaux"
+> Tentation naïve : "je prends un bout du tas de 10 d'épaisseur et je le mets dans le trou de capacité 20, donc il reste 10 à remplir". Mais $T$ envoie **chaque point** $x$ vers **un seul point** $T(x)$. Ce qui s'ajuste, c'est la **densité locale** : un intervalle infinitésimal $[x, x + dx]$ envoyé sur $[T(x), T(x) + T'(x)\, dx]$ a sa densité multipliée par $1/T'(x)$. Si $T'(x) > 1$ (la map "étire"), la densité diminue. Si $T'(x) < 1$ (la map "comprime"), la densité augmente. C'est cette élasticité locale qui permet à $T$ de transformer $\mu$ en $\nu$ même si les densités sont différentes.
+
+> [!example] Exemple 1 : translation pure (densités identiques décalées)
+> Tas uniforme sur $[0, 10]$ (densité 10) et trou uniforme sur $[5, 15]$ (densité 10 aussi). Total = 100 dans les deux cas.
+> 
+> Les quantiles :
+> 
+> | Quantile | $\mu$ : point dans le tas | $\nu$ : point dans le trou | $T$ envoie où |
+> | :--- | :---: | :---: | :---: |
+> | 0% | $x = 0$ | $y = 5$ | $T(0) = 5$ |
+> | 30% | $x = 3$ | $y = 8$ | $T(3) = 8$ |
+> | 50% | $x = 5$ | $y = 10$ | $T(5) = 10$ |
+> | 100% | $x = 10$ | $y = 15$ | $T(10) = 15$ |
+> 
+> Donc $T(x) = x + 5$ : **translation pure**, $T'(x) = 1$ partout. La densité ne change pas localement (1/$T'$ = 1), et tout le trou est rempli uniformément.
+
+> [!example] Exemple 2 : dilatation (densités différentes)
+> Tas uniforme sur $[0, 10]$ (densité 10), trou uniforme sur $[0, 20]$ (densité 5). Total = 100 dans les deux cas.
+> 
+> Les quantiles :
+> 
+> | Quantile | Tas | Trou | $T$ envoie |
+> | :--- | :---: | :---: | :---: |
+> | 0% | $x = 0$ | $y = 0$ | $T(0) = 0$ |
+> | 25% | $x = 2.5$ | $y = 5$ | $T(2.5) = 5$ |
+> | 50% | $x = 5$ | $y = 10$ | $T(5) = 10$ |
+> | 100% | $x = 10$ | $y = 20$ | $T(10) = 20$ |
+> 
+> Donc $T(x) = 2x$ : **dilatation par 2**, $T'(x) = 2$ partout. La densité est divisée par 2 : la matière étalée sur une largeur double a une densité moitié moindre. Vérification : densité du tas 10, divisée par $T'(x) = 2$, donne densité du trou 5. ✓
+> 
+> **C'est exactement ça qui répond à l'intuition "le trou est plus large que ce que j'apporte"** : $T$ peut **étirer** localement la matière, ce qui ajuste automatiquement la densité.
+
+## II. Construction explicite du "T" via les CDFs
 
 En 1D, on peut **construire explicitement** la map optimale via les fonctions de répartition (CDFs).
 
@@ -83,7 +119,7 @@ D'où l'expression explicite :
 
 $$\boxed{T(x) = G^{-1}(F(x))}$$
 
-![[brenier_1d_cdf.png|402]]
+![[brenier_1d_cdf.png|566]]
 *Construction de la map optimale en 1D via les CDFs. On lit l'altitude $u = F(x)$ sur la courbe rouge ($F$ = CDF de $\mu$), puis on redescend sur la courbe bleue ($G$ = CDF de $\nu$) pour trouver le point $T(x) = G^{-1}(u)$.*
 
 > [!example] Exemple : deux gaussiennes
@@ -130,7 +166,7 @@ $$\langle x_2 - x_1, \, y_2 - y_1 \rangle \geq 0$$
 
 C'est-à-dire que les vecteurs $\vec{x_1 x_2}$ et $\vec{y_1 y_2}$ font un **angle aigu** (produit scalaire positif).
 
-![[brenier_cyclical_monotone.png]]
+![[Pasted image 20260512150021.png]]
 *Cyclical monotonicity en dimension supérieure, cas $N=2$. Les vecteurs $\vec{x_1 x_2}$ (rouge, dans le domaine source) et $\vec{y_1 y_2}$ (bleu, dans le domaine cible) doivent faire un angle aigu. Géométriquement : la map ne peut pas "tordre" la masse, elle peut seulement la déplacer dans des directions cohérentes.*
 
 C'est la généralisation directe de la monotonie 1D ($x_1 < x_2 \Rightarrow y_1 \leq y_2$, qui est équivalent à $(x_2 - x_1)(y_2 - y_1) \geq 0$).
@@ -140,29 +176,111 @@ C'est la généralisation directe de la monotonie 1D ($x_1 < x_2 \Rightarrow y_1
 > 
 > En dimension 1, monotonie et cyclical monotonicity coïncident. Mais en dimension $\geq 2$, il existe des maps "monotones par paires" qui ne sont pas cycliquement monotones — elles violent l'inégalité dès $N = 3$.
 
+### Lecture algorithmique : élimination de sommets du polytope
+
+La cyclical monotonicity a une **interprétation algorithmique très éclairante** quand on la relie au [polytope de Birkhoff vu en note 01](01_Problème%20de%20Monge%20et%20Kantorovich.md).
+
+Dans l'exemple visuel 3×3, on avait **6 sommets** $\sigma_1, \ldots, \sigma_6$ correspondant aux 6 permutations. Chacun est un candidat à l'optimum, mais on doit calculer le coût pour chacun pour trouver le meilleur.
+
+**La cyclical monotonicity est un filtre** qui élimine directement des sommets sans avoir à calculer leur coût :
+
+| Candidat $\sigma_i$ | Test cyclical monotone | Statut |
+| :--- | :---: | :--- |
+| $\sigma_i$ ne crée pas de croisement | ✓ | Candidat valide à l'optimum |
+| $\sigma_i$ crée un croisement | ✗ | **Éliminé** : on peut faire mieux en échangeant |
+
+Concrètement : si une permutation $\sigma_i$ envoie $x_1 \to y_a$ et $x_2 \to y_b$ avec $\langle x_2 - x_1, y_b - y_a \rangle < 0$ (angle obtus), alors on **sait sans calcul** que ce n'est pas l'optimum — il suffirait d'échanger les destinations ($x_1 \to y_b$, $x_2 \to y_a$) pour diminuer le coût.
+
+**Conséquence forte** : au lieu d'explorer les $n!$ sommets du polytope, on ne regarde que les **sommets cycliquement monotones**, ce qui réduit drastiquement l'espace de recherche. Le théorème de Brenier (section V) renforce encore ça : pour le coût quadratique, **l'unique** sommet cycliquement monotone est l'optimum.
+
+> [!example]- Lien avec les conditions de KKT
+> Cette interprétation correspond exactement aux **conditions d'optimalité** que tu connais en programmation linéaire :
+> 
+> | Concept LP | Équivalent OT |
+> | :--- | :--- |
+> | Région faisable | Polytope $\Pi(\mu, \nu)$ |
+> | Conditions de KKT (nécessaire d'optimalité) | Cyclical monotonicity |
+> | Sommets candidats à l'optimum | Permutations cycliquement monotones |
+> | Minimisation de la fonction objectif | Choisir parmi les candidats celui qui minimise $\langle C, P \rangle$ |
+> 
+> En LP classique, KKT te dit "si l'optimum existe, il vérifie ces équations". En OT, la cyclical monotonicity te dit "si $P$ est optimal, alors aucun cycle ne crée de croisement". Même logique : on **caractérise** l'optimum par une condition nécessaire qui filtre l'espace.
+
 ## IV. Théorème de Rockafellar
 
-Le résultat clé qui transforme la cyclical monotonicity en quelque chose d'exploitable :
+### La transition : on a une condition nécessaire, mais pas exploitable
+
+Faisons le point sur ce qu'on a obtenu :
+
+- **En 1D** (section I-II) : la map optimale est monotone, et on a la formule explicite $T = G^{-1} \circ F$. Concret, calculable.
+- **En 2D+** (section III) : la map optimale est cycliquement monotone. C'est une **condition nécessaire** d'optimalité, mais **abstraite** : elle dit "pour tout $N$ et toute permutation cyclique, l'inégalité $\sum \langle x_i, y_{i+1} - y_i \rangle \leq 0$ doit tenir". Difficile à tester en pratique, et surtout difficile de **construire** une telle map.
+
+Ce qu'on cherche : une **forme exploitable** de la cyclical monotonicity. Quelque chose qui nous permette de paramétrer les maps optimales par un objet mathématique bien connu.
+
+C'est exactement ce que fait le théorème de Rockafellar : il transforme une condition combinatoire (toutes les permutations cycliques) en une condition analytique (convexité d'une fonction).
+
+### Première observation : les gradients convexes sont cycliquement monotones
+
+Commençons par le sens "facile" : si on prend une fonction convexe $\varphi : \mathbb{R}^n \to \mathbb{R}$ différentiable, alors son gradient $\nabla \varphi$ est automatiquement cycliquement monotone.
+
+> [!note]- Preuve (sens facile)
+> Rappel : pour une fonction convexe différentiable, on a l'inégalité de **tangence sous le graphe** :
+> 
+> $$\varphi(y) \geq \varphi(x) + \langle \nabla \varphi(x), y - x \rangle \quad \forall x, y$$
+> 
+> Appliquons cette inégalité aux points $x_i, x_{i+1}$ de notre cycle :
+> 
+> $$\varphi(x_{i+1}) \geq \varphi(x_i) + \langle \nabla \varphi(x_i), x_{i+1} - x_i \rangle$$
+> 
+> En sommant sur le cycle ($i = 1, \ldots, N$ avec indices modulo $N$), le membre de gauche **télescope** :
+> 
+> $$\sum_{i=1}^N \varphi(x_{i+1}) = \sum_{i=1}^N \varphi(x_i)$$
+> 
+> Donc :
+> 
+> $$0 \geq \sum_{i=1}^N \langle \nabla \varphi(x_i), x_{i+1} - x_i \rangle$$
+> 
+> En posant $y_i = \nabla \varphi(x_i)$ et en réarrangeant, c'est exactement la condition cyclical monotone.
+
+**Conclusion** : tout gradient d'une fonction convexe est cycliquement monotone. C'est gratuit, c'est juste la convexité.
+
+### Le théorème de Rockafellar : la réciproque
+
+Rockafellar (1966) a montré le résultat **inverse**, qui est beaucoup plus profond :
 
 > [!quote] Théorème (Rockafellar, 1966)
-> Un ensemble $\Gamma \subset \mathbb{R}^n \times \mathbb{R}^n$ est cycliquement monotone si et seulement si il est contenu dans le **sous-différentiel** d'une fonction **convexe** $\varphi : \mathbb{R}^n \to \mathbb{R}$ :
+> Un ensemble $\Gamma \subset \mathbb{R}^n \times \mathbb{R}^n$ est cycliquement monotone **si et seulement si** il est contenu dans le **sous-différentiel** d'une fonction **convexe** $\varphi : \mathbb{R}^n \to \mathbb{R}$ :
 > 
 > $$\Gamma \subset \{(x, y) : y \in \partial \varphi(x)\}$$
 > 
 > En particulier, si la map $T$ est cycliquement monotone, alors $T(x) \in \partial \varphi(x)$ pour une certaine fonction convexe $\varphi$. Si $\varphi$ est différentiable, cela donne $T(x) = \nabla \varphi(x)$.
 
-**Intuition.** Pour une fonction convexe $\varphi$ et son gradient $\nabla \varphi$ :
-
-$$\sum_{i=1}^N \langle x_i, \nabla\varphi(x_{i+1}) - \nabla\varphi(x_i) \rangle \leq 0$$
-
-découle de l'inégalité de convexité $\varphi(x_{i+1}) \geq \varphi(x_i) + \langle \nabla\varphi(x_i), x_{i+1} - x_i \rangle$ sommée sur le cycle. Rockafellar montre la réciproque : toute map cycliquement monotone est de cette forme.
+C'est un théorème de **caractérisation** : il dit que les deux notions (cyclical monotone et gradient convexe) sont **équivalentes**. On peut passer librement de l'une à l'autre.
 
 > [!note]- Rappel : sous-différentiel
 > Pour une fonction convexe $\varphi$, le sous-différentiel en $x$ est :
 > 
 > $$\partial \varphi(x) = \{p \in \mathbb{R}^n : \varphi(y) \geq \varphi(x) + \langle p, y - x \rangle \, \forall y\}$$
 > 
-> Si $\varphi$ est différentiable en $x$, alors $\partial \varphi(x) = \{\nabla \varphi(x)\}$. Sinon (par exemple en un coin de $\varphi$), $\partial \varphi(x)$ contient tous les "gradients admissibles".
+> Si $\varphi$ est différentiable en $x$, alors $\partial \varphi(x) = \{\nabla \varphi(x)\}$ (singleton). Sinon (par exemple en un coin de $\varphi$, comme $|x|$ en $x = 0$), $\partial \varphi(x)$ contient tous les "gradients admissibles". C'est la généralisation naturelle du gradient aux fonctions convexes non-différentiables.
+
+### Pourquoi c'est crucial : on a maintenant une paramétrisation utilisable
+
+| Sans Rockafellar | Avec Rockafellar |
+| :--- | :--- |
+| Chercher $T$ cycliquement monotone | Chercher $\varphi$ convexe et calculer $\nabla \varphi$ |
+| Condition combinatoire (toutes les permutations cycliques de $N$ points pour tout $N$) | Condition analytique (convexité d'une seule fonction) |
+| Pas de formule constructive | Théorie convexe classique, EDP, optimisation |
+
+C'est exactement le **même type de pont** qu'en optimisation convexe : on ne teste pas "$f$ est convexe" en regardant toutes les paires de points, on regarde si la Hessienne est SDP. Rockafellar joue le rôle de "passe d'une caractérisation combinatoire à une caractérisation analytique".
+
+> [!example] Vérification en 1D
+> En 1D, on avait montré que la map optimale est monotone croissante avec la formule $T(x) = G^{-1}(F(x))$. Rockafellar dit qu'elle doit aussi être le gradient d'une convexe.
+> 
+> En 1D, une fonction $T$ est croissante **si et seulement si** elle est la dérivée d'une fonction convexe. En effet :
+> 
+> $$\varphi(x) = \int_0^x T(t) \, dt \quad \Rightarrow \quad \varphi'(x) = T(x), \quad \varphi''(x) = T'(x) \geq 0$$
+> 
+> donc $\varphi$ est bien convexe. Tout se boucle : monotone $\Leftrightarrow$ cycliquement monotone (en 1D) $\Leftrightarrow$ gradient de convexe.
 
 ## V. Théorème de Brenier
 

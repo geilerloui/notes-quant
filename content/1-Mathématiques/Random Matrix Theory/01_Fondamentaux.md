@@ -16,12 +16,26 @@ Rappel : $\lambda \in \mathbb{R}$ est valeur propre de $M$ s'il existe un vecteu
 
 Quand on parlera de "loi du spectre" en RMT, on parlera de **l'histogramme de ces $N$ valeurs propres**. On tire une matrice aléatoire $N \times N$, on calcule ses $N$ valeurs propres, on les met dans un histogramme. La question centrale : à quoi ressemble cet histogramme quand $N$ devient grand ?
 
-> [!example] Exemple à la main — spectre d'une matrice 3×3
+> [!example] Exemple à la main — spectre d'une matrice 2×2
 > Soit
-> $$M = \begin{pmatrix} 0.5 & 1.2 & -0.8 \\ 1.2 & -0.3 & 0.6 \\ -0.8 & 0.6 & 1.1 \end{pmatrix}$$
-> Cette matrice est symétrique (donc ses valeurs propres sont réelles), avec des entrées d'ordre 1. Le calcul donne trois valeurs propres :
-> $$\lambda_1 \approx -1.43, \quad \lambda_2 \approx 0.49, \quad \lambda_3 \approx 2.24$$
-> Le spectre de $M$ est l'ensemble $\{-1.43, 0.49, 2.24\}$. On peut tracer un mini-histogramme à 3 barres — c'est la "distribution spectrale" de cette matrice particulière.
+> $$M = \begin{pmatrix} 2.48 & 1.04 \\ 1.04 & 0.92 \end{pmatrix}$$
+> Cette matrice est symétrique, avec deux valeurs propres bien contrastées :
+> $$\lambda_1 = 3.0, \quad \lambda_2 = 0.4$$
+> associées aux vecteurs propres
+> $$v_1 = \begin{pmatrix} 0.89 \\ 0.45 \end{pmatrix}, \quad v_2 = \begin{pmatrix} -0.45 \\ 0.89 \end{pmatrix}$$
+> Ces deux vecteurs sont orthogonaux ($v_1^\top v_2 = 0$) et de norme 1 — ils forment une **base orthonormale** de $\mathbb{R}^2$.
+>
+> Cela signifie que n'importe quel vecteur $w \in \mathbb{R}^2$ s'écrit comme combinaison linéaire de $v_1$ et $v_2$ :
+> $$w = \alpha_1 v_1 + \alpha_2 v_2, \quad \text{avec} \quad \alpha_i = v_i^\top w$$
+> Par exemple, pour $w = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$ : $\alpha_1 = 0.89$, $\alpha_2 = -0.45$. Le vecteur $w$ se décompose en $0.89$ parts de direction $v_1$ et $-0.45$ parts de direction $v_2$. Ce sont exactement les coordonnées de $w$ dans le repère des vecteurs propres — c'est-à-dire $Q^\top w$ avec $Q = [v_1 | v_2]$.
+
+> [!warning] Théorème spectral
+> Toute matrice **symétrique réelle** $M \in \mathbb{R}^{N \times N}$ admet $N$ valeurs propres réelles et $N$ vecteurs propres **orthogonaux entre eux**. On peut donc écrire
+> $$M = Q \Lambda Q^\top$$
+> avec $Q = [v_1 | \cdots | v_N]$ orthogonale ($Q^\top Q = I$) et $\Lambda = \text{diag}(\lambda_1, \dots, \lambda_N)$. Les vecteurs propres forment une base orthonormale de $\mathbb{R}^N$ — tout vecteur $w$ se décompose uniquement comme $w = \sum_i (v_i^\top w)\, v_i$.
+
+![[images/1-Mathématiques/Random Matrix Theory/figA_vecteurs_propres.png]]
+*Figure A. Chaque vecteur bleu (sur le cercle unité) est transformé en un vecteur rouge par $M$ — en général il change de direction. Seuls les deux vecteurs propres (vert foncé) restent sur leur droite : $\lambda_1 = 3.0$ étire, $\lambda_2 = 0.4$ compresse.*
 
 ### (ii) Invariance orthogonale, sans algèbre
 
@@ -33,11 +47,33 @@ Une matrice orthogonale $O$ représente une **rotation** de l'espace (éventuell
 Conséquence concrète qu'on utilisera : les **vecteurs propres** d'une telle matrice pointent dans des directions complètement uniformes sur la sphère. La matrice est "isotrope" — elle ne sait rien des axes de coordonnées.
 
 > [!example] Exemple à la main — rotation préserve le spectre
-> Reprenons la matrice $M$ ci-dessus. Sa rotation par $O = \begin{pmatrix} \cos\theta & -\sin\theta & 0 \\ \sin\theta & \cos\theta & 0 \\ 0 & 0 & 1 \end{pmatrix}$ (rotation d'angle $\theta = \pi/4$ dans le plan $(x,y)$) donne une nouvelle matrice $M' = O M O^\top$. Ses entrées sont *différentes* de celles de $M$ — par exemple $M'_{11} \approx 1.31$ au lieu de $0.5$.
+> Reprenons la matrice $M = \begin{pmatrix} 2.48 & 1.04 \\ 1.04 & 0.92 \end{pmatrix}$. Appliquons une rotation d'angle $\theta = \pi/4$ : $M' = O M O^\top$ avec $O = \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}$. Les entrées de $M'$ sont différentes — par exemple $M'_{11} \approx 1.78$ au lieu de $2.48$.
 >
-> Mais ses **valeurs propres sont exactement les mêmes** : $\{-1.43, 0.49, 2.24\}$. Le spectre est invariant par changement de repère. C'est une propriété générale, pas un hasard.
+> Mais ses **valeurs propres sont exactement les mêmes** : $\{0.4, 3.0\}$. Le spectre est invariant par changement de repère. C'est une propriété générale, pas un hasard.
 >
 > Pour une matrice GOE, ce n'est pas seulement le spectre mais aussi **toute la distribution** de la matrice qui est invariante par $M \mapsto OMO^\top$ : si on rejoue le tirage de $M$ après rotation, on retombe sur la même loi.
+
+![[images/1-Mathématiques/Random Matrix Theory/figB_ellipse.png]]
+*Figure B. Le cercle unité est transformé en ellipse par $M$. Les axes de l'ellipse coïncident exactement avec les vecteurs propres, et leur longueur est proportionnelle à la valeur propre correspondante : la valeur propre mesure l'étirement dans la direction propre.*
+
+### (iii) Diagonalisation et changement de base
+
+Pour une matrice **symétrique** $\Sigma$, les vecteurs propres sont toujours orthogonaux entre eux — c'est le théorème spectral. On peut donc former la matrice $P = [v_1 | v_2 | \cdots | v_N]$ dont les colonnes sont les vecteurs propres normalisés : $P$ est une matrice **orthogonale** ($P^{-1} = P^\top$). On obtient alors la décomposition
+
+$$\Sigma = P \Lambda P^\top$$
+
+avec $\Lambda = \text{diag}(\lambda_1, \dots, \lambda_N)$ la matrice diagonale des valeurs propres. C'est la **diagonalisation** de $\Sigma$.
+
+L'intérêt concret : $P^\top x$ est un **changement de base** qui exprime le vecteur $x$ dans le repère des vecteurs propres. Dans ce nouveau repère, $\Sigma$ devient $\Lambda$ — une matrice diagonale. Cela signifie que les composantes de $P^\top x$ sont **décorrélées** : chaque axe capture une source de variance indépendante, de magnitude $\lambda_i$.
+
+> [!warning] Pourquoi c'est central en RMT
+> Les matrices de covariance $\Sigma$ sont toujours symétriques. Leur diagonalisation $\Sigma = P\Lambda P^\top$ décompose le risque d'un portefeuille en directions indépendantes — les vecteurs propres sont les **facteurs de risque**, les valeurs propres leur **variance**. La question de RMT est précisément : quand $\Sigma$ est estimée sur des données finies, quels $\lambda_i$ et $v_i$ sont du signal, et lesquels sont du bruit statistique ?
+
+![[images/1-Mathématiques/Random Matrix Theory/figC_diagonalisation.png]]
+*Figure C. À gauche : l'ellipse de $\Sigma$ dans le repère original — les axes propres sont obliques. À droite : après le changement de base $P^\top x$, l'ellipse est alignée sur les axes de coordonnées. Les directions sont décorrélées, chaque axe porte une variance $\lambda_i$.*
+
+![[images/1-Mathématiques/Random Matrix Theory/figD_pca_nuage.png]]
+*Figure D. À gauche : nuage de données corrélées dans le repère original, avec les vecteurs propres en rouge. À droite : le même nuage après projection $P^\top x$ — les données sont décorrélées et les axes de variance maximale sont alignés sur les axes de coordonnées. C'est exactement ce que fait la PCA.*
 
 ## I. La question
 
@@ -127,10 +163,10 @@ $$\widetilde{M} = \frac{M}{\sqrt{N}}$$
 Ses valeurs propres sont divisées par $\sqrt{N}$, donc $\lambda_{\max}(\widetilde{M}) \approx 2$ **indépendamment de $N$**. Le spectre se range sur l'intervalle $[-2, 2]$ quelle que soit la taille. C'est sur cet intervalle stable que vit la loi du demi-cercle.
 
 > [!example] Exemple à la main — l'effet de la normalisation
-> Reprenons notre matrice 3×3 de la section 0 :
-> $$M = \begin{pmatrix} 0.5 & 1.2 & -0.8 \\ 1.2 & -0.3 & 0.6 \\ -0.8 & 0.6 & 1.1 \end{pmatrix}, \quad \text{spectre} : \{-1.43, \; 0.49, \; 2.24\}$$
-> On divise par $\sqrt{N} = \sqrt{3} \approx 1.732$. Les valeurs propres sont divisées par ce facteur :
-> $$\widetilde{M} = M / \sqrt{3} \quad \Longrightarrow \quad \text{spectre} : \{-0.83, \; 0.28, \; 1.29\}$$
+> Reprenons notre matrice 2×2 :
+> $$M = \begin{pmatrix} 2.48 & 1.04 \\ 1.04 & 0.92 \end{pmatrix}, \quad \text{spectre} : \{0.4, 3.0\}$$
+> On divise par $\sqrt{N} = \sqrt{2} \approx 1.414$. Les valeurs propres sont divisées par ce facteur :
+> $$\widetilde{M} = M / \sqrt{2} \quad \Longrightarrow \quad \text{spectre} : \{0.28, 2.12\}$$
 > Toutes les valeurs propres tombent dans l'intervalle $[-2, 2]$. Si on refaisait l'exercice à $N = 1000$ sans normaliser, $\lambda_{\max}$ serait $\sim 63$ et le spectre s'étalerait sur $[-63, 63]$. Avec normalisation, il reste cantonné dans $[-2, 2]$, peu importe $N$.
 
 > [!example] Analogie : le théorème central limite

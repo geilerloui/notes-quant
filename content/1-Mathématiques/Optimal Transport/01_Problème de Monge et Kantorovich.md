@@ -75,7 +75,7 @@ $$T^{-1}(B) = A_1 \cup A_2 \cup A_3$$
 
 (des points pris à des endroits différents du tas peuvent atterrir dans le même intervalle $B$)
 
-![[im3 (1) 1.png|448]]
+![[im3 (1) 1.png|403]]
 *Trois morceaux $A_1, A_2, A_3$ du tas (rouge) sont envoyés par $T$ dans le même intervalle $B$ du trou (bleu). La terre qui arrive dans $B$ vient de ces trois morceaux.*
 
 La **condition de conservation** s'écrit alors : la quantité totale de terre qui arrive dans $B$ doit être égale à la hauteur prescrite par $\nu$ sur $B$ :

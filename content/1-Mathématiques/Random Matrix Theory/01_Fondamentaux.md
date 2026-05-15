@@ -53,7 +53,7 @@ Conséquence concrète qu'on utilisera : les **vecteurs propres** d'une telle ma
 >
 > Pour une matrice GOE, ce n'est pas seulement le spectre mais aussi **toute la distribution** de la matrice qui est invariante par $M \mapsto OMO^\top$ : si on rejoue le tirage de $M$ après rotation, on retombe sur la même loi.
 
-![[images/1-Mathématiques/Random Matrix Theory/figB_ellipse.png]]
+![[images/1-Mathématiques/Random Matrix Theory/figB_ellipse.png|289]]
 *Figure B. Le cercle unité est transformé en ellipse par $M$. Les axes de l'ellipse coïncident exactement avec les vecteurs propres, et leur longueur est proportionnelle à la valeur propre correspondante : la valeur propre mesure l'étirement dans la direction propre.*
 
 ### (iii) Diagonalisation et changement de base
@@ -64,7 +64,18 @@ $$\Sigma = P \Lambda P^\top$$
 
 avec $\Lambda = \text{diag}(\lambda_1, \dots, \lambda_N)$ la matrice diagonale des valeurs propres. C'est la **diagonalisation** de $\Sigma$.
 
-L'intérêt concret : $P^\top x$ est un **changement de base** qui exprime le vecteur $x$ dans le repère des vecteurs propres. Dans ce nouveau repère, $\Sigma$ devient $\Lambda$ — une matrice diagonale. Cela signifie que les composantes de $P^\top x$ sont **décorrélées** : chaque axe capture une source de variance indépendante, de magnitude $\lambda_i$.
+La décomposition $\Sigma = P \Lambda P^\top$ est une tautologie algébrique — on n'a "rien fait", c'est la même matrice écrite autrement. L'intérêt est qu'elle **sépare deux types d'information** mélangés dans $\Sigma$ : $P$ dit *où* (les directions), $\Lambda$ dit *combien* (les amplitudes). Cette séparation rend trois opérations triviales qui seraient autrement coûteuses :
+
+$$\Sigma^{-1} = P \Lambda^{-1} P^\top \quad \text{(inverser = prendre } 1/\lambda_i \text{)}, \qquad \Sigma^{1/2} = P \Lambda^{1/2} P^\top, \qquad \Sigma \approx \sum_{i=1}^k \lambda_i v_i v_i^\top \text{ (troncature rang } k\text{)}$$
+
+Mais l'usage principal est ailleurs. La vraie séquence en pratique :
+
+1. Estimer $\Sigma$ sur les données
+2. Décomposer pour **obtenir $P$** — c'est l'objectif, pas un résultat intermédiaire
+3. Calculer $P^\top X$ — **pivoter tous les points de données** dans le repère propre
+4. Dans ce repère, les colonnes de $P^\top X$ sont décorrélées et classées par variance décroissante $\lambda_1 \geq \lambda_2 \geq \dots$
+
+$P^\top x$ c'est une **rotation pure** ($P$ est orthogonale, elle préserve distances et angles). Les points ne bougent pas dans l'absolu — on les regarde depuis un nouveau repère, celui où les axes correspondent aux directions de variance maximale.
 
 > [!warning] Pourquoi c'est central en RMT
 > Les matrices de covariance $\Sigma$ sont toujours symétriques. Leur diagonalisation $\Sigma = P\Lambda P^\top$ décompose le risque d'un portefeuille en directions indépendantes — les vecteurs propres sont les **facteurs de risque**, les valeurs propres leur **variance**. La question de RMT est précisément : quand $\Sigma$ est estimée sur des données finies, quels $\lambda_i$ et $v_i$ sont du signal, et lesquels sont du bruit statistique ?
@@ -74,6 +85,92 @@ L'intérêt concret : $P^\top x$ est un **changement de base** qui exprime le ve
 
 ![[images/1-Mathématiques/Random Matrix Theory/figD_pca_nuage.png]]
 *Figure D. À gauche : nuage de données corrélées dans le repère original, avec les vecteurs propres en rouge. À droite : le même nuage après projection $P^\top x$ — les données sont décorrélées et les axes de variance maximale sont alignés sur les axes de coordonnées. C'est exactement ce que fait la PCA.*
+
+### (iv) Matrices PSD et matrices de projection
+
+#### Définie positive, semi-définie positive — les 4 catégories
+
+Une matrice symétrique $A$ est caractérisée par le signe de la **forme quadratique** $x^\top A x$. Ce scalaire mesure si $A x$ pointe dans la même direction que $x$ (produit scalaire positif) ou en sens opposé.
+
+> [!warning] Les 4 catégories
+> Soit $A$ une matrice symétrique réelle. Pour tout vecteur non nul $x$ :
+>
+> **Définie positive (PD)** : $x^\top A x > 0$ — toutes les valeurs propres $> 0$. $Ax$ pointe toujours dans la même demi-sphère que $x$.
+>
+> **Semi-définie positive (PSD)** : $x^\top A x \geq 0$ — valeurs propres $\geq 0$, au moins une nulle. Il existe des directions dans lesquelles $A$ écrase tout à zéro.
+>
+> **Définie négative (ND)** : $x^\top A x < 0$ — toutes les valeurs propres $< 0$. $Ax$ pointe toujours en sens opposé à $x$.
+>
+> **Indéfinie** : le signe de $x^\top Ax$ dépend de $x$ — des valeurs propres positives et négatives coexistent.
+
+![[images/1-Mathématiques/Random Matrix Theory/figPSD1_transformation.png]]
+*Figure PSD-1. Les 4 catégories vues comme transformations : en PD, $Ax$ reste dans la même demi-sphère que $x$ (angle aigu). En PSD, certaines directions sont écrasées. En ND, $Ax$ retourne systématiquement $x$. En indéfinie, le signe dépend de la direction.*
+
+La forme quadratique $f(x) = x^\top A x$ peut être tracée en 3D en faisant varier $x$ — elle révèle immédiatement la catégorie. La connexion avec la vision "transformation" : $x^\top (Ax)$ est le produit scalaire entre $x$ et son image $Ax$, donc son signe dit si l'angle entre les deux est aigu ou obtus.
+
+![[images/1-Mathématiques/Random Matrix Theory/figPSD2_quadratique.png]]
+*Figure PSD-2. La forme quadratique $f(x) = x^\top A x$ tracée en 3D pour les 4 catégories. PD → bol convexe avec un unique minimum global. PSD → gouttière, minimum sur toute une droite (direction nulle). ND → bol concave, unique maximum. Indéfinie → point de selle, ni minimum ni maximum.*
+
+#### Pourquoi les matrices de covariance sont toujours PSD
+
+Une matrice de covariance empirique s'écrit $\Sigma = \frac{1}{T} X X^\top$. Pour tout vecteur $w$ :
+
+$$w^\top \Sigma w = \frac{1}{T} w^\top X X^\top w = \frac{1}{T} \|X^\top w\|^2 \geq 0$$
+
+C'est une norme au carré — toujours positive ou nulle. Donc $\Sigma$ est automatiquement PSD, sans hypothèse sur les données. Si $X$ est plein rang ($T > N$), alors $\Sigma$ est même PD et inversible. Si $T < N$ (moins d'observations que de dimensions), $\Sigma$ est singulière — certaines valeurs propres sont nulles et $\Sigma^{-1}$ n'existe pas. C'est un problème concret en finance quand on a 200 actifs et 150 jours de données.
+
+#### Matrice de projection
+
+La décomposition spectrale $\Sigma = \sum_i \lambda_i v_i v_i^\top$ fait apparaître les matrices $P_i = v_i v_i^\top$. Chacune est une **matrice de projection** : elle projette orthogonalement n'importe quel vecteur sur la droite engendrée par $v_i$.
+
+$$P_i w = v_i v_i^\top w = (v_i^\top w) v_i$$
+
+Le scalaire $v_i^\top w$ est la coordonnée de $w$ dans la direction $v_i$, et $P_i w$ est le vecteur obtenu en gardant uniquement cette composante. On vérifie que $P_i^2 = P_i$ (projeter deux fois = projeter une fois) et $P_i P_j = 0$ pour $i \neq j$ (les projections sont orthogonales entre elles).
+
+La décomposition spectrale s'écrit alors :
+
+$$\Sigma = \sum_{i=1}^N \lambda_i P_i = \sum_{i=1}^N \lambda_i v_i v_i^\top$$
+
+$\Sigma$ est une **somme pondérée de projections** — chaque direction propre contribue à hauteur de sa variance $\lambda_i$. La troncature rang $k$ garde les $k$ termes dominants et écarte les $N-k$ directions de faible variance (ou de bruit).
+
+![[images/1-Mathématiques/Random Matrix Theory/figProjection.png]]
+*Figure E. Décomposition de $w$ via les matrices de projection. Gauche : $P_1 w = (v_1^\top w) v_1$ — projection orthogonale sur $v_1$. Milieu : $P_2 w = (v_2^\top w) v_2$ — projection sur $v_2$. Droite : $w = P_1 w + P_2 w = \alpha_1 v_1 + \alpha_2 v_2$ — reconstruction exacte par somme des deux projections.*
+
+### (v) Déterminant
+
+Le **déterminant** de $A$ mesure le **facteur de volume** de la transformation $x \mapsto Ax$ : si tu prends un cube unité dans $\mathbb{R}^N$ et que tu lui appliques $A$, son volume est multiplié par $|\det(A)|$.
+
+$$\det(A) = \prod_{i=1}^N \lambda_i$$
+
+Cette identité est fondamentale. Elle relie directement déterminant et spectre.
+
+> [!warning] Trois cas clés
+> **$\det(A) > 0$** : la transformation préserve l'orientation et étire le volume. Toutes les valeurs propres ont le même signe (toutes positives pour PD).
+>
+> **$\det(A) = 0$** : au moins une valeur propre est nulle. La transformation écrase l'espace sur un sous-espace de dimension inférieure — la matrice est **singulière**, non inversible. En finance : $\Sigma$ non-inversible si $T < N$.
+>
+> **$\det(A) < 0$** : la transformation retourne l'orientation (comme un miroir). Au moins une valeur propre est négative — la matrice est indéfinie.
+
+![[images/1-Mathématiques/Random Matrix Theory/figDet.png]]
+*Figure F. Le déterminant comme facteur de volume. Gauche : $\det > 0$, le carré unité est étiré en parallélogramme, volume augmenté. Milieu : $\det = 0$, le carré est écrasé sur une droite — la matrice est singulière. Droite : $\det < 0$, l'orientation est retournée (miroir).*
+
+En pratique, $\det(\Sigma)$ mesure le "volume total de risque" d'un portefeuille — le produit de toutes les variances directionnelles. Si une direction de risque est nulle ($\lambda_i = 0$), le déterminant s'annule et $\Sigma$ n'est plus inversible, ce qui bloque l'optimisation de Markowitz.
+
+### (vi) Deux visions d'une matrice
+
+Un piège récurrent en algèbre linéaire appliquée : confondre **matrice comme fonction** et **matrice comme données**. Ce sont deux objets conceptuellement différents, même si la notation est identique.
+
+**Matrice comme fonction** : $A \in \mathbb{R}^{N \times P}$ est une transformation linéaire qui envoie des vecteurs de $\mathbb{R}^P$ vers $\mathbb{R}^N$. Les colonnes de $A$ décrivent où vont les vecteurs de base standard. Tout ce qu'on a vu jusqu'ici — valeurs propres, diagonalisation, PSD — concerne cette vision : on étudie comment $A$ déforme l'espace.
+
+**Matrice comme données** : $X \in \mathbb{R}^{T \times N}$ est un tableau où chaque ligne est une observation ($T$ jours de données) et chaque colonne est une variable ($N$ actifs). Ici $X$ ne "transforme" rien — c'est un stockage d'information. Les colonnes de $X$ sont des séries temporelles, pas des directions de transformation.
+
+La confusion surgit parce que $\Sigma = \frac{1}{T} X^\top X$ utilise $X$ comme données pour construire une matrice-fonction $\Sigma$. $X$ est du côté données, $\Sigma$ est du côté fonction.
+
+> [!example] En finance
+> $X \in \mathbb{R}^{T \times N}$ : $T = 500$ jours, $N = 200$ actifs. Chaque ligne de $X$ est un vecteur de rendements journaliers — c'est une **donnée**. $\Sigma = \frac{1}{T} X^\top X \in \mathbb{R}^{N \times N}$ est la covariance empirique — c'est une **fonction** qui transforme des portefeuilles (vecteurs de poids $w \in \mathbb{R}^N$) en vecteurs de risque $\Sigma w$. Appliquer $P^\top$ à $X$ (changer de base) opère sur les données : chaque observation est réexprimée dans le repère propre.
+
+![[images/1-Mathématiques/Random Matrix Theory/figDeuxVisions.png]]
+*Figure G. Gauche : matrice comme fonction — des vecteurs $x$ sont transformés en $Ax$, les colonnes de $A$ définissent où vont les vecteurs de base. Droite : matrice comme données — chaque point est une observation, les axes sont des features. Même notation $A$, deux objets conceptuellement différents.*
 
 ## I. La question
 

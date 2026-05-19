@@ -651,7 +651,7 @@ Le FF5 améliore le FF3 sur deux fronts : il absorbe les anomalies de profitabil
 
 ---
 
-## Asness, Moskowitz & Pedersen (2013) — Value and Momentum Everywhere
+# Asness, Moskowitz & Pedersen (2013) — Value and Momentum Everywhere
 
 Le papier étudie deux stratégies d'investissement sur **8 classes d'actifs** simultanément : la stratégie **value** (acheter des actifs sous-évalués) et la stratégie **momentum** (acheter des actifs qui ont bien performé récemment).
 

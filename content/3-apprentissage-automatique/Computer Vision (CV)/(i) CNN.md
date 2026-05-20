@@ -60,12 +60,12 @@ Le filtre $[-1, 0, 1]$ calcule essentiellement *« case de droite − case de ga
 
 ### 4. Tableau récapitulatif des filtres 1D classiques
 
-| Filtre | Calcule | Approxime | Détecte |
-|---|---|---|---|
-| $[-1, 1]$ | $f[i+1] - f[i]$ | $f'$ (ordre 1) | variation locale (asymétrique) |
-| $[-1, 0, 1]$ | $f[i+1] - f[i-1]$ | $f'$ (ordre 2) | variation locale (symétrique) |
-| $[1, -2, 1]$ | $f[i-1] - 2f[i] + f[i+1]$ | $f''$ | concavité, points d'inflexion |
-| $[1, 1, 1]/3$ | moyenne des 3 voisins | lissage | atténuation du bruit |
+| Filtre        | Calcule                   | Approxime      | Détecte                        |
+| ------------- | ------------------------- | -------------- | ------------------------------ |
+| $[-1, 1]$     | $f[i+1] - f[i]$           | $f'$ (ordre 1) | variation locale (asymétrique) |
+| $[-1, 0, 1]$  | $f[i+1] - f[i-1]$         | $f'$ (ordre 2) | variation locale (symétrique)  |
+| $[1, -2, 1]$  | $f[i-1] - 2f[i] + f[i+1]$ | $f''$          | concavité, points d'inflexion  |
+| $[1, 1, 1]/3$ | moyenne des 3 voisins     | lissage        | atténuation du bruit           |
 
 ### 5. Différence simple vs centrée
 

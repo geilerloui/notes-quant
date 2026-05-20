@@ -37,7 +37,6 @@ $$\boxed{\text{Le supervised learning} \;=\; \text{Approximation de la fonction 
 > 💡 **$\varepsilon$ est une hypothèse sur le monde, pas sur le modèle.** Que tu utilises une régression linéaire ou un random forest, ce bruit reste dans les données. Aucune sophistication algorithmique ne peut le faire disparaître — c'est précisément la borne inférieure que rencontrera tout modèle, quel qu'il soit. On verra en I.D que cette borne porte un nom : l'**erreur irréductible**.
 
 ---
-
 ### B. EPE et espérance conditionnelle
 
 **Le besoin.** On a posé l'existence de $f$, mais pour la définir précisément, il faut un **critère**. Quelle fonction $f^*$ veut-on viser exactement ? La réponse vient de la théorie de la décision statistique : on se donne une fonction de coût $L(Y, f(X))$ qui mesure l'écart entre la vraie valeur $Y$ et la prédiction $f(X)$, et on définit la fonction optimale comme celle qui minimise l'erreur en espérance.
@@ -179,7 +178,7 @@ $$\text{RSS}(f) \;=\; \sum_{i=1}^n (y_i - f(x_i))^2.$$
 **Figure 3.** Cas particulier où la vraie fonction de régression est affine : $\mathbb{E}[Y \mid X = x] = a^* + b^* x$.
 
 > [!example] Fil rouge — la régression linéaire en pratique
-> On choisit la MSE comme loss et la classe affine $\mathcal{F} = \{f(x) = a + bx\}$ pour notre problème de prix d'appartement, avec $X = $ surface en m². L'ERM s'écrit
+> On choisit la MSE comme loss et la classe affine $\mathcal{F} = \{f(x) = a + bx\}$ pour notre problème de prix d'appartement, avec $X =$ surface en m². L'ERM s'écrit
 > 
 > $$\hat f(x) = \hat a + \hat b \cdot x, \qquad (\hat a, \hat b) \;=\; \arg\min_{a, b} \sum_{i=1}^n (y_i - a - b x_i)^2.$$
 > 

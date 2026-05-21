@@ -91,6 +91,11 @@ $$\log p_\theta(x) = \log \int p_\theta(x \mid z) \, p(z) \, dz.$$
 
 L'intégrale marginalise sur toutes les valeurs possibles de $z$. Et là, problème majeur.
 
+$$
+P(X)=\int P(X \mid z) P(z) d z 
+=\iint \cdots \int P\left(X \mid z_{1}, z_{2}, \ldots, z_{n}\right) P\left(z_{1}, z_{2}, \ldots, z_{n}\right) d z_{1}, \ldots d z_{n}
+$$
+
 > [!warning] L'intégrale est intractable
 > Pour calculer $p_\theta(x)$, il faudrait intégrer $p_\theta(x \mid z) p(z)$ sur tout $\mathbb{R}^d$. Avec $d = 64$ et $z$ continu, c'est une intégrale en dimension 64 — incalculable analytiquement, et l'approximation numérique naïve (Monte Carlo uniforme) est désastreuse (cf. §III).
 > 
@@ -128,7 +133,7 @@ Mais l'inégalité de Jensen nous dit que, pour une fonction concave comme le lo
 
 $$\log \mathbb{E}_{z \sim q(z)}[f(z)] \;\geq\; \mathbb{E}_{z \sim q(z)}[\log f(z)].$$
 
-En appliquant à $f(z) = p_\theta(x, z) / q(z)$ qui est l'estimateur d'importance sampling de l'intégrale $\int p_{\theta}(x,z)dz$ avec $x$ qui est fixe c'est une image qu'on a choisi sinon on ne pourrait pas décrire f(z) comme ça : 
+En appliquant à $f(z) = p_\theta(x, z) / q(z)$ qui est l'estimateur d'importance sampling de l'intégrale $\int p_{\theta}(x,z)dz$ avec $x$ qui est fixe c'est une image (eg chat) qu'on a choisi sinon on ne pourrait pas décrire $f(z)$ comme ça : 
 
 $$\log p_\theta(x) \;=\; \log \mathbb{E}_{z \sim q(z)}\!\left[\frac{p_\theta(x, z)}{q(z)}\right] \;\geq\; \mathbb{E}_{z \sim q(z)}\!\left[\log \frac{p_\theta(x, z)}{q(z)}\right].$$
 

@@ -5,7 +5,7 @@ title: Inférence - PGM
 
 > Cette note couvre la deuxième des trois parties des PGM : **comment poser des questions au modèle**. On voit d'abord le cadre général (types de requêtes, sum-product), puis les algorithmes principaux (Variable Elimination, Belief Propagation, MAP), puis l'inférence dans les **modèles temporels** (HMM, Kalman) et enfin l'**inférence par échantillonnage** (ancestral, Gibbs).
 
-> Pré-requis : [[Représentation]] (Bayesian Networks, Markov Random Fields, factorisation, indépendance).
+> Pré-requis : [[02_Représentation]] (Bayesian Networks, Markov Random Fields, factorisation, indépendance).
 
 ---
 
@@ -18,7 +18,7 @@ On peut poser plein de requêtes sur un graphe, mais la plus commune est probabl
 - **Objectif** : calculer $p(Y \mid E = e)$
 
 > [!example] BN — exemple de l'étudiant complété
-> On reprend le BN de l'étudiant ([[Représentation]]) avec une variable supplémentaire $C$ (cohérence du cours, etc.). L'inférence sur les PGM utilise la notion de **facteur** : $P(G \mid I, D)$ se convertit en $\phi_G(G, I, D)$.
+> On reprend le BN de l'étudiant ([[02_Représentation]]) avec une variable supplémentaire $C$ (cohérence du cours, etc.). L'inférence sur les PGM utilise la notion de **facteur** : $P(G \mid I, D)$ se convertit en $\phi_G(G, I, D)$.
 >
 > Si l'on veut calculer $P(J)$, il suffit de **marginaliser** par rapport à toutes les variables sauf $J$.
 

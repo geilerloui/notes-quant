@@ -5,7 +5,7 @@ title: Apprentissage - PGM
 
 > Cette note couvre la troisième et dernière des trois parties des PGM : **comment ajuster un modèle aux données**. C'est le pilier qui boucle la boucle Représentation → Inférence → Apprentissage : on a vu comment représenter une distribution avec un graphe, comment lui poser des questions ; reste à savoir d'où viennent les paramètres (et même la structure) du graphe lui-même.
 
-> Pré-requis : [[Représentation]], [[Inférence]].
+> Pré-requis : [[02_Représentation]], [[03_Inférence]].
 
 > ⚠️ **Note importante.** Cette section est en très grande partie à l'arrache et à compléter. Elle suit le plan des **modules 3 à 6 du cours de Daphne Koller (Stanford / Coursera)** :
 > - Module 3 : Parameter Estimation in Bayesian Networks
@@ -124,7 +124,7 @@ Et deux régimes selon les données disponibles :
 
 *À développer.*
 
-> 💡 **Lien avec [[Représentation#V.C I-équivalence|I-équivalence]].** Plusieurs graphes peuvent encoder les mêmes indépendances. Donc en pure observation, on ne peut **pas** identifier un BN unique — au mieux on récupère sa **classe d'équivalence** (un CPDAG). Pour orienter les arêtes restantes, il faut des connaissances additionnelles (causales, expérimentales, temporelles).
+> 💡 **Lien avec [[02_Représentation#V.C I-équivalence|I-équivalence]].** Plusieurs graphes peuvent encoder les mêmes indépendances. Donc en pure observation, on ne peut **pas** identifier un BN unique — au mieux on récupère sa **classe d'équivalence** (un CPDAG). Pour orienter les arêtes restantes, il faut des connaissances additionnelles (causales, expérimentales, temporelles).
 
 ---
 
@@ -148,7 +148,7 @@ Et deux régimes selon les données disponibles :
 - Dérivation via l'ELBO (lien direct avec [[Variational Inference]] — EM est un cas particulier de VI où l'E-step est exact).
 - Convergence : monotone mais pas vers le global.
 - Cas mixture de gaussiennes comme fil rouge.
-- Cas HMM → c'est exactement [[Inférence#A.7 Apprentissage des paramètres — Baum-Welch|Baum-Welch]].
+- Cas HMM → c'est exactement [[03_Inférence#A.7 Apprentissage des paramètres — Baum-Welch|Baum-Welch]].
 
 ### B. Limites de EM
 

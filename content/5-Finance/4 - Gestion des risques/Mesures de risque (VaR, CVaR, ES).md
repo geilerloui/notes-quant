@@ -186,7 +186,7 @@ $$\max_x\;\; \mathbb{E}[R_x] - \lambda\,\text{CVaR}_\alpha(R_x) \qquad \text{s.c
 
 Même structure que le critère de Markowitz $E[R] - \lambda \text{Var}$, mais avec le CVaR à la place de la variance. C'est le programme de référence pour la **mean-CVaR optimization**.
 
-> 💡 **Pourquoi remplacer Var par CVaR ?** Voir [[Markowitz#V. Limites du modèle|Markowitz §V — Limites du modèle]] : la variance pénalise hausses **et** baisses (symétrie), alors que le CVaR ne pénalise que les pertes extrêmes. Le critère est donc beaucoup plus aligné avec la perception intuitive du risque.
+> 💡 **Pourquoi remplacer Var par CVaR ?** Voir [[02_Markowitz#V. Limites du modèle|Markowitz §V — Limites du modèle]] : la variance pénalise hausses **et** baisses (symétrie), alors que le CVaR ne pénalise que les pertes extrêmes. Le critère est donc beaucoup plus aligné avec la perception intuitive du risque.
 
 ### C. CVaR comme contrainte
 
@@ -197,7 +197,7 @@ On maximise le rendement attendu **sous contrainte** que la perte moyenne dans l
 > [!example] Lecture concrète
 > *"Je veux maximiser mon rendement espéré, mais je m'impose que ma perte moyenne en cas de crise (sur les 5% pires scénarios) ne dépasse pas 1 million d'euros."*
 > 
-> C'est typiquement comme ça qu'un risk manager institutionnel pose la contrainte : il fixe un budget de risque exprimé en euros (ou en pourcentage de l'AUM), et il laisse le gérant maximiser le rendement à l'intérieur de cette enveloppe. Voir aussi [[Markowitz#A.4 Contraintes de risque|Markowitz Annexe A.4]] qui mentionne cette contrainte parmi les contraintes de risque standard du programme.
+> C'est typiquement comme ça qu'un risk manager institutionnel pose la contrainte : il fixe un budget de risque exprimé en euros (ou en pourcentage de l'AUM), et il laisse le gérant maximiser le rendement à l'intérieur de cette enveloppe. Voir aussi [[02_Markowitz#A.4 Contraintes de risque|Markowitz Annexe A.4]] qui mentionne cette contrainte parmi les contraintes de risque standard du programme.
 
 ---
 

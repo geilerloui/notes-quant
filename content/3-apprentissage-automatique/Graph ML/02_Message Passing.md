@@ -5,7 +5,7 @@ title: Message Passing - Graph ML
 
 > Cette note couvre le **message passing** pour la classification semi-supervisée de nœuds dans un graphe. On part du problème (semi-supervised node classification : étiqueter des nœuds non labellisés à partir de quelques labels connus), on voit les **trois algorithmes classiques** (Relational classification, Iterative classification, Loopy Belief Propagation), et on illustre avec deux applications réelles (détection de faux avis, fraude aux enchères en ligne).
 
-> 💡 **Pré-requis utiles.** Cette note partage des concepts avec [[Représentation]] (notion de message passing dans Belief Propagation, V-structure) et [[Inférence#III. Belief Propagation]]. Le BP des PGM et le BP des graphes ML sont **la même idée mathématique**, juste appliquée à des graphes différents (PGM = graphe de variables aléatoires, ici = graphe de données).
+> 💡 **Pré-requis utiles.** Cette note partage des concepts avec [[02_Représentation]] (notion de message passing dans Belief Propagation, V-structure) et [[03_Inférence#III. Belief Propagation]]. Le BP des PGM et le BP des graphes ML sont **la même idée mathématique**, juste appliquée à des graphes différents (PGM = graphe de variables aléatoires, ici = graphe de données).
 
 ---
 
@@ -270,7 +270,7 @@ L'algorithme se déroule en trois étapes :
 
 **Vue d'ensemble.** Loopy Belief Propagation est une approche par **programmation dynamique** pour répondre à des conditional probability queries dans un modèle graphique. C'est un processus **itératif** où les nœuds voisins "se parlent" en se passant des messages, jusqu'à atteindre un consensus.
 
-> 💡 **Lien avec PGM.** C'est exactement le même algorithme que dans [[Inférence#III. Belief Propagation]] côté PGM. La différence : ici on l'applique à des graphes de données réelles (réseau social, bipartite reviewer/produit, etc.) plutôt qu'à un graphe de variables aléatoires.
+> 💡 **Lien avec PGM.** C'est exactement le même algorithme que dans [[03_Inférence#III. Belief Propagation]] côté PGM. La différence : ici on l'applique à des graphes de données réelles (réseau social, bipartite reviewer/produit, etc.) plutôt qu'à un graphe de variables aléatoires.
 
 #### A.1 Message Passing — exemple intuitif
 

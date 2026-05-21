@@ -272,7 +272,7 @@ On rejette $H_0$ uniquement quand $T_{\text{obs}}$ est **trop grand**. La p-valu
 
 $$\text{p-value} = \mathbb{P}_{H_0}[T \ge T_{\text{obs}}]$$
 
-![[im9.png|307]]
+![[images/3-Apprentissage automatique/Generative Models/im9.png|307]]
 
 ### B. Test unilatéral à gauche
 

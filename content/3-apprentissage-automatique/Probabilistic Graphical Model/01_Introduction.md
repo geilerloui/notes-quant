@@ -83,7 +83,7 @@ On définit le dataset avec les paramètres suivants — c'est ce qu'on appeller
 
 $$p(D) \;=\; \sum_I p(I, D)$$
 
-![[im3 (3).png|490]]
+![[images/3-Apprentissage automatique/Generative Models/im3 (3).png|490]]
 **Figure 3.** Marginalisation : on somme sur les valeurs de la variable qu'on veut éliminer.
 
 ---

@@ -299,7 +299,7 @@ $$f(x_0) = f(x_{k-1}) + (x_0 - x_{k-1}) \cdot \frac{f(x_k) - f(x_{k-1})}{x_k - x
 
 > 💡 **Limite du score "vraie classe simple".** Sur MNIST ça marche, mais ne capte pas bien l'incertitude pour les images vraiment ambiguës. APS exploite **toutes** les classes du softmax.
 
-![[im3-5 (1).png]]
+![[images/3-Apprentissage automatique/Generative Models/im3-5 (1).png]]
 
 > [!note]- APS — algorithme
 > **(1) Construction du score.** Pour chaque obs du calibration set, on **trie** le softmax par ordre décroissant. On somme les probabilités jusqu'à atteindre la vraie classe. Le score est cette **masse cumulée**.

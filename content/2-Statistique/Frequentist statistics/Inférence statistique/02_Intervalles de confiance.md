@@ -78,7 +78,7 @@ $$P(|\bar{R}_n - p| \ge x) = \alpha$$
 
 Graphiquement, on veut que l'erreur (distance entre estimateur et vraie valeur) soit $\alpha$-petite.
 
-![[im2 (2).png]]
+![[images/3-Apprentissage automatique/Generative Models/im2 (2).png]]
 
 > [!note]- Preuve
 > $$

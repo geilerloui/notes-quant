@@ -39,10 +39,10 @@ On note $X$ l'entrée (par exemple une image) et $Y$ l'étiquette (par exemple "
 - Un **modèle discriminatif** apprend la conditionnelle $p(Y \mid X)$. C'est ce que fait une régression logistique ou un CNN de classification : on lui donne une image, il sort une distribution sur les classes.
 - Un **modèle génératif** apprend la jointe $p(X, Y)$, ou la marginale $p(X)$ si l'on travaille sans étiquette.
 
-![[images/3-Apprentissage automatique/Generative Models/im8.png|167]]
+![[images/3-Apprentissage automatique/Generative Models/introduction/im8.png|167]]
 Figure graphe bayésien de generative vs discriminative models
 
-![[images/3-Apprentissage automatique/Generative Models/im9.png|348]]
+![[images/3-Apprentissage automatique/Generative Models/introduction/im9.png|348]]
 Autre graphe
 
 > [!warning] Comment lire ces DAG : le sens des flèches
@@ -107,7 +107,7 @@ Une fois posé qu'on veut apprendre $p(x)$, **trois questions structurent tout l
 > 3. **Inférence** : une fois $\theta^*$ trouvé, comment **utiliser** le modèle ? Échantillonner, évaluer la densité, marginaliser, conditionner, calculer des espérances.
 
 
-![[images/3-Apprentissage automatique/Generative Models/im1 (1) 1.png]]
+![[images/3-Apprentissage automatique/Generative Models/autorégressif/im1 (1) 1.png]]
 **Figure 1.** Les trois questions. Représentation = choix de la famille de modèles (le set vert) ; learning = trouver le point le plus proche du target (le point rouge) selon une métrique ; inférence = utiliser le modèle appris.
 
 Chaque famille de modèles (autorégressifs, VAE, flows, GANs, diffusion) fait des choix différents sur ces trois axes, et c'est ce qui les différencie. Par exemple :
@@ -126,7 +126,7 @@ Cette grille de lecture sera reprise systématiquement dans chaque note. Pour le
 
 L'enjeu commun à toutes les approches est simple à énoncer : $x$ vit en haute dimension. Une image $32 \times 32$ en noir et blanc, c'est déjà $2^{1024}$ valeurs possibles. Aucun ordinateur ne peut stocker une table avec autant d'entrées. Il faut donc trouver une **forme compacte** pour $p(x)$.
 
-![[images/3-Apprentissage automatique/Generative Models/im3 (3).png|429]]
+![[images/3-Apprentissage automatique/Generative Models/vae/im3 (3).png|429]]
 Exemple on prend les trois chiffres 9, 3 et 6 en noir et blanc
 
 ### A. Le mur combinatoire
@@ -150,7 +150,7 @@ $$p(x_1, \ldots, x_n) = \prod_{i=1}^{n} p(x_i).$$
 - **Nombre de paramètres :** $n$ (un Bernoulli par pixel). Pour $n = 1024$, c'est 1024 — tractable.
 - **Problème :** échantillonner depuis ce modèle revient à tirer chaque pixel **indépendamment** des autres. On obtient du **bruit**, aucune structure spatiale, aucune corrélation. Inutile.
 
-![[images/3-Apprentissage automatique/Generative Models/im4.png]]
+![[images/3-Apprentissage automatique/Generative Models/vae/im4.png]]
 **Figure 2.** Échantillon d'un modèle à indépendance totale. Chaque pixel est tiré indépendamment d'une Bernoulli — résultat : du bruit pur, aucune cohérence.
 
 L'hypothèse est trop forte. Il faut un compromis entre la jointe complète (intractable) et l'indépendance totale (inutile).
@@ -199,7 +199,7 @@ Le modèle de Markov est un cas particulier d'un cadre plus général : les **r�
 > 
 > avec $\text{Pa}(i)$ l'ensemble des parents de $i$ dans $G$. Le DAG encode les hypothèses d'indépendance conditionnelle, et chaque facteur $p(x_i \mid x_{\text{Pa}(i)})$ est une **CPD** (conditional probability distribution).
 
-![[images/3-Apprentissage automatique/Generative Models/im6 (1).png]]
+![[images/3-Apprentissage automatique/Generative Models/introduction/im6 (1).png]]
 **Figure 3.** Exemple de réseau bayésien. La factorisation jointe se lit directement sur le graphe : un facteur par nœud, conditionné sur ses parents.
 
 **Comptage des paramètres pour un BN.** Si chaque variable est binaire et que le nœud $i$ a $k_i = |\text{Pa}(i)|$ parents, alors la CPD $p(x_i \mid x_{\text{Pa}(i)})$ demande $2^{k_i}$ paramètres (un Bernoulli par configuration des parents). Le total est

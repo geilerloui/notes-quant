@@ -13,7 +13,7 @@ Reprenons la grille de `[[00_Fondations#III. Les trois questions fondamentales]]
 
 $$z \sim p(z), \qquad x \sim p_\theta(x \mid z).$$
 
-![[images/3-Apprentissage automatique/Generative Models/im9 (1).png|97]]
+![[images/3-Apprentissage automatique/Generative Models/vae/im9 (1).png|97]]
 Figure Graphical model perspective of the VAE
 
 
@@ -33,7 +33,7 @@ $$\min_{\theta, \phi} \; \frac{1}{m} \sum_{i=1}^{m} \| x^{(i)} - \hat x^{(i)} \|
 
 Un AE entraîné apprend bien à représenter $x$ par un $h$ compact, et le décodeur sait reconstruire depuis $h$. **Tentation naturelle :** retirer l'encodeur, prendre un $h$ au hasard, le passer au décodeur, et obtenir une nouvelle image.
 
-![[images/3-Apprentissage automatique/Generative Models/im1 (2).png|174]]
+![[images/3-Apprentissage automatique/Generative Models/vae/im1 (2).png|174]]
 Figure l'autoencodeur
 
 
@@ -47,7 +47,7 @@ Figure l'autoencodeur
 
 
 
-![[images/3-Apprentissage automatique/Generative Models/im2 (2).png|175]]
+![[images/3-Apprentissage automatique/Generative Models/vae/im2 (2).png|175]]
 Figure On a appris les poides de l'autoencodeur et on vire "x" pour prédire x hat
 
 ### C. Le saut conceptuel du VAE
@@ -67,7 +67,7 @@ C'est ce qui transforme l'AE en générateur. Le reste de la note est la formali
 
 Le VAE est un modèle graphique dirigé minimal — deux nœuds :
 
-![[images/3-Apprentissage automatique/Generative Models/im9 (1).png|97]]
+![[images/3-Apprentissage automatique/Generative Models/vae/im9 (1).png|97]]
 
 - **$z \in \mathbb{R}^d$** est la variable latente, jamais observée.
 - **$x \in \mathbb{R}^n$** est la variable observée (image, etc.), $d \ll n$.
@@ -206,7 +206,7 @@ j'ai une distribution marginale X qui est la distribution des images et Z la dis
 
 et en gros le délire c'est que $p_{\theta}(z \mid X=x^{(1)})$ est incalculable et c'est $q_{\phi}(z \mid x)$ qu'on apprend à approximer cette distribution-là (où plutôt sa moyenne et sa variance dans la famille gaussienne).
 
-![[images/3-Apprentissage automatique/Generative Models/im3-5 (1).png|515]]
+![[images/3-Apprentissage automatique/Generative Models/vae/im3-5 (1).png|515]]
 
 et c'est la ou c'est compliqué c'est que en grande dimension p_theta(z | X=x^{(1)}) est un petit nuage gaussien dans R^64 centré sur un point mu^{(1)} le truc c'est qu'on dit que c'est entangled (représentations enchevêtrées) car tout est mélangé dans ce nuage je vais pas avoir précisément une information très précise du type "style penché, fin" ou "style droit, épais" si je dois détecter l'image du chiffre "7".
 
@@ -218,7 +218,7 @@ il parle apres que y'a eu trois améliorations :
 
 
 autre image
-![[images/3-Apprentissage automatique/Generative Models/im4-4.png]]
+![[images/3-Apprentissage automatique/Generative Models/vae/im4-4.png]]
 
 
 
@@ -259,7 +259,7 @@ où $\mu_\phi$ et $\sigma_\phi$ sont les sorties d'un réseau de neurones. En pr
 
 |    Amortization    |     |
 | :----------------: | :-: |
-| ![[images/3-Apprentissage automatique/Generative Models/im11.png\|306]] |     |
+| ![[images/3-Apprentissage automatique/Generative Models/vae/im11.png\|306]] |     |
 
 > [!warning] Important : $q_\phi$ approxime, ne reproduit pas
 > $q_\phi(z \mid x)$ ne vise pas à reproduire **exactement** la posterior $p_\theta(z \mid x)$ (qu'on ne sait pas calculer de toute façon — elle nécessiterait $p_\theta(x)$ par Bayes, l'intractable de départ). Le réseau $\phi$ va trouver, par SGD conjointe avec $\theta$, le **meilleur compromis** dans la famille restreinte qu'on lui permet (gaussiennes diagonales).
@@ -309,7 +309,7 @@ Le diagramme ci-dessus illustre la différence : à gauche, le nœud $z \sim \ma
 
 |          Avant          | Après reparametrization |     |
 | :---------------------: | :---------------------: | :-: |
-| ![[im2-1 (3).png\|198]] | ![[images/3-Apprentissage automatique/Generative Models/im10 (1).png\|194]]  |     |
+| ![[im2-1 (3).png\|198]] | ![[images/3-Apprentissage automatique/Generative Models/vae/im10 (1).png\|194]]  |     |
 
 ## VII. L'architecture complète
 

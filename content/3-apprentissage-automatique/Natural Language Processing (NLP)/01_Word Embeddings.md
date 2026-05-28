@@ -354,7 +354,7 @@ $$\mathbf{v}_{\text{queen}} - \mathbf{v}_{\text{woman}} + \mathbf{v}_{\text{man}
 
 Il y a un problème avec le Skip-gram vanilla : le **softmax est computationnellement très cher**. Il faut scanner toute la matrice d'embeddings de sortie ($W_{\text{output}}$) pour calculer la distribution de probabilité sur les $V$ mots, où $V$ peut être de plusieurs millions.
 
-![[im1-2.png]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im1-2.png]]
 **Figure 15.** Le coût du softmax explose avec la taille du vocabulaire.
 
 ### B. Negative Sampling

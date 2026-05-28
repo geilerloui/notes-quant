@@ -78,7 +78,7 @@ $$P(|\bar{R}_n - p| \ge x) = \alpha$$
 
 Graphiquement, on veut que l'erreur (distance entre estimateur et vraie valeur) soit $\alpha$-petite.
 
-![[images/3-Apprentissage automatique/Generative Models/im2 (2).png]]
+![[images/3-Apprentissage automatique/Generative Models/vae/im2 (2).png]]
 
 > [!note]- Preuve
 > $$
@@ -296,6 +296,6 @@ $$\lim_{n \to \infty} \mathbb{P}(\lambda \in [0.12, 0.20]) \ge 0.95 \quad ? \qua
 
 Une autre interprétation, plus pratique : imaginons qu'on pèse un échantillon de souris femelles d'une population, on calcule leur moyenne. Puis on considère un grand nombre d'échantillons tirés par bootstrap sur lesquels on calcule leurs moyennes.
 
-![[im4 (1).png|419]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im4 (1).png|419]]
 
 ![[images/2-Statistiques/Frequentist/Inférence statistique/im5 (1).png|431]]

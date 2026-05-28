@@ -11,11 +11,11 @@ title: Generative Adversarial Networks (GAN)
 
 Toutes les familles vues jusqu'ici partagent un même squelette d'apprentissage : on définit une densité $p_\theta(x)$, on en évalue la log-vraisemblance sur les données, on maximise.
 
-| Famille | Densité | Apprentissage |
-|---|---|---|
-| Autorégressif | $\prod_i p_\theta(x_i \mid x_{<i})$, exacte | MLE direct |
-| VAE | $\int p_\theta(x \mid z) p(z) dz$, intractable | Borne ELBO |
-| Flow | $p_Z(f^{-1}_\theta(x)) \, |\det J|$, exacte | MLE direct |
+| Famille       | Densité                                        | Apprentissage |     |     |
+| ------------- | ---------------------------------------------- | ------------- | --- | --- |
+| Autorégressif | $\prod_i p_\theta(x_i \mid x_{<i})$, exacte    | MLE direct    |     |     |
+| VAE           | $\int p_\theta(x \mid z) p(z) dz$, intractable | Borne ELBO    |     |     |
+| Flow          | $p_Z(f^{-1}_\theta(x)) \det J$, exacte         | MLE direct    |     |     |
 
 Le principe est toujours le même : la KL entre $p_{\text{data}}$ et $p_\theta$ se ramène (cf. `[[00_Fondations#V bis. Apprentissage par maximum de vraisemblance]]`) à la maximisation de $\mathbb{E}_{p_{\text{data}}}[\log p_\theta(x)]$.
 
@@ -67,6 +67,8 @@ Symétrique : on mémorise le dataset d'entraînement et on échantillonne unifo
 
 Étant donné deux ensembles d'échantillons $S_1 = \{x \sim P\}$ et $S_2 = \{x \sim Q\}$, peut-on tester si $P = Q$ sans connaître ni $P$ ni $Q$ ?
 
+![[vanilla1.png|359]]
+
 C'est un problème classique de statistique : le **two-sample test**. On définit une statistique $T(S_1, S_2)$ qui mesure une "distance" entre les deux jeux d'échantillons, et on accepte $H_0 : P = Q$ si $T < \alpha$.
 
 > [!note] Observation clé
@@ -95,6 +97,8 @@ Et on entraîne **simultanément** le générateur à produire des échantillons
 > Le générateur cherche à **tromper** le discriminateur ; le discriminateur cherche à **résister** à la tromperie. À l'équilibre, le générateur produit des échantillons indistinguables des vraies données et le discriminateur ne fait pas mieux qu'un tirage à pile ou face.
 
 Le diagramme ci-dessus illustre l'architecture du jeu.
+
+![[vanilla5.png|271]]
 
 ### B. Le jeu minimax
 

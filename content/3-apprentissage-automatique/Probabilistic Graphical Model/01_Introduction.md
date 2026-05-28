@@ -71,19 +71,19 @@ On définit le dataset avec les paramètres suivants — c'est ce qu'on appeller
 >
 > Avec sa loi jointe $P(I, D, G)$.
 
-![[im1 (3).png|263]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im1 (3).png|263]]
 **Figure 1.** Loi jointe $P(I, D, G)$ de l'exemple de l'étudiant.
 
 **Opération de conditionnement** sur $g^1$ : c'est un processus en **deux étapes** : (i) **réduction** et (ii) **renormalisation**, où l'on part d'une mesure non normalisée $p(I, D, g^1)$ pour aboutir à la probabilité conditionnelle $p(I, D \mid g^1)$.
 
-![[im2 (3).png]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im2 (3).png]]
 **Figure 2.** Conditionnement sur $g^1$ : on extrait la tranche $g = g^1$ (réduction), puis on renormalise pour que la somme fasse 1.
 
 **Opération de marginalisation** par rapport à $I$ :
 
 $$p(D) \;=\; \sum_I p(I, D)$$
 
-![[images/3-Apprentissage automatique/Generative Models/im3 (3).png|490]]
+![[images/3-Apprentissage automatique/Generative Models/vae/im3 (3).png|490]]
 **Figure 3.** Marginalisation : on somme sur les valeurs de la variable qu'on veut éliminer.
 
 ---

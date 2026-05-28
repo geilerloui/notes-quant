@@ -31,7 +31,7 @@ $$\theta^* = \arg\max_\theta \; \log p_\theta(X) = \arg\max_\theta \; \sum_{n=1}
 
 Chaque terme $\log p_\theta(x^{(n)})$ se développe en marginalisant sur $z^{(n)}$ :
 
-$$\theta^* = \arg\max_\theta \; \log p_\theta(X) = \arg\max_\theta \; \sum_{n=1}^{N}\sum_{z^{(n)}}  \log p_\theta(x^{(n)}, z^{(n)}).$$
+$$\theta^* = \arg\max_\theta \; \log p_\theta(X) = \arg\max_\theta \; \log \sum_{n=1}^{N}\sum_{z^{(n)}}   p_\theta(x^{(n)}, z^{(n)}).$$
 
 
 > [!warning] Le log est bloqué par la somme
@@ -451,6 +451,20 @@ Quand la posterior $p_\theta(z \mid x)$ n'est pas calculable analytiquement, on 
 $$\mathcal{Q}(\theta, \theta^{\text{old}}) \approx \frac{1}{L} \sum_{l=1}^{L} \log p_\theta(x, z^{(l)}), \quad z^{(l)} \sim p_{\theta^{\text{old}}}(z \mid x).$$
 
 **Stochastic EM** : cas limite où on tire **un seul** $z$ par itération (assignment dur stochastique). Utilisé en pratique sur des modèles trop gros pour calculer les responsabilités complètes.
+
+> [!warning] La jointe $p_\theta(x, z)$ n'est presque jamais "gratuite"
+> Dire "MCEM s'utilise quand la posterior n'est pas calculable" donne l'impression que la jointe $p_\theta(x, z)$, elle, l'est toujours — comme dans GMM où $p(x, z = k) = \pi_k \mathcal{N}(x \mid \mu_k, \Sigma_k)$ se lit directement. **C'est un cas particulier**, pas la règle.
+> 
+> Pour la plupart des modèles à variable latente qu'on rencontre en pratique, la jointe est elle aussi piégeuse :
+> 
+> - **Latent continu + likelihood non-linéaire** (VAE, modèles bayésiens non-conjugués) : on évalue $p_\theta(x, z) = p(z) p_\theta(x \mid z)$ pointwise, mais la marginale $\int p_\theta(x, z) \, dz$ est intractable — et donc la posterior $p_\theta(z \mid x) = p_\theta(x, z) / p_\theta(x)$ aussi.
+> - **Energy-based models, MRFs** : $p_\theta(x, z) = \frac{1}{Z_\theta} \exp(-E_\theta(x, z))$ avec $Z_\theta$ inconnu. La jointe n'est même pas évaluable pointwise — seulement à une constante près.
+> - **Latents discrets de grande dimension** ($z \in \{0,1\}^D$ avec $D$ grand : RBM, sigmoid belief nets) : la jointe se calcule, mais la marginalisation pour Bayes coûterait $2^D$ termes.
+> - **Latents structurés** (HMM, CRF denses) : factorisation locale tractable, marginale globale exponentielle.
+> 
+> **Pourquoi MCEM marche quand même.** MCMC (cf. `[[MCMC]]`) ne demande pas la posterior normalisée. Metropolis–Hastings n'a besoin que de la jointe **à une constante près**, et Gibbs n'a besoin que des conditionnelles complètes $p_\theta(z_i \mid z_{-i}, x)$ — souvent simples même quand la jointe globale est monstrueuse. C'est ce qui rend MCEM utilisable bien au-delà du cadre confortable du GMM.
+> 
+> **Ce que GMM rendait invisible.** GMM est le cas où *tout* est gratuit : jointe explicite, marginale finie ($K$ termes), posterior par règle des trois. C'est pour ça qu'on l'introduit en premier — mais ça fausse l'intuition sur ce qui est "facile" en général.
 
 ### B. EM pour mixture de Bernoulli
 

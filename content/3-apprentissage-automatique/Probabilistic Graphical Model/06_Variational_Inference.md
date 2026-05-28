@@ -159,6 +159,21 @@ Donc on choisit l'objectif calculable (l'ELBO), on le maximise par n'importe que
 ![[vi_elbo_decomposition.png]]
 *Figure. La décomposition $\log p_\theta(x) = \mathcal{L}(\phi, \theta) + \text{KL}(q_\phi \| p_\theta(z \mid x))$ comme un "thermomètre". La hauteur totale $\log p_\theta(x)$ est **fixe** (en $\theta, x$ donnés). À gauche : $q_\phi^{(0)}$ initial, la KL prend une grosse part du thermomètre, l'ELBO peu. À droite : après optimisation sur $\phi$, la KL a fondu, l'ELBO a monté d'autant. **Maximiser l'ELBO = serrer la borne contre la vraie log-vraisemblance.***
 
+> [!warning]- Différence fondamentale avec EM : on n'« égalise » plus
+> Dans EM (cf. §IV.B de `[[05_Expectation_Maximization]]`), le E-step posait $q := p_\theta(z \mid x)$ **exactement**. C'était possible parce que $q$ était **libre** : la vraie posterior fait partie des $q$ autorisés, donc on pouvait la *prendre*. Résultat : $D_{\text{KL}} = 0$, et l'ELBO **touchait** la log-vraisemblance après chaque E-step (borne serrée).
+> 
+> En VI, $q_\phi$ est **contraint** à la famille $\mathcal{Q}$, et la vraie posterior n'y appartient quasiment jamais. On ne peut donc plus *prendre* $p_\theta(z \mid x)$ — on ne peut que **projeter** sur $\mathcal{Q}$, c'est-à-dire choisir le membre de $\mathcal{Q}$ le plus proche au sens KL. Comme la cible est *hors* de $\mathcal{Q}$, il reste toujours un gap résiduel $D_{\text{KL}}(q_\phi^* \| p_\theta(z \mid x)) > 0$. **L'ELBO ne touche jamais $\log p_\theta(x)$.**
+> 
+> | | EM | VI |
+> |---|---|---|
+> | $q$ | libre | contraint à $\mathcal{Q}$ |
+> | $p_\theta(z \mid x) \in$ espace de $q$ ? | oui | non (presque jamais) |
+> | E-step | $q := p_\theta(z \mid x)$ (on **prend**) | $q := \arg\min_{\mathcal{Q}} \text{KL}$ (on **projette**) |
+> | KL après E-step | $= 0$ (annulée) | $> 0$ (réduite, jamais nulle) |
+> | Borne ELBO | serrée (touche) | lâche (gap permanent) |
+> 
+> C'est *toute* la différence. Et c'est précisément parce qu'on ne peut plus annuler la KL que **la direction de la KL se met à compter** (mode-seeking, §IV) : en EM, $q = p$ donc la question ne se posait pas ; en VI, $q \neq p$ forcément, donc la *façon* dont $q$ rate $p$ devient un choix lourd de conséquences.
+
 ### E. Pourquoi l'ELBO est tractable et la KL ne l'est pas
 
 Développons l'ELBO pour voir explicitement ce qui se passe :
@@ -477,7 +492,144 @@ Dans le cas où la posterior est tractable ET factorise naturellement par les la
 2. **Datasets massifs** : chaque itération CAVI revisite toutes les données pour calculer l'update. Pour $N$ très grand, c'est trop cher → SVI (§VI.A).
 3. **Mean-field trop pauvre** : si la posterior a des corrélations fortes, CAVI converge vers une mauvaise approximation (cf. §III.D).
 
-## VI. Quand CAVI ne suffit pas : SVI et BBVI
+## VI. Cas d'étude : Bayesian GMM
+
+C'est l'exemple qui ancre tout. Le Bayesian GMM est à VI ce que le GMM est à EM : le cas concret où les formules abstraites (ELBO, mean-field, CAVI) deviennent des updates qu'on peut suivre du doigt. Si une seule section doit rendre VI concret, c'est celle-ci.
+
+### A. L'idée : rendre les paramètres aléatoires
+
+Rappel du GMM classique (note EM, §III) : les paramètres $\theta = \{\pi_k, \mu_k, \Sigma_k\}$ sont des **valeurs fixes** qu'on estime par MLE. Seuls les assignments $z_n$ sont aléatoires.
+
+Le Bayesian GMM fait un pas de plus : **on rend les paramètres eux-mêmes aléatoires** en leur mettant des priors. Tout l'inconnu devient latent :
+
+$$\underbrace{z_{1:N}}_{\text{assignments}} \;,\; \underbrace{\pi}_{\text{poids}} \;,\; \underbrace{\mu_{1:K}, \Lambda_{1:K}}_{\text{params gaussiennes}}$$
+
+où $\Lambda_k = \Sigma_k^{-1}$ est la **précision** (on travaille avec la précision plutôt que la covariance car son prior conjugué est plus simple). Les priors conjugués standards :
+
+$$\pi \sim \text{Dirichlet}(\alpha_0), \qquad \mu_k \mid \Lambda_k \sim \mathcal{N}(m_0, (\beta_0 \Lambda_k)^{-1}), \qquad \Lambda_k \sim \mathcal{W}(W_0, \nu_0)$$
+
+(Dirichlet pour les poids parce que c'est le conjugué du multinomial ; Normal-Wishart pour $(\mu_k, \Lambda_k)$ parce que c'est le conjugué de la gaussienne à moyenne et précision inconnues.)
+
+> [!note] Pourquoi se compliquer la vie avec des priors ?
+> Deux gains concrets, qu'on verra en §VI.D :
+> 1. **Plus de singularités** : le prior sur $\Lambda_k$ empêche une composante de collapser sur un point (le piège n°1 du GMM classique, note EM §III.F).
+> 2. **Sélection automatique du nombre de clusters** : le prior Dirichlet éteint les composantes inutiles. On n'a plus à deviner $K$.
+
+### B. La posterior est intractable → VI
+
+On veut la posterior sur tout l'inconnu :
+
+$$p(z_{1:N}, \pi, \mu_{1:K}, \Lambda_{1:K} \mid X).$$
+
+Comme toujours (§I), le dénominateur de Bayes — la marginale $p(X)$ — demande d'intégrer sur **tous** ces latents à la fois (les assignments discrets ET les paramètres continus). Intractable. On applique donc VI avec une approximation **mean-field** qui découple les assignments des paramètres :
+
+$$q(z_{1:N}, \pi, \mu, \Lambda) = \underbrace{q(z_{1:N})}_{\text{assignments}} \cdot \underbrace{q(\pi)}_{\text{poids}} \cdot \prod_{k=1}^{K} \underbrace{q(\mu_k, \Lambda_k)}_{\text{params}}.$$
+
+On reconnaît la coupure naturelle : d'un côté "qui appartient à quoi" ($z$), de l'autre "à quoi ressemblent les clusters" ($\pi, \mu, \Lambda$). C'est l'hypothèse mean-field de §III appliquée à ce modèle précis.
+
+> [!note]- D'où sortent ces updates ? La mécanique CAVI déroulée
+> C'est le chaînon qui manque souvent. On a posé $q$ en mean-field — et après ? Tout sort d'**une seule formule**, l'équation maîtresse de CAVI (§V.B) :
+> 
+> $$\log q_j^*(Z_j) = \mathbb{E}_{q_{-j}}\big[\log p(X, Z)\big] + \text{cst}$$
+> 
+> **En mots** : pour trouver le facteur optimal sur une variable, prends le log de la jointe complète, et prends son espérance sous *tous les autres* facteurs. Ce qui reste, en fonction de $Z_j$, est le log de ton facteur optimal.
+> 
+> **Pourquoi ça marche (lien avec EM).** Maximiser l'ELBO par rapport à un seul facteur $q_j$, les autres figés, revient à minimiser une KL entre $q_j$ et la pseudo-distribution $\tilde p(Z_j) \propto \exp(\mathbb{E}_{q_{-j}}[\log p(X,Z)])$. Une KL est nulle quand les deux distributions coïncident, donc $q_j^* = \tilde p$. C'est ton réflexe EM ("la KL s'annule quand les distributions sont égales") — mais appliqué **facteur par facteur**, pas globalement. La vraie posterior globale reste hors d'atteinte (gap permanent, §II.D) ; chaque *sous-problème*, lui, se résout par une égalisation exacte.
+> 
+> ---
+> 
+> **Application aux trois facteurs du GMM.** On a $q(z)$, $q(\pi)$, $q(\mu_k, \Lambda_k)$. On applique la formule maîtresse à chacun.
+> 
+> **① Facteur $q(z)$ — l'analogue du E-step**
+> $$\log q^*(z) = \mathbb{E}_{q(\pi),\, q(\mu,\Lambda)}\big[\log p(X, Z, \pi, \mu, \Lambda)\big] + \text{cst}$$
+> On développe la jointe, on ne garde que les termes dépendant de $z$ : ce sont $\log \pi_k$ et $\log \mathcal{N}(x_n \mid \mu_k, \Lambda_k)$. Comme $\pi$ et $(\mu_k, \Lambda_k)$ sont aléatoires, on remplace leur valeur par leur **espérance sous $q$** :
+> $$\log \gamma_{nk} = \mathbb{E}[\log \pi_k] + \mathbb{E}[\log \mathcal{N}(x_n \mid \mu_k, \Lambda_k)] + \text{cst}$$
+> C'est *exactement* le E-step d'EM, mais avec des espérances de log au lieu des valeurs.
+> 
+> **② Facteur $q(\pi)$ — un morceau du M-step**
+> $$\log q^*(\pi) = \mathbb{E}_{q(z)}\big[\log p(X, Z, \pi, \mu, \Lambda)\big] + \text{cst}$$
+> On garde les termes en $\pi$ : le prior $\log \text{Dir}(\alpha_0)$ et $\sum_n \mathbb{E}[z_{nk}] \log \pi_k = \sum_n \gamma_{nk} \log \pi_k$. En recollant, on reconnaît une **Dirichlet** de paramètre $\alpha_0 + N_k$ où $N_k = \sum_n \gamma_{nk}$. La conjugaison "prior Dirichlet + likelihood multinomial → posterior Dirichlet" joue, mais avec les comptes *espérés* $N_k$ au lieu de comptes durs.
+> 
+> **③ Facteur $q(\mu_k, \Lambda_k)$ — l'autre morceau du M-step**
+> Même recette : on garde les termes en $(\mu_k, \Lambda_k)$, et la conjugaison Normal-Wishart ressort une **Normal-Wishart** dont les paramètres sont mis à jour par les statistiques pondérées par $\gamma_{nk}$ (moyenne pondérée, dispersion pondérée). C'est le pendant bayésien du $\mu_k = \frac{1}{N_k}\sum_n \gamma_{nk} x_n$ d'EM.
+> 
+> **Puis on boucle** : nouveau $q(z)$ avec les nouveaux $q(\pi), q(\mu, \Lambda)$, etc., jusqu'à convergence de l'ELBO. C'est du **coordinate ascent** : on tourne sur les facteurs en figeant les autres à chaque pas.
+> 
+> ---
+> 
+> **Le schéma mental EM ↔ CAVI**
+> 
+> | | EM | CAVI (Bayesian GMM) |
+> |---|---|---|
+> | Objet maître | $\log p_\theta(x, z)$ | $\log p(X, Z, \pi, \mu, \Lambda)$ |
+> | E-step ↔ | $q(z) = p_\theta(z \mid x)$ | $\log q^*(z) = \mathbb{E}_{\text{params}}[\log p] + c$ |
+> | M-step ↔ | $\max_\theta \mathbb{E}_q[\log p]$ | $\log q^*(\text{param}) = \mathbb{E}_z[\log p] + c$ |
+> | On fige à chaque pas | l'autre étape | tous les *autres* facteurs |
+> | Égalisation KL | globale ($= 0$) | locale à chaque facteur ($= 0$) |
+> | Gap global | nul | permanent |
+> 
+> **La phrase à retenir** : EM annule UNE KL globale ; CAVI annule une KL LOCALE à chaque facteur, en boucle. La posterior globale reste inatteignable, mais chaque sous-problème se résout par une égalisation exacte — d'où la ressemblance trompeuse avec EM.
+
+### C. Les updates CAVI : presque EM, avec des espérances en plus
+
+En appliquant la formule CAVI générale (§V.B) à chaque facteur, on obtient des updates en **forme fermée** (grâce à la conjugaison). Et le résultat est frappant : **ils ont presque exactement la même forme que l'EM-GMM**, à un détail près.
+
+> [!warning] Le tableau de correspondance EM-GMM ↔ Bayesian GMM
+> | Étape | GMM classique (EM) | Bayesian GMM (VI / CAVI) |
+> |---|---|---|
+> | Responsabilités | $\gamma_{nk} \propto \pi_k \, \mathcal{N}(x_n \mid \mu_k, \Sigma_k)$ | $\gamma_{nk} \propto \exp\big(\mathbb{E}[\log \pi_k] + \mathbb{E}[\log \mathcal{N}(x_n \mid \mu_k, \Lambda_k)]\big)$ |
+> | Comptes effectifs | $N_k = \sum_n \gamma_{nk}$ | $N_k = \sum_n \gamma_{nk}$ (identique) |
+> | Poids | $\pi_k = N_k / N$ | $q(\pi) = \text{Dirichlet}(\alpha_0 + N_k)$ |
+> | Moyennes / précisions | $\mu_k, \Sigma_k$ = stats pondérées par $\gamma_{nk}$ | $q(\mu_k, \Lambda_k) = \text{Normal-Wishart}$ avec stats pondérées par $\gamma_{nk}$ |
+> 
+> **La seule vraie différence** : là où EM utilise les **valeurs** $\pi_k$ et $\mathcal{N}(x_n \mid \mu_k, \Sigma_k)$, VI utilise des **espérances de leur log** sous les facteurs $q$. Tout le reste — la structure des deux étapes, les comptes $N_k$, les stats pondérées — est identique.
+
+Le sens profond : EM met à jour des **valeurs ponctuelles** de paramètres ; VI met à jour des **distributions** sur ces paramètres. Le coordinate ascent qu'on avait en §IV.C de la note EM est devenu un coordinate ascent sur des distributions. Même machinerie ELBO, espace d'inconnues élargi.
+
+> [!note]- Pourquoi des espérances de log plutôt que les valeurs ?
+> Dans l'update CAVI des responsabilités, la formule générale (§V.B) demande $\mathbb{E}_{q_{-i}}[\log p_\theta(x, z)]$. Le terme $\log p$ contient $\log \pi_k$ et $\log \mathcal{N}(x_n \mid \mu_k, \Lambda_k)$. Comme $\pi$ et $(\mu_k, \Lambda_k)$ sont maintenant **aléatoires** (on a un $q$ dessus), on ne peut pas mettre leur valeur — on met leur **espérance sous $q$**.
+> 
+> Ces espérances ont des formes fermées explicites mais font intervenir des fonctions spéciales :
+> $$\mathbb{E}[\log \pi_k] = \psi(\alpha_k) - \psi\big(\textstyle\sum_j \alpha_j\big), \qquad \mathbb{E}[\log |\Lambda_k|] = \sum_{d} \psi\!\Big(\frac{\nu_k + 1 - d}{2}\Big) + D\log 2 + \log|W_k|$$
+> où $\psi$ est la **fonction digamma** (dérivée de $\log \Gamma$). Ces formules sortent des propriétés des familles exponentielles Dirichlet et Wishart. Pas besoin de les retenir — juste de comprendre que "espérance de log" remplace "valeur", et que la conjugaison garantit que ça se calcule.
+> 
+> Détails complets : Bishop §10.2.
+
+### D. Ce que ça change en pratique : ARD et robustesse
+
+C'est ici que le Bayesian GMM justifie son coût. Il résout deux des trois pièges du GMM classique (note EM §III.F).
+
+**1. Plus de singularités.** Le prior Wishart sur $\Lambda_k$ régularise automatiquement : aucune composante ne peut collapser sur un seul point (ce qui ferait diverger la vraisemblance en GMM classique). Plus besoin du hack "$\Sigma_k + \epsilon I$".
+
+**2. Sélection automatique du nombre de clusters (ARD).** C'est la propriété spectaculaire. **ARD** = *Automatic Relevance Determination* : si tu lances avec **trop** de composantes, le modèle **éteint tout seul** les composantes inutiles en envoyant leur poids $\pi_k \to 0$.
+
+![[bgmm_ard.png]]
+*Figure. ARD en action. Bayesian GMM lancé avec $K = 10$ composantes sur des données qui n'ont que 3 vrais clusters. **Rangée du haut** : les ellipses (contours 1σ et 2σ) à différentes itérations. **Rangée du bas** : la distribution des poids $\pi_k$. À l'itération 1, les 10 composantes sont empilées au centre avec des poids égaux (~0.1). Au fil des itérations, 7 composantes voient leur poids s'effondrer sous le seuil (ligne rouge) et meurent, pendant que 3 survivent et se calent exactement sur les vrais clusters. **Aucun choix manuel de $K$** — le modèle a déterminé tout seul qu'il fallait 3 composantes.*
+
+Le mécanisme : avec un prior Dirichlet à concentration faible ($\alpha_0$ petit), la solution variationnelle favorise la **parcimonie** — elle préfère mettre tout le poids sur peu de composantes plutôt que de l'étaler. Les composantes qui ne "gagnent" pas de points voient leur $N_k \to 0$, donc leur poids Dirichlet $\alpha_0 + N_k \to \alpha_0 \approx 0$, donc elles disparaissent.
+
+**Comparaison directe avec le GMM classique** sur le même problème :
+
+![[bgmm_vs_emgmm.png]]
+*Figure. Même $K = 10$ demandé, mêmes données à 3 clusters. **Gauche (GMM classique, EM)** : l'algorithme **utilise toutes ses 10 composantes** parce qu'il maximise la vraisemblance — il découpe chaque vrai cluster en plusieurs morceaux artificiels (sur-ajustement). Aucun mécanisme ne le pousse vers la parcimonie. **Droite (Bayesian GMM, VI)** : 3 composantes seulement survivent (en couleur), les 7 autres sont éteintes (gris fantôme) par ARD. Le modèle bayésien a récupéré la vraie structure ; le modèle MLE l'a fragmentée.*
+
+> [!warning] La leçon ARD
+> En GMM classique, tu dois tester $K = 2, 3, 4, 5, \ldots$ et comparer avec un critère externe (BIC, AIC, validation croisée). Pénible et fragile.
+> 
+> En Bayesian GMM, tu mets $K$ **volontairement trop grand** (disons 10 ou 20), tu lances une fois, et le modèle te garde le bon nombre. La sélection de modèle est **intégrée à l'inférence** au lieu d'être une étape séparée. C'est l'un des arguments les plus concrets en faveur de l'approche bayésienne.
+
+**3. Ce qui ne change pas : label switching.** La symétrie de permutation des composantes (note EM §III.F, piège n°2) reste structurelle — elle est inhérente à tout mélange et n'est pas affectée par les priors. Si tu lances deux fois, tu peux retrouver les mêmes clusters dans un ordre différent.
+
+### E. Pourquoi c'est le bon exemple pour VI
+
+Le Bayesian GMM coche toutes les cases pédagogiques :
+- **Structure familière** : tu connais déjà le GMM, donc tu vois exactement *ce qui change* quand on devient bayésien (les paramètres deviennent aléatoires, les valeurs deviennent des espérances de log).
+- **Updates en forme fermée** : grâce aux conjugaisons Dirichlet/multinomial et Normal-Wishart/gaussienne, CAVI donne des formules explicites — pas besoin de gradient stochastique.
+- **Illustre tous les concepts de la note** : mean-field (§III), CAVI (§V), et une propriété émergente (ARD) qu'on ne voit pas en EM.
+
+C'est le pont parfait entre l'abstrait des §II-V et les applications réelles. Et c'est exactement le rôle qu'avait le GMM dans la note EM : l'exemple qui rend tout concret.
+
+## VII. Quand CAVI ne suffit pas : SVI et BBVI
 
 CAVI exige (1) conjugaison pour les forme fermées, (2) un pass sur tout le dataset à chaque itération. Pour les modèles modernes (haute dimension, datasets massifs, formes non-conjuguées), il faut des méthodes plus flexibles. Deux extensions principales : **Stochastic VI** (SVI) et **Black-Box VI** (BBVI).
 
@@ -532,7 +684,7 @@ $$\nabla_\phi \mathcal{L} = \mathbb{E}_{\epsilon}\!\big[\nabla_\phi (\log p_\the
 
 Quel que soit le choix, le **principe reste le même** : maximiser l'ELBO sur $\phi$. Ce qui change, c'est juste **comment** on calcule (ou approxime) les updates.
 
-## VII. Récap et place dans la généalogie
+## VIII. Récap et place dans la généalogie
 
 ### A. Ce qu'on a vu
 

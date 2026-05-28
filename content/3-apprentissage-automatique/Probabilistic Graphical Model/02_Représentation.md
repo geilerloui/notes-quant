@@ -19,7 +19,7 @@ title: Représentation - PGM
 > - Student **S**AT (score SAT)
 > - Reference **L**etter (lettre de recommandation)
 
-![[images/3-Apprentissage automatique/Generative Models/im9 (1).png]]
+![[images/3-Apprentissage automatique/Generative Models/vae/im9 (1).png]]
 **Figure 1.** Bayesian Network de l'exemple de l'étudiant, avec les CPD (conditional probability distributions) attachées à chaque nœud.
 
 Pour obtenir la **factorisation** du graphe, on applique d'abord la chain rule :

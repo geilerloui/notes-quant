@@ -63,7 +63,7 @@ Intuitivement : si la map optimale "croisait" deux points (envoyer un point de g
 > 
 > Donc $x_1 < x_2 \Rightarrow y_1 \leq y_2$. La map est croissante.
 > 
-> ![[images/1-Mathématiques/Optimal transport/im6.png|326]]
+> ![[images/1-Mathématiques/E_Optimal transport/im6.png|326]]
 > *Illustration de la preuve par permutation : si la map "croise" (envoie $x_1$ à droite et $x_2$ à gauche alors que $x_1 < x_2$), on peut **échanger** les destinations pour diminuer le coût total. La map optimale ne croise donc jamais — elle est monotone croissante.*
 
 **Interprétation géométrique.** Sur la droite réelle, "transporter optimalement" $\mu$ vers $\nu$ revient à les **trier ensemble** : le $k$-ième percentile de $\mu$ va sur le $k$-ième percentile de $\nu$.

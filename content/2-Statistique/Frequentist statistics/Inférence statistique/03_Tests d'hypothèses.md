@@ -272,7 +272,7 @@ On rejette $H_0$ uniquement quand $T_{\text{obs}}$ est **trop grand**. La p-valu
 
 $$\text{p-value} = \mathbb{P}_{H_0}[T \ge T_{\text{obs}}]$$
 
-![[images/3-Apprentissage automatique/Generative Models/introduction/im9.png|307]]
+![[images/3-Apprentissage automatique/05_Generative Models/introduction/im9.png|307]]
 
 ### B. Test unilatéral à gauche
 
@@ -282,7 +282,7 @@ Symétriquement, on rejette uniquement quand $T_{\text{obs}}$ est **trop petit**
 
 $$\text{p-value} = \mathbb{P}_{H_0}[T \le T_{\text{obs}}]$$
 
-![[images/2-Statistiques/Frequentist/Inférence statistique/im10 (1).png]]
+![[images/2-Statistiques/A_Frequentist/Inférence statistique/im10 (1).png]]
 
 ### C. Test bilatéral
 
@@ -294,7 +294,7 @@ $$\text{p-value} = \mathbb{P}_{H_0}[|T| \ge |T_{\text{obs}}|] = 2 \cdot \mathbb{
 
 (La dernière égalité utilise la symétrie de la distribution de $T$ sous $H_0$ — vraie pour la gaussienne, vraie pour Student.)
 
-![[images/2-Statistiques/Frequentist/Inférence statistique/im11.png]]
+![[images/2-Statistiques/A_Frequentist/Inférence statistique/im11.png]]
 
 > 💡 **Cas Auto.** L'hypothèse alternative est $H_1: \mu_J \neq \mu_U$ → **test bilatéral** → on multiplie par 2. Et c'est ce qu'on a fait dans la figure 4 (les deux zones orange hachurées des deux côtés).
 

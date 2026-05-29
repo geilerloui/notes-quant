@@ -489,7 +489,7 @@ Par défaut, XGBoost commence avec une **prédiction constante de $0.5$** pour t
 
 **(i) Similarity au nœud racine.** On met tous les résidus dans une seule feuille initiale et on calcule sa similarity :
 
-![[xgb2.png]]
+![[xgb2.png|408]]
 *Figure. Tous les résidus du dataset dans la feuille initiale. Avec $\lambda = 0$, on a $\text{Similarity} = (-10.5 + 6.5 + 7.5 - 7.5)^2 / 4 = 4$.*
 
 **(ii) Calcul du Gain pour chaque candidat de split.** On teste différents seuils sur Dosage et on calcule le Gain pour chacun. Sur cet exemple, le premier split optimal donne :
@@ -498,14 +498,14 @@ $$\text{Gain} = \text{Sim}_L + \text{Sim}_R - \text{Sim}_{\text{root}} = 110.25 
 
 **(iii) Splitting récursif.** On continue à splitter la feuille de droite tant que `max_depth` n'est pas atteint :
 
-![[xgb4.png]]
+![[xgb4.png|340]]
 *Figure. Split récursif de la feuille de droite. Nouveau Gain : $98 + 56.25 - 14.08 = 140.17$.*
 
 **(iv) Pruning par $\gamma$.** Une fois l'arbre construit, on **prune** en remontant des feuilles vers la racine : pour chaque branche, on calcule $\text{Gain} - \gamma$. Si c'est **négatif**, on supprime la branche ; sinon, on la garde. Avec $\gamma = 130$ :
 
 $$\text{Gain} - \gamma = 140.17 - 130 = 10.17 > 0 \implies \text{on garde}$$
 
-![[xgb5.png]]
+![[xgb5.png|360]]
 *Figure. Arbre final après pruning par $\gamma = 130$ : toutes les branches sont conservées.*
 
 #### Étape 3 — Prédiction avec learning rate
@@ -518,12 +518,12 @@ Pour le MSE, c'est essentiellement la **moyenne des résidus** dans la feuille (
 
 $$\hat{y}^{\text{new}}_i = \hat{y}^{\text{old}}_i + \eta \cdot w_j^\star \quad \text{si } x_i \in \text{feuille } j$$
 
-![[xgb6.png]]
+![[xgb6.png|393]]
 *Figure. Après ajout du premier arbre scalé par $\eta = 0.3$ : la nouvelle prédiction (ligne noire) s'approche du point. Le résidu devient plus petit.*
 
 On répète le processus pour construire le second arbre sur les nouveaux résidus, puis le troisième, etc.
 
-![[xgb7.png]]
+![[xgb7.png|356]]
 *Figure. Après plusieurs arbres : la prédiction (en escalier, somme de tous les arbres) suit progressivement la cible.*
 
 ### V.3 Classification — log-loss et Cover
@@ -545,31 +545,31 @@ où $p_i = \sigma(\hat{y}_i)$ est la probabilité prédite via sigmoïde, et $\h
 
 Le processus est identique à la régression — similarity score, Gain, splitting récursif — mais avec les nouveaux $g_i, h_i$.
 
-![[xgb8.png]]
+![[xgb8.png|267]]
 *Figure. Setup classification : 4 observations (Dosage en x, P(effective) en y), prédiction initiale constante $p = 0.5$ et résidus.*
 
 **Feuille initiale.** Avec $p_i = 0.5$ pour tous, les résidus s'annulent (autant de positifs que de négatifs) et la similarity de la racine est nulle :
 
-![[xgb9.png]]
+![[xgb9.png|252]]
 *Figure. Tous les résidus dans la feuille racine. Numérateur = $(-0.5 + 0.5 + 0.5 - 0.5)^2 = 0$, donc Similarity $= 0$.*
 
 **Premier split.** On teste $\text{Dosage} < 15$. Le calcul de la similarity de la feuille de gauche (3 résidus à $-0.5, +0.5, +0.5$) donne :
 
 $$\frac{(-0.5 + 0.5 + 0.5)^2}{3 \times (0.5)(1 - 0.5) + \lambda} = \frac{0.25}{0.75 + \lambda} = 0.33 \text{ pour } \lambda = 0$$
 
-![[xgb10.png]]
+![[xgb10.png|315]]
 *Figure. Premier split à $\text{Dosage} < 15$. Gain = $0.33 + 1 - 0 = 1.33$.*
 
 On teste les autres seuils, aucun ne donne un meilleur Gain — on retient $\text{Dosage} < 15$.
 
 **Splitting récursif sur la feuille gauche** :
 
-![[xgb11.png]]
+![[xgb11.png|316]]
 *Figure. Split supplémentaire $\text{Dosage} < 5$ sur la feuille de gauche. La profondeur est limitée à 2, on s'arrête.*
 
 **Pruning** : avec $\gamma = 2$, $\text{Gain} - \gamma = 2.66 - 2 = 0.66 > 0$ — on garde l'arbre.
 
-![[xgb13.png]]
+![[xgb13.png|302]]
 *Figure. Arbre final après pruning par $\gamma = 2$.*
 
 #### Prédiction : logit → probabilité
@@ -578,11 +578,11 @@ L'arbre prédit dans l'espace logit. Pour un point qui tombe dans une feuille de
 
 $$\text{logit}_{\text{new}} = \text{logit}_{\text{old}} + \eta \cdot w^\star, \qquad p_{\text{new}} = \sigma(\text{logit}_{\text{new}}) = \frac{1}{1 + e^{-\text{logit}_{\text{new}}}}$$
 
-| Étape | Figure |
-|:---|:---:|
-| Conversion proba initiale $0.5$ → log-odds $0$ | ![[xgb14.png\|280]] |
-| Ajout du terme $\eta \cdot w^\star = 0.3 \times (-2) = -0.6$ | ![[xgb15.png\|280]] |
-| Conversion log-odds $-0.6$ → proba $0.35$ via sigmoïde | ![[xgb16.png\|280]] |
+| Étape                                                        |       Figure        |
+| :----------------------------------------------------------- | :-----------------: |
+| Conversion proba initiale $0.5$ → log-odds $0$               | ![[xgb14.png\|114]] |
+| Ajout du terme $\eta \cdot w^\star = 0.3 \times (-2) = -0.6$ | ![[xgb15.png\|283]] |
+| Conversion log-odds $-0.6$ → proba $0.35$ via sigmoïde       | ![[xgb16.png\|280]] |
 
 #### Cover en classification — un point délicat
 
@@ -593,7 +593,7 @@ $$\text{logit}_{\text{new}} = \text{logit}_{\text{old}} + \eta \cdot w^\star, \q
 
 Pour le premier arbre où tous les $p_i = 0.5$, chaque résidu apporte $0.25$ au Cover. Une feuille avec 3 résidus a $\text{Cover} = 0.75 < 1$ — XGBoost refuse de la créer avec la valeur par défaut.
 
-![[xgb12.png]]
+![[xgb12.png|495]]
 *Figure. Effet du Cover en classification : avec `min_child_weight = 1` (défaut), aucune feuille n'est autorisée (toutes ont $\text{Cover} < 1$). Solution pratique pour ce petit exemple : mettre `min_child_weight = 0`.*
 
 ### V.4 Dérivation Taylor à l'ordre 2
@@ -685,6 +685,8 @@ Pour chaque feature continue, on **bucketise** une fois pour toutes les valeurs 
 
 XGBoost a ajouté un mode `hist` (équivalent algorithmiquement) en 2017 en réponse à LightGBM.
 
+![[Pasted image 20260529175702.png|263]]![[Pasted image 20260529175720.png|216]]
+
 ### VI.2 GOSS — Gradient-based One-Side Sampling
 
 **Idée** : les observations à **fort gradient** $|g_i|$ sont mal modélisées par les arbres actuels (résidus élevés), elles portent donc beaucoup d'information pour le prochain arbre. Les observations à **faible gradient** sont déjà bien modélisées, contribuent peu.
@@ -697,6 +699,8 @@ XGBoost a ajouté un mode `hist` (équivalent algorithmiquement) en 2017 en rép
 
 **Effet** : on entraîne sur ~30% des données mais avec quasi pas de perte de qualité — speedup typique 2-3×.
 
+![[Pasted image 20260529175826.png|306]]![[Pasted image 20260529175843.png|270]]
+
 ### VI.3 EFB — Exclusive Feature Bundling
 
 **Constat** : dans les datasets très sparse (one-hot encoding, texte, RecSys…), beaucoup de features sont **mutuellement exclusives** — elles ne sont jamais non-nulles en même temps. Par exemple, dans un one-hot à 100 catégories, exactement **une** feature est non-nulle par observation.
@@ -704,6 +708,8 @@ XGBoost a ajouté un mode `hist` (équivalent algorithmiquement) en 2017 en rép
 **Idée** : on peut "fusionner" plusieurs features mutuellement exclusives en **une seule feature combinée** sans perte d'information. Si feature A prend des valeurs dans $\{0, 1, 2\}$ et feature B mutuellement exclusive dans $\{0, 1, 2, 3\}$, on les combine en une feature unique dans $\{0, 1, 2, 3, 4, 5, 6\}$ : valeurs $1$–$2$ = A non-nul, $3$–$6$ = B non-nul. Plus de combinaisons que de bins individuels mais **bien moins** que les features séparées.
 
 **Effet** : sur du sparse, peut diviser le nombre effectif de features par 5-10×.
+
+![[Pasted image 20260529175951.png|315]]
 
 ### VI.4 Leaf-wise vs level-wise growth
 
@@ -715,6 +721,8 @@ XGBoost a ajouté un mode `hist` (équivalent algorithmiquement) en 2017 en rép
 | Overfitting | Moins sensible | Plus prone à overfitter sur petit dataset |
 
 LightGBM atteint typiquement la **même loss en moins d'arbres** que XGBoost level-wise — mais demande plus de prudence sur les hyperparamètres (limiter `num_leaves`, augmenter `min_data_in_leaf`) sur petit dataset.
+
+![[Pasted image 20260529180219.png]]
 
 ### VI.5 Quand préférer LightGBM ?
 

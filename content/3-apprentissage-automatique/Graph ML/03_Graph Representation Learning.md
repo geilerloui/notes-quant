@@ -16,32 +16,32 @@ title: Graph Representation Learning
 > [!warning] Définition (Graph Representation Learning)
 > On veut **apprendre automatiquement les features** plutôt que les construire à la main comme en ML basique. À partir d'un nœud, on génère un embedding via une transformation $f$.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im1.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im1.png]]
 **Figure 1.** Du graphe à l'embedding : une transformation $f$ produit un vecteur dense par nœud.
 
 **Le pipeline.** On part d'un grand graphe, on construit la **matrice d'adjacence** — qui est très **creuse et grande**, donc coûteuse à manipuler directement. On la mappe vers un **espace d'embedding** où chaque colonne capture un aspect du graphe (degré, motifs...). Comme c'est une dimension latente, on ne peut pas dire exactement quelle colonne correspond à quelle information.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im2.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im2.png]]
 **Figure 2.** Pipeline : graphe → matrice d'adjacence (creuse) → embedding (dense, dimension réduite).
 
 > [!example] Zachary's Karate Club
 > Embeddings 2D des nœuds du fameux *Karate Club* de Zachary. Les nœuds similaires sont proches dans l'espace d'embedding.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im3 (1).png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im3 (1).png]]
 
 ### B. Pourquoi le ML classique ne marche pas sur les graphes
 
 Pour une **image**, on pourrait construire un graphe à partir du dataset MNIST, mais ce graphe aurait beaucoup trop de **régularité** pour être représentatif d'un vrai graphe. Pour un **RNN**, la représentation textuelle est une chaîne, qui ne capture pas le même genre d'info qu'un graphe arbitraire.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im4.png]]
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im5.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im4.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im5.png]]
 **Figure 3.** Image et texte ont des structures **régulières** (grille / chaîne) — pas représentatives des graphes réels.
 
 **Cas CNN sur graphe.** Un nœud noir = présent, blanc = absent. Quatre fenêtres convolutionnelles sur ce treillis prennent en compte les nœuds manquants — mais ce n'est pas comme ça qu'un graphe fonctionne. **On ne peut pas fixer un ordre.**
 
 > 💡 **Le problème d'isomorphisme.** On peut prendre un graphe, permuter ses lignes et colonnes dans la matrice d'adjacence, et la **structure topologique reste la même** — ce qui n'est absolument pas le cas pour du texte ou des images. Encore pire : un graphe peut être **dynamique** (nœuds/arêtes qui apparaissent et disparaissent), avec des features multimodales, etc. D'où le besoin d'un nouveau modèle.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im6.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im6.png]]
 
 ---
 
@@ -51,7 +51,7 @@ Pour une **image**, on pourrait construire un graphe à partir du dataset MNIST,
 
 **Setup.** Soit un graphe $G = (V, E)$ avec ensemble de sommets $V$, ensemble d'arêtes $E$, et une matrice d'adjacence $A$ (binaire pour simplifier — pas de features de nœuds ni d'info supplémentaire).
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/1.Introduction/im1.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/1.Introduction/im1.png]]
 
 **Objectif :**
 
@@ -59,7 +59,7 @@ $$\text{similarity}(u, v) \approx \mathbf{z}_v^T \mathbf{z}_u.$$
 
 La **similarité** est dans le graphe original, le **produit scalaire** est dans l'espace d'embedding.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im7.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im7.png]]
 **Figure 4.** La similarité dans le graphe doit être préservée par le produit scalaire des embeddings.
 
 > [!warning] Pseudo-code (Node Embeddings)
@@ -69,7 +69,7 @@ La **similarité** est dans le graphe original, le **produit scalaire** est dans
 >
 > où $\mathbf{Z} \in \mathbb{R}^{d \times |V|}$ est une matrice (chaque colonne = embedding d'un nœud, **paramètres à apprendre**) et $v \in \mathbb{I}^{|V|}$ est le vecteur indicateur du nœud (one-hot).
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im8.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im8.png]]
 >
 > 2. **Similarity function** : spécifie comment les relations dans l'espace vectoriel correspondent aux relations dans le graphe :
 >
@@ -109,7 +109,7 @@ La **similarité** est dans le graphe original, le **produit scalaire** est dans
 > [!warning] Définition (Random Walk)
 > Étant donné un graphe et un point de départ, on sélectionne un voisin au hasard, on s'y déplace, puis on recommence. La séquence de points visités ainsi est un **random walk** sur le graphe.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/2.Deep_walk/im1.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/2.Deep_walk/im1.png]]
 
 > [!warning] Définition (Similarity Function pour Random-Walk Embedding)
 > La similarité est définie comme la **probabilité que $u$ et $v$ co-occurrent sur un random walk** :
@@ -121,11 +121,11 @@ La **similarité** est dans le graphe original, le **produit scalaire** est dans
 > [!note]- Algorithme général
 > 1. Estimer la probabilité de visiter $v$ depuis $u$ via une stratégie de random walk $R$.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Representation Learning/2.Deep_walk/im2.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/2.Deep_walk/im2.png]]
 >
 > 2. Optimiser les embeddings pour encoder ces statistiques de random walks : la similarité dans l'espace d'embedding (produit scalaire = $\cos \theta$) encode la similarité par random walk.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Representation Learning/2.Deep_walk/im3 (1).png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/2.Deep_walk/im3 (1).png]]
 
 > [!warning] Avantages des Random-Walk Embeddings
 > - **Expressivité** : définition stochastique flexible de la similarité de nœuds qui incorpore l'info de **voisinage local et d'ordre supérieur**. Si un random walk depuis $u$ visite $v$ avec haute probabilité, $u$ et $v$ sont similaires (info multi-hop).
@@ -149,7 +149,7 @@ $$\mathcal{L} = \sum_{u \in V} \sum_{v \in N_R(u)} -\log P(v \mid \mathbf{z}_u).
 
 On paramétrise $P(v \mid \mathbf{z}_u)$ par un softmax :
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/2.Deep_walk/im4.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/2.Deep_walk/im4.png]]
 
 > 💡 **Problème.** La double somme sur les nœuds donne une complexité $O(|V|^2)$. Le coupable : le **terme de normalisation** du softmax. Peut-on l'approcher ?
 
@@ -182,22 +182,22 @@ DeepWalk utilise **Skip-Gram** pour créer les embeddings. Première étape : **
 
 **Comment ?** Faire plusieurs random walks de longueur fixe depuis chaque nœud. Par exemple, voici le résultat de 1 random walk de longueur 20 sur chaque nœud d'un graphe :
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im9.png|411]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im9.png|411]]
 
 La $i$-ème ligne = random walk démarré en nœud $i$. Par exemple, la 8e ligne :
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im10 (1).png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im10 (1).png]]
 
 Lecture : le walk a démarré en 8, est allé en 9, puis 10, est revenu en 9, est retourné en 10, puis en 11, etc. jusqu'à 9.
 
 > 💡 **L'analogie NLP.** On a 13 "phrases" de 20 "mots" chacune. Vocabulaire de taille 13. On peut appliquer **Skip-Gram exactement comme en NLP** : fenêtre autour d'un nœud (= ses voisins dans le walk) → embeddings.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/2.Deep_walk/im6.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/2.Deep_walk/im6.png]]
 **Figure 5.** Skip-Gram appliqué sur les random walks d'un graphe.
 
 **Visualisation.** Embeddings projetés en 2D via PCA. On voit clairement la **structure communautaire** du graphe — deux groupes émergent.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/2.Deep_walk/im7.png|462]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/2.Deep_walk/im7.png|462]]
 
 ### B. node2vec
 
@@ -212,7 +212,7 @@ Lecture : le walk a démarré en 8, est allé en 9, puis 10, est revenu en 9, es
 > - $N_{BFS}(u) = \{s_1, s_2, s_3\}$ — vue locale microscopique.
 > - $N_{DFS}(u) = \{s_4, s_5, s_6\}$ — vue globale macroscopique.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im12.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im12.png]]
 
 #### B.2 Random walk de premier ordre
 
@@ -225,7 +225,7 @@ où $\mathcal{N}_v$ est l'ensemble des voisins de $v$ et $d(v)$ son degré.
 > [!example] Calcul concret
 > $p(u_3 \mid v) = 0.2 / 3 \approx 0.07$.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Representation Learning/3.Node2vec/im1.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/3.Node2vec/im1.png]]
 
 #### B.3 Random walk de second ordre (biaisé)
 
@@ -236,7 +236,7 @@ où $\mathcal{N}_v$ est l'ensemble des voisins de $v$ et $d(v)$ son degré.
 
 **Lecture.** En partant de $s_1$, on calcule la distance aux autres nœuds. Distance 1 ($s_1$ à $s_2$) → proba 1. Retour à $s_1$ depuis $w$ → toujours $1/p$. Distance > 1 → proba $1/q$. Le paramètre $q$ aide à choisir entre **DFS** et **BFS**.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/2.Deep_walk/im5.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/2.Deep_walk/im5.png]]
 
 Les probabilités de transition de second ordre :
 
@@ -244,12 +244,12 @@ $$p(u \mid v, t) = \frac{\alpha_{pq}(t, u) \, w(u, v)}{\sum_{u' \in \mathcal{N}_
 
 Mêmes formules que pour le premier ordre, avec en plus le terme de biais $\alpha$.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/3.Node2vec/im2.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/3.Node2vec/im2.png]]
 
 > [!example] Illustration
 > Le random walk vient de traverser l'arête $(s_1, w)$ et est en $w$. Le biased walk étant **second-order**, il se souvient toujours d'où il vient (= $s_1$).
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Representation Learning/2.Deep_walk/im5.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/2.Deep_walk/im5.png]]
 >
 > Où aller ensuite ? Trade-off entre :
 > - **$p$** — *return parameter*.
@@ -257,7 +257,7 @@ Mêmes formules que pour le premier ordre, avec en plus le terme de biais $\alph
 >
 > Walk type **BFS** → $p$ faible. Walk type **DFS** → $q$ faible.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im13.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im13.png]]
 
 #### B.4 Algorithme node2vec
 
@@ -297,7 +297,7 @@ Trois types d'applications principales (+ une).
 > [!example] Link prediction
 > On veut savoir si les arêtes marquées "?" devraient exister. L'algo répond oui/non pour chacune.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im14.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im14.png]]
 
 > [!warning] Graph classification
 > Embedding du graphe entier $z_G$ via agrégation d'embeddings de nœuds ou via *anonymous random walks*. Prédire un label sur la base de $z_G$.
@@ -312,13 +312,13 @@ Trois types d'applications principales (+ une).
 
 Dans un **Knowledge Graph (KG)**, les arêtes sont de **types différents** — appelées **relations**. Les nœuds sont appelés **entities**. Exemples d'arêtes : *genre dans un livre*, *relation entre deux auteurs*, etc.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im15.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im15.png]]
 
 ### B. Link prediction dans les KG (KG Completion)
 
 Construire un KG est laborieux : si une arête manque, le résultat de recherche est impacté. On veut un modèle de link prediction qui apprend depuis les **patterns de connectivité locale et globale**, en tenant compte des entités et relations de différents types **simultanément**.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im16.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im16.png]]
 
 ### C. Translating Embeddings (TransE)
 
@@ -332,7 +332,7 @@ $$h + l \approx t \quad \text{si la relation tient}.$$
 
 > 💡 **Intuition.** Une fois le mapping appris, on translate d'un nœud à un autre par la relation. Si la relation tient, on doit retrouver la *tail entity*. C'est le genre de fonction objectif qu'on cherche.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im17.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im17.png]]
 
 ### D. Pseudo-code TransE
 
@@ -347,7 +347,7 @@ $$h + l \approx t \quad \text{si la relation tient}.$$
 >
 > C'est une **comparative loss** : pull pour les bons, push pour les mauvais. L'intérêt majeur : on trouve des embeddings **sans random walks**.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im18.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im18.png]]
 
 ---
 
@@ -371,7 +371,7 @@ $$z_G = \sum_{v \in G} z_v.$$
 
 Introduire un **nœud virtuel** pour représenter le (sous)graphe et lancer une technique d'embedding standard. Proposé dans [Gated Graph Sequence Neural Networks](https://arxiv.org/abs/1511.05493) (Li et al. 2017) comme technique générale pour subgraph embedding.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im19.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im19.png]]
 
 ### C. Approche 3 — Anonymous Walk Embeddings
 
@@ -381,7 +381,7 @@ Introduire un **nœud virtuel** pour représenter le (sous)graphe et lancer une 
 
 Dans un **anonymous walk**, les états correspondent à l'**index de la première visite** du nœud dans le random walk. Au lieu de représenter un random walk comme une séquence de nœuds, on le représente comme une séquence de **temps de première visite**.
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/im20.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/im20.png]]
 
 > [!example] Trois random walks
 > - **Walk 1.** Index 1 (A visité au step 1), 2 (B visité au step 2), 3 (C au step 3), puis B (déjà visité, garde son index 2), puis C (garde son 3) → $1, 2, 3, 2, 3$.
@@ -396,7 +396,7 @@ Le nombre d'anonymous walks **croît exponentiellement**. Il y a 5 walks de long
 
 $$w_1 = 111, \; w_2 = 112, \; w_3 = 121, \; w_4 = 122, \; w_5 = 123.$$
 
-![[images/3-Apprentissage automatique/Graph ML/Representation Learning/4.Graph_embed/im1.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Representation Learning/4.Graph_embed/im1.png]]
 
 #### C.3 Embedding du graphe
 

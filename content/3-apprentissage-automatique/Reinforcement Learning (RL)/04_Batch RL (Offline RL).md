@@ -17,7 +17,7 @@ Offline RL aka Batch Reinforcement Learning, is a variant of RL that requires th
 
 For Group B we repeat the same experiment but reversed they start by the cross multiplication. And they pass an exam in average they got 92.
 
-![[images/3-Apprentissage automatique/Reinforcement learning/Offline/im1.png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/Offline/im1.png]]
 
 Now the question is if we have a new student what should we do ? You can directly of doing the sequence or group A, but maybe the size of the sample was way smaller than group B, which would turn the estimate of the score to be biased. Basically if group B is different than group A we run into the issue of censored data. We could also think of a counterfactual reasoning what would have happened if the person was on the other group ?\\
 

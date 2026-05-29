@@ -99,7 +99,7 @@ La façon la plus naturelle de comparer deux champs de vecteurs est de regarder 
 
 $$\boxed{\;\mathcal{L}_{\text{Fisher}}(\theta) = \frac{1}{2}\, \mathbb{E}_{p(x)}\!\left[\left\|\nabla_x \log p(x) - s_\theta(x)\right\|_2^2\right]\;}$$
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im1 (3).png|454]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im1 (3).png|454]]
 
 > [!warning] L'objectif est intractable tel quel
 > On ne peut pas calculer cette divergence directement : elle dépend de $\nabla_x \log p(x)$, c'est-à-dire **exactement la quantité qu'on cherche à apprendre**. On semble tourner en rond. La suite est l'astuce d'intégration par parties qui résout le problème.
@@ -188,12 +188,12 @@ $$\widehat{\mathcal{L}}_{\text{SM}}(\theta) = \frac{1}{N} \sum_{i=1}^N \left[\tf
 
 | Réseau de neurones                                                                   | Sortie                                                                               |
 | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| ![[images/3-Apprentissage automatique/Generative Models/score based/im1-4.png\|368]] | ![[images/3-Apprentissage automatique/Generative Models/score based/im1-1.png\|263]] |
+| ![[images/3-Apprentissage automatique/05_Generative Models/score based/im1-4.png\|368]] | ![[images/3-Apprentissage automatique/05_Generative Models/score based/im1-1.png\|263]] |
 *Figures. blabla*
 
 **(2) Calcul de la norme deux.** On commence par considérer un cas jouet pour calculer la norme deux : il suffit d'une propagation avant (feed forward), puis on peut calculer la norme deux.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im2 (3).png|178]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im2 (3).png|178]]
 
 Mathématiquement, cela revient à faire passer la matrice $X$ à travers le réseau de neurones $s_{\theta}(\mathbf{x})$ : pour chaque vecteur on obtient un gradient de dimension deux, et on calcule la norme pour chaque observation, c'est-à-dire $\sqrt{x_{11}^2+x_{12}^2}$.
 
@@ -203,7 +203,7 @@ $$
 
 **(3) Calcul de la trace. (i) Calcul du Jacobien.** On fait d'abord une propagation avant pour obtenir la sortie $s_{\theta, 1}(x)$, puis on fait une rétropropagation et on ne prend que la première dérivée.
 
-![[im3 (4).png]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im3 (4).png]]
 
 On poursuit cette procédure pour la deuxième composante : on répète exactement le même processus jusqu'à avoir tous les éléments de la diagonale. On note $D$ la dimension de l'entrée. **Sur ImageNet, on a des millions de dimensions : ce ne sera pas faisable à cause de la taille, donc cette approche ne peut pas être utilisée pour calculer la trace.**
 
@@ -215,7 +215,7 @@ $$
 
 **(ii) Calcul de la trace.** Quand notre gradient est un tenseur de dimension trois, la trace est simplement l'empilement des diagonales du tenseur. Par exemple, si on a le tenseur suivant :
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im4 (1).png|484]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im4 (1).png|484]]
 
 **(4) Visualisation (plotting).** À partir de ce qu'on a dit précédemment, on affirme que
 
@@ -225,7 +225,7 @@ $$
 
 Pour visualiser le champ de gradient, on commence par tracer l'ensemble des points de données $[X]$. Ensuite, pour chaque point on a son vecteur $s_{\theta}(x)$, qui constitue le point d'arrivée du vecteur.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im1-2.png|295]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im1-2.png|295]]
 
 **(5) Échantillonnage (sampling).** Une fois le champ de vecteurs appris, on peut tirer parti de la dynamique de Langevin pour produire de vrais échantillons de la densité $\mathbf{p(x)}$ en s'appuyant uniquement sur $\nabla_{\mathbf{x}} \log p(\mathbf{x})$. L'échantillonnage est défini d'une manière très similaire aux approches MCMC, en appliquant récursivement la formule suivante, où on a posé ici $x_0 = (1.5, -1.5)$ :
 
@@ -298,7 +298,7 @@ $$\boxed{\;l(\theta;\sigma) = \mathbb{E}_{q_{\sigma}(\tilde{x} \mid x)}\, \mathb
 
 | Réseau de neurones                                                                   | Inputs                                                                               |
 | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| ![[images/3-Apprentissage automatique/Generative Models/score based/im1-4.png\|368]] | ![[images/3-Apprentissage automatique/Generative Models/score based/im1-1.png\|263]] |
+| ![[images/3-Apprentissage automatique/05_Generative Models/score based/im1-4.png\|368]] | ![[images/3-Apprentissage automatique/05_Generative Models/score based/im1-1.png\|263]] |
 *Figures. blabla*
 
 **(2) Fonction de perte.** On rappelle que le réseau optimal vérifiant $s_{\theta}(x) \approx \nabla_x \log p(x)$ est obtenu en minimisant :
@@ -322,7 +322,7 @@ $$
 
 **(3) Visualisation.** Pour visualiser le champ de gradient, on part du dataset $[X]$ ; le point d'arrivée de chaque vecteur est $s_{\theta}(x)$.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im1-2.png|295]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im1-2.png|295]]
 
 ### B. Sliced score matching
 
@@ -330,11 +330,11 @@ $$
 
 **Idée centrale.** Faire le calcul en dimension 1 est plus facile qu'en dimension multiple. On y arrive par **projections aléatoires** : on projette les champs de vecteurs sur des directions aléatoires (lignes en pointillé), de sorte qu'ils deviennent des champs scalaires.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im5.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im5.png]]
 
 Ensuite, on projette tous les vecteurs sur ces deux droites aléatoires. On obtient des scalaires faciles à manipuler. Les deux champs vectoriels sont proches l'un de l'autre si et seulement si leurs projections aléatoires le sont aussi.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im6 (2).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im6 (2).png]]
 
 **Fonction objectif.** On définit une nouvelle fonction objectif, la **Sliced Fisher Divergence**. C'est l'erreur quadratique entre les projections du score de $p$ et du score modèle :
 
@@ -363,17 +363,17 @@ Les deux expressions sont égales parce que $v$ ne dépend pas de $x$, on peut d
 
 On fait d'abord un forward pour calculer $s_{\theta}(x)$, puis le produit scalaire (équivalent à ajouter un nœud, c'est-à-dire une couche linéaire). On obtient un scalaire (le produit interne). On peut ensuite rétropropager à travers ce calcul : ça donne le gradient du produit interne.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im7.png|494]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im7.png|494]]
 
 Le dernier produit scalaire est la procédure inverse. **Une seule passe de backprop suffit** pour évaluer l'objectif du sliced score matching — bien mieux que le score matching original.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im8 (1).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im8 (1).png]]
 
 **Limite.** Le sliced peut être plus lent que le denoising score matching. L'objectif du sliced demande un backprop, alors que le denoising ne demande qu'un forward — ce qui peut rendre le sliced jusqu'à 4× plus lent.
 
 **Vérification empirique de la scalabilité.** En abscisse la dimension des données, en ordonnée le temps par itération pour calculer l'objectif (plus bas = mieux). En marron : score matching original ; SSM : sliced ; SSM-VR : une variante ; DSM : denoising ; CP et approx-BP : autres méthodes d'accélération, sans garantie théorique et parfois mauvaises en pratique. Le sliced est nettement plus rapide que le score matching original, qui sature en mémoire au-delà de 300 dimensions. DSM est légèrement meilleur.
 
-![[im9 (2).png|288]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im9 (2).png|288]]
 
 #### Exemple
 
@@ -381,7 +381,7 @@ Le dernier produit scalaire est la procédure inverse. **Une seule passe de back
 
 | Réseau de neurones                                                                   | Inputs                                                                               |
 | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| ![[images/3-Apprentissage automatique/Generative Models/score based/im1-4.png\|368]] | ![[images/3-Apprentissage automatique/Generative Models/score based/im1-1.png\|263]] |
+| ![[images/3-Apprentissage automatique/05_Generative Models/score based/im1-4.png\|368]] | ![[images/3-Apprentissage automatique/05_Generative Models/score based/im1-1.png\|263]] |
 *Figures. blabla*
 
 **(2) Fonction de perte.** On rappelle :
@@ -398,7 +398,7 @@ Les deux termes sont calculés avec la fonction `autograd.functional.jvp()`, qui
 
 **(b) Terme de droite.** La fonction $s_\theta(x)$ est `logp`. Il suffit de faire le produit scalaire entre le vecteur aléatoire et `logp`.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im7 (1).png|544]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im7 (1).png|544]]
 
 **(c) Terme de gauche.** Le gradient de $v^\top s_\theta(x)$ est le terme `jvp`. On refait un produit scalaire à droite avec $v$ pour obtenir le terme de gauche.
 
@@ -406,7 +406,7 @@ Les deux termes sont calculés avec la fonction `autograd.functional.jvp()`, qui
 
 **(3) Visualisation.** Pour visualiser le champ de gradient, on part du dataset $[X]$ ; le point d'arrivée de chaque vecteur est $s_{\theta}(x)$.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im1-2.png|295]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im1-2.png|295]]
 
 ## IV. Denoising Score Matching avec Langevin Dynamics (SMLD)
 
@@ -414,11 +414,11 @@ Les deux termes sont calculés avec la fonction `autograd.functional.jvp()`, qui
 
 **De l'estimation du score à la génération.** Depuis le début du chapitre, on suppose que disposer du champ de scores permet de générer de nouveaux échantillons. L'idée : tirer des points aléatoires, puis les déplacer le long du gradient pour qu'ils ressemblent à la distribution originale. Les échantillons suivent alors la direction du gradient :
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im12.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im12.png]]
 
 Avec uniquement le gradient, les échantillons restent piégés (image de gauche). En ajoutant un bruit aléatoire, le résultat est bien meilleur (image de droite).
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im13.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im13.png]]
 
 **Échantillonnage par dynamique de Langevin.** Technique standard pour échantillonner $p(x)$ en n'utilisant que son score $\nabla_x \log p(x)$ :
 
@@ -431,29 +431,29 @@ $$\begin{aligned} z_t &\sim \mathcal{N}(0, I) \\ \tilde{x}_t &\leftarrow \tilde{
 
 **Modélisation générative basée sur le score.** Le framework est formalisé par [Song & Ermon (2019)](https://arxiv.org/abs/1907.05600). On dispose uniquement d'échantillons de la distribution de données ; on apprend le score par score matching, puis on échantillonne par dynamique de Langevin.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im14.png|292]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im14.png|292]]
 
 ### Trois pièges qui font tout planter
 
 **Piège 1 : l'hypothèse de variété (manifold hypothesis).** En pratique, une grande partie des données vit sur une variété de dimension plus faible que celle de l'espace ambiant. Sur l'image ci-dessous, les points 3D vivent en réalité sur une bande 2D. Dans ce cas, le score n'est **pas défini** :
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im15.png|231]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im15.png|231]]
 
 $$\nabla_x \log p_{\text{data}}(x) \;\text{ n'existe pas — la densité est singulière sur la variété.}$$
 
 Intuition : si la distribution est concentrée autour d'un anneau, plus l'anneau devient fin, plus le score devient grand. À la limite (épaisseur nulle, variété 1D dans un espace 2D), le score explose.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im16.png|254]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im16.png|254]]
 
 *Test empirique.* On ajuste les données avec un algorithme de variété linéaire (PCA). Sur MNIST, les images font 784 dimensions, mais PCA trouve une sous-variété linéaire de dimension 595 qui reconstruit fidèlement les images d'origine. Avec une variété non-linéaire la dimension serait encore plus petite.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im17.png|514]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im17.png|514]]
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im18.png|438]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im18.png|438]]
 
 *Conséquence sur CIFAR-10.* La courbe d'apprentissage avec SSM décroît rapidement puis explose en oscillations à cause de problèmes numériques.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im19.png|190]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im19.png|190]]
 
 **Piège 2 : score imprécis dans les zones de faible densité.** L'estimateur Monte Carlo de l'objectif s'écrit :
 
@@ -461,11 +461,11 @@ $$\frac{1}{2}\, \mathbb{E}_{p_{\text{data}}}\!\left[\|\nabla_x \log p_{\text{dat
 
 Vu comme un jeu enseignant/élève : l'enseignant tire $x \sim p_{\text{data}}$, l'élève approxime le score en ce point. Le problème est que dans les régions jamais échantillonnées (les zones « ? » sur le graphe), l'élève n'a aucune information.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im25.png|402]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im25.png|402]]
 
 Sur le même jouet 2D : à gauche le score idéal, à droite le score appris — précis uniquement dans la zone rouge (où il y a des données), faux ailleurs.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im20.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im20.png]]
 
 **Piège 3 : mauvais mélange de Langevin entre modes.** Soit un mélange à deux modes à supports disjoints :
 
@@ -473,28 +473,28 @@ $$p_{\text{data}}(x) = \pi p_1(x) + (1-\pi)\, p_2(x).$$
 
 Sur le support du premier mode, le score ne dépend pas de $\pi$ (et idem pour le second). Comme Langevin n'utilise *que* le score, **il ne peut pas retrouver $\pi$** : il va échantillonner les deux modes mais avec des poids relatifs faux. En pratique on retrouve la position des modes mais pas leurs poids — c'est un gros problème.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im26.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im26.png]]
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im27.png|519]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im27.png|519]]
 
 ### Solution unifiée : perturbation gaussienne multi-échelle
 
 **Perturbation gaussienne.** L'astuce qui résout les trois pièges d'un coup : perturber les données avec du bruit gaussien. Le gradient de la log-densité perturbée est alors **bien défini partout**, et en pratique ça marche très bien.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im28.png|527]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im28.png|527]]
 
 Mais une perturbation trop grande détruit l'information utile. D'où un trade-off : gros bruit pour couvrir les zones de faible densité, petit bruit pour rester fidèle à $p_{\text{data}}$. La solution est d'utiliser **une séquence de variances** décroissantes pour récupérer l'information à plusieurs granularités :
 
 $$\sigma_1 > \sigma_2 > \cdots > \sigma_{L-1} > \sigma_L$$
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im21.png|530]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im21.png|530]]
 
 **Annealed Langevin Dynamics.** L'idée est simple :
 
 - Échantillonner successivement avec $\sigma_1, \sigma_2, \ldots, \sigma_L$ via Langevin à chaque échelle.
 - Réduire progressivement le pas (step size).
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im27.png|519]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im27.png|519]]
 
 Algorithme :
 
@@ -502,11 +502,11 @@ Algorithme :
 
 Comparaison avec la dynamique de Langevin vanilla :
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im22.png|558]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im22.png|558]]
 
 **Noise Conditional Score Networks (NCSN).** Plutôt que d'entraîner $L$ réseaux séparés (un par niveau de bruit), on utilise **un seul réseau conditionné sur la variance** : il prend $(x, \sigma)$ en entrée et estime le score correspondant à chaque niveau.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im23.png|556]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im23.png|556]]
 
 Distribution perturbée :
 
@@ -516,7 +516,7 @@ Réseau :
 
 $$s_\theta(x, \sigma) \approx \nabla_x \log q_\sigma(x)$$
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im32.png|483]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im32.png|483]]
 
 Loss finale, somme pondérée des objectifs de denoising score matching à chaque échelle :
 
@@ -526,13 +526,13 @@ $$\boxed{\;\mathcal{L}_{\{\sigma_i\}_{i=1}^L}(\theta) = \frac{1}{L} \sum_{i=1}^L
 
 **Échantillonnage.** On part d'un gros bruit et on raffine : à mesure que $\sigma$ diminue, les samples deviennent réalistes. Pour la première fois, un modèle non-adversarial égale ou surpasse les GAN sur la qualité visuelle — alors que les modèles à vraisemblance n'y parvenaient pas.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im24.png|273]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im24.png|273]]
 
 ![[im34.png|339]]
 
 **Plus proche voisin.** À gauche les vraies images, à droite leurs voisins les plus proches dans les samples générés — preuve que le modèle ne fait pas que recopier les données d'entraînement.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im33.png|299]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im33.png|299]]
 
 **Inpainting.** La moitié droite de l'image est masquée, le réseau conditionné complète la zone manquante. À droite : reconstruction complète.
 
@@ -558,11 +558,11 @@ $$[\tilde{X}]_{10k \times 2} = X + [U]_{10k \times 2} \times [\sigma]_{10k \time
 
 **(c) Terme de gauche.** On nourrit le réseau $s_\theta(\tilde{x}, \sigma_i)$ avec la matrice perturbée et ses labels associés. Le réseau apprend des embeddings pour les quatre niveaux de bruit.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im4-1 (1).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im4-1 (1).png]]
 
 **(3) Visualisation.** Pour visualiser le champ de gradient, on utilise le dataset $X$ avec les vecteurs $s_\theta(\tilde{x}, \sigma_i)$ comme points d'arrivée (cela demande les labels et les données perturbées).
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im1-2.png|295]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im1-2.png|295]]
 
 ## V. Modèles de diffusion discrets
 
@@ -570,7 +570,7 @@ $$[\tilde{X}]_{10k \times 2} = X + [U]_{10k \times 2} \times [\sigma]_{10k \time
 
 *Sohl-Dickstein et al., ICML 2015.* Inspiré de la thermodynamique hors équilibre : on définit un processus de bruitage progressif (forward) qui détruit la donnée, et on apprend à le renverser (reverse).
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im5-1.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im5-1.png]]
 
 **Processus forward (diffusion).** À chaque étape on injecte une quantité de bruit pré-définie. Le noyau de diffusion markovien avec un taux $\beta_t$ est :
 
@@ -927,7 +927,7 @@ $$\operatorname{tr}(A) = \operatorname{tr}(AI) = \operatorname{tr}\!\big(A\, \ma
 
 Quand $z$ est tiré d'une Rademacher (entrées $\pm 1$ avec proba $0.5$), c'est l'**estimateur de Hutchinson**.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im3-1 (2).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im3-1 (2).png]]
 
 **Estimateur de Skilling-Hutchinson.** En pratique, la divergence d'une fonction vectorielle $f$ est dure à évaluer, mais on peut utiliser cet estimateur non biaisé. Soit $\epsilon \sim \mathcal{N}(0, I)$ :
 
@@ -1000,7 +1000,7 @@ $$p(z_0, x) = p_\theta(z_0)\, p_\psi(x \mid z_0).$$
 
 L'entraînement apprend $\{\phi, \theta, \psi\}$ : paramètres de l'encodeur, du score, et du décodeur.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/latent space/im1-1 (1).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/latent space/im1-1 (1).png]]
 
 **Entraînement.** Deux étapes :
 

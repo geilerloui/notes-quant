@@ -151,7 +151,7 @@ Pour contourner les problèmes de Monge, Leonid Kantorovich propose en 1942 une 
 
 Kantorovich travaille sur l'optimisation de la logistique militaire pendant la Seconde Guerre mondiale. La situation : on a des **casernes** à l'arrière avec des soldats en réserve, et des **positions au front** où il faut envoyer ces soldats.
 
-| ![[images/1-Mathématiques/Optimal transport/im2-1 (2).png\|307]] | ![[images/1-Mathématiques/Optimal transport/im2-2.png\|310]] |
+| ![[images/1-Mathématiques/E_Optimal transport/im2-1 (2).png\|307]] | ![[images/1-Mathématiques/E_Optimal transport/im2-2.png\|310]] |
 | ----------------------- | ------------------- |
 *Trois casernes (rouge, en réserve) avec respectivement 60, 90 et 150 soldats. Trois positions au front (bleu) qui demandent 120, 90 et 90 soldats. Total : 300 = 300, la conservation est OK. **Question** : comment répartir les soldats pour minimiser la distance totale parcourue ?*
 
@@ -165,7 +165,7 @@ Kantorovich introduit deux objets pour formaliser le problème.
 
 **La matrice de distance** $D = (d_{ij})$ : c'est donné. $d_{ij}$ est la distance entre la caserne $i$ et la position $j$.
 
-| ![[images/1-Mathématiques/Optimal transport/im2-3.png\|271]] | ![[im2-5.png\|396]] |
+| ![[images/1-Mathématiques/E_Optimal transport/im2-3.png\|271]] | ![[im2-5.png\|396]] |
 | ------------------- | ------------------- |
 *À gauche : la matrice de transport $P$ qu'on cherche. À droite : la matrice de distance $D$ qui est donnée (les distances géographiques entre casernes et positions).*
 

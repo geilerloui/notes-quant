@@ -15,7 +15,7 @@ $$h_t = (o_0, a_0, r_1, o_1, a_1, r_2, \ldots, o_t)$$
 
 et la politique (policy) de l'agent peut être vue comme une fonction $a_{t} = \pi(h_{t-1})$ qui décide de l'action suivante à partir du passé.
 
-![[images/3-Apprentissage automatique/Reinforcement learning/RL Tabulaire/im1.png|391]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/im1.png|391]]
 **Figure 1.** Vue d'ensemble de l'interaction agent–environnement.
 
 Ce cadre se distingue de l'apprentissage supervisé sur deux points essentiels :

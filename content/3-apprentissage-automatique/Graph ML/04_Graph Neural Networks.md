@@ -24,8 +24,8 @@ On peut voir une **image** comme une grille 2D de nœuds interconnectés. Le CNN
 
 > 💡 **Le cœur du CNN = Locality + Aggregation.** C'est ces deux étapes qu'on va vouloir généraliser aux graphes.
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/1.intro/im1.png]]
-![[images/3-Apprentissage automatique/Graph ML/GNN/1.intro/im2.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/1.intro/im1.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/1.intro/im2.png]]
 
 ### B. Pourquoi le CNN ne s'applique pas directement aux graphes
 
@@ -33,7 +33,7 @@ On peut voir une **image** comme une grille 2D de nœuds interconnectés. Le CNN
 > - **Pas de grille fixe.** Les images et le texte sont des grilles régulières. Les graphes n'ont **pas** de pattern régulier — un nœud peut avoir 2 voisins ou 50.
 > - **Pas d'ordre spatial.** Topologie complexe, espace non-euclidien, **pas d'ordre fixe des nœuds**. Si on permute les nœuds, le graphe est le même mais les "lignes" de la matrice d'adjacence sont dans un ordre différent.
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/1.intro/im3 (1).png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/1.intro/im3 (1).png]]
 **Figure 1.** Image et texte = structures de grille fixe. Graphe = aucune régularité.
 
 ### C. L'approche naïve qui ne marche pas
@@ -47,7 +47,7 @@ On pourrait représenter le graphe par sa matrice d'adjacence, ajouter des featu
 >
 > Or les graphes sont **invariants par permutation des nœuds** — propriété qu'un MLP naïf ne respecte pas.
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/im2.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/im2.png]]
 
 ### D. L'objectif des GNN — node embedding
 
@@ -63,7 +63,7 @@ $$\text{sim}(a, b) = (z^a)^T z^b = (x^a)^T x^b.$$
 
 $$f(a + b) \equiv f(b + a).$$
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/im4.png|555]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/im4.png|555]]
 **Figure 2.** Construction du graphe computationnel : à gauche le graphe, à droite l'arbre de calcul autour d'un nœud cible.
 
 ---
@@ -72,7 +72,7 @@ $$f(a + b) \equiv f(b + a).$$
 
 > 💡 **Référence.** [Semi-supervised Classification with Graph Convolutional Networks](https://arxiv.org/pdf/1609.02907.pdf) (Kipf & Welling, ICLR 2017). L'idée centrale : **le voisinage d'un nœud définit son graphe computationnel**.
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/im3 (1).png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/im3 (1).png]]
 
 ### A. Aggregate Neighbors
 
@@ -88,7 +88,7 @@ On part d'un nœud cible $A$. Ses voisins (B, C, D) forment la **layer-1**. On r
 
 **Propriété d'invariance.** Si $A$ et $C$ sont permutés en layer-0, le résultat ne doit pas changer.
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/2.Basic/im1.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/2.Basic/im1.png]]
 
 #### A.2 Que met-on dans les boîtes ?
 
@@ -108,13 +108,13 @@ $$h_v^{(l+1)} = \sigma\!\left( W_l \sum_{u \in N(v)} \frac{h_u^{(l)}}{|N(v)|} + 
 > - **Deuxième terme (bleu)** : on combine avec le message du nœud lui-même au layer précédent.
 > - **$W_l$** et **$B_l$** : matrices de transformation **partagées par tous les nœuds** au layer $l$ — c'est ça qu'on apprend.
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/2.Basic/im2.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/2.Basic/im2.png]]
 
 ### B. Entraînement du modèle
 
 On a besoin d'une **loss sur les embeddings**. On peut feeder les embeddings dans n'importe quelle loss et faire du SGD.
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/2.Basic/im3 (1).png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/2.Basic/im3 (1).png]]
 
 > [!warning] Notation finale
 > - $h_v^l$ : représentation cachée de $v$ au layer $l$.
@@ -134,11 +134,11 @@ On a besoin d'une **loss sur les embeddings**. On peut feeder les embeddings dan
 
 À chaque stage on stocke une matrice cachée où chaque ligne est un nœud.
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/2.Basic/im11.png|407]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/2.Basic/im11.png|407]]
 
 **Update equation.**
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/2.Basic/im5.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/2.Basic/im5.png]]
 
 > [!warning] Deux ajustements importants
 > - **Self-loop.** On modifie $A$ en $A + I$ pour que chaque nœud "se voie lui-même".
@@ -159,7 +159,7 @@ $$\boxed{H^{(l+1)} = \sigma\!\left( \textcolor{red}{\tilde A H^{(l)} W_l^T} + \t
 
 avec $\tilde A = D^{-1/2} A D^{-1/2}$ (normalisation symétrique). En **rouge** : agrégation du voisinage. En **bleu** : transformation du nœud lui-même.
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/im6.png|312]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/im6.png|312]]
 
 > 💡 **En pratique, $\tilde A$ est très sparse**, donc on peut utiliser de la multiplication matricielle creuse efficace. (Note : tous les GNN ne se mettent pas en forme matricielle — ça dépend de la complexité de l'agrégation.)
 
@@ -173,18 +173,18 @@ avec $\tilde A = D^{-1/2} A D^{-1/2}$ (normalisation symétrique). En **rouge** 
 > [!warning] (b) Supervised — entraîner directement pour une tâche
 > Par exemple node classification.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/GNN/2.Basic/im4.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/GNN/2.Basic/im4.png]]
 
 > [!example] Application — drug-drug interaction
 > Détecter si une drogue est toxique ou sûre dans un graphe d'interactions médicamenteuses.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/GNN/2.Basic/im5.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/GNN/2.Basic/im5.png]]
 
 ### E. Vue d'ensemble du design
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/2.Basic/im6.png]]
-![[images/3-Apprentissage automatique/Graph ML/GNN/2.Basic/im7.png]]
-![[images/3-Apprentissage automatique/Graph ML/GNN/2.Basic/im8.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/2.Basic/im6.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/2.Basic/im7.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/2.Basic/im8.png]]
 
 ### F. Capacité inductive
 
@@ -193,13 +193,13 @@ avec $\tilde A = D^{-1/2} A D^{-1/2}$ (normalisation symétrique). En **rouge** 
 >
 > Exemple : entraîner sur un graphe d'interactions protéiques de l'organisme A, et générer des embeddings pour de nouvelles données de l'organisme B.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/GNN/2.Basic/im9.png]]
-> ![[images/3-Apprentissage automatique/Graph ML/GNN/2.Basic/im10 (1).png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/GNN/2.Basic/im9.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/GNN/2.Basic/im10 (1).png]]
 
 > [!warning] Generalize to new nodes
 > On peut générer des embeddings **online** à mesure que de nouveaux nœuds arrivent (Reddit, YouTube, Google Scholar). L'embedding s'adapte dynamiquement.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/GNN/im10 (1).png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/GNN/im10 (1).png]]
 
 ---
 
@@ -270,10 +270,10 @@ $$\boxed{h_v^k = \sigma\!\left( \sum_{u \in N(v)} \alpha_{vu} W_k h_u^{k-1} \rig
 
 Les paramètres de $a$ sont appris **conjointement** avec les autres poids du réseau, end-to-end.
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/4.Attention/im1.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/4.Attention/im1.png]]
 **Figure 3.** Visualisation : les arêtes les plus importantes sont mises en valeur. Le softmax assure que les poids restent comparables entre voisinages.
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/4.Attention/im2.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/4.Attention/im2.png]]
 **Figure 4.** Synthèse du processus d'attention.
 
 ### C. Multi-head attention
@@ -292,7 +292,7 @@ Comme dans les Transformers, on **réplique** l'opération d'attention $R$ fois 
 
 Nœuds = papiers, arêtes = citations, classes = domaines scientifiques.
 
-![[images/3-Apprentissage automatique/Graph ML/GNN/im11.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/GNN/im11.png]]
 **Figure 5.** Sur Cora, DeepWalk obtient 67.2% de classification accuracy ; GAT monte à **83.8%** — saut substantiel.
 
 > 💡 Le t-SNE des embeddings GAT colore les 7 classes de publication, et l'épaisseur des arêtes est proportionnelle à $\sum_k (\alpha_{ij}^k + \alpha_{ji}^k)$ (somme sur 8 attention heads).

@@ -38,7 +38,7 @@ Deux conséquences immédiates :
 - $E(\varepsilon) = 0$ — en prenant $f = 1$
 - $\text{cov}(\varepsilon, X) = 0$ — en prenant $f = X$
 
-![Interprétation géométrique dans L²|407](images/2-Statistiques/Frequentist/regression-lineaire/im2.png)
+![Interprétation géométrique dans L²|407](images/2-Statistiques/A_Frequentist/regression-lineaire/im2.png)
 
 **Figure 1.** Interprétation géométrique dans $L^2$. $E(Y|X)$ est la projection orthogonale de $Y$ sur $L^2_X$ (le sous-espace de **toutes** les fonctions de $X$). Le résidu $\varepsilon = Y - E(Y|X)$ est orthogonal à tout le sous-espace $L^2_X$.
 
@@ -672,7 +672,7 @@ L'hypothèse d'indépendance est violée dès qu'il y a **une structure** qui cr
 
 > 💡 **À retenir.** Le modèle **sait prédire** mais il **ne sait pas répartir les coefficients**. Conséquence : les variances de $\hat{\beta}_j$ explosent, les coefficients deviennent instables et changent radicalement quand on ajoute/retire d'autres variables corrélées.
 
-![Multicolinéarité](images/2-Statistiques/Frequentist/regression-lineaire/im3.png)
+![Multicolinéarité](images/2-Statistiques/A_Frequentist/regression-lineaire/im3.png)
 
 **Figure 14.** Multicolinéarité : quand $X_1$ et $X_2$ pointent dans la même direction, projeter $Y$ dessus devient ambigu — les coefficients $\beta_1$ et $\beta_2$ ne sont plus identifiables individuellement.
 
@@ -913,7 +913,7 @@ La décomposition SST = SSE + SSR n'est rien d'autre que **Pythagore** appliqué
 > 
 > où $\theta$ est l'angle entre $Y - \bar{y}$ et le sous-espace $L^2_X$ (sous-espace des prédictions).
 
-![Pythagore dans L² centré|500](images/2-Statistiques/Frequentist/regression-lineaire/im4.png)
+![Pythagore dans L² centré|500](images/2-Statistiques/A_Frequentist/regression-lineaire/im4.png)
 
 **Figure 18.** Pythagore dans $L^2$ centré. La décomposition $\text{SST} = \text{SSE} + \text{SSR}$ est le théorème de Pythagore appliqué au triangle $\bar{y}, \hat{Y}, Y$. $R^2 = \cos^2\theta$.
 
@@ -1524,7 +1524,7 @@ $$\mathcal{L}(\theta) = \frac{1}{m}\sum_{i=1}^m \left(h_\theta(x^{(i)}) - y^{(i)
 
 La solution régularisée est le premier point de contact entre les ellipses de la loss OLS et la contrainte. La différence entre Ridge et Lasso est géométrique :
 
-![Géométrie Ridge vs Lasso](images/2-Statistiques/Frequentist/regression-lineaire/im5.png)
+![Géométrie Ridge vs Lasso](images/2-Statistiques/A_Frequentist/regression-lineaire/im5.png)
 
 **Figure 19.** Géométrie Ridge vs Lasso. À gauche, la contrainte sphérique de Ridge provoque une tangence hors des axes : les coefficients sont contractés mais non nuls. À droite, la contrainte losange de Lasso provoque une tangence sur un coin : certains coefficients sont exactement nuls.
 

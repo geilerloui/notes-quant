@@ -106,7 +106,7 @@ Ce $\theta$ est appelé le **vrai paramètre**, et il est inconnu. Le but de l'e
 > 
 > L'estimation peut être une réalisation de l'expérience : $\hat{\mu}_{\text{obs}} = 3.14$.
 
-![[images/3-Apprentissage automatique/Generative Models/vae/im1 (2).png|519]]
+![[images/3-Apprentissage automatique/05_Generative Models/vae/im1 (2).png|519]]
 
 ### B. Consistance et normalité asymptotique
 

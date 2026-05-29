@@ -44,7 +44,7 @@ Beaucoup de modèles de classification produisent des "probabilités" qui ne son
 > [!warning] Définition
 > Pour un problème de classification binaire, le **reliability diagram** trace, pour chaque bin de probabilités prédites, la **fréquence empirique** des positifs vs la **moyenne des probabilités prédites**.
 
-![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/im1-1.png]]
+![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/im1-1.png]]
 **Figure 1.** En binaire, on entraîne un modèle à estimer $f(x_i) = p(y_i = 1 \mid x_i)$.
 
 **Construction du diagramme** (3 étapes) :
@@ -52,7 +52,7 @@ Beaucoup de modèles de classification produisent des "probabilités" qui ne son
 > [!note]- Étape (i) — bucketization
 > Diviser $[0, 1]$ en $M$ buckets (souvent $M = 10$). Buckets de largeur égale ou de quantiles égaux selon $\hat p(y = 1 \mid x)$.
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/im1-2.png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/im1-2.png]]
 
 > [!note]- Étape (ii) — calculs par bin
 > Pour le bin $b \in \{1, \ldots, M\}$, soit $B_b$ l'ensemble des points dont la proba tombe dans $B_b$.
@@ -65,8 +65,8 @@ Beaucoup de modèles de classification produisent des "probabilités" qui ne son
 >
 > $$\hat p(B_b) = \frac{1}{|B_b|} \sum_{x \in B_b} \hat p(y = 1 \mid x).$$
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/im1-3.png]]
-> ![[images/3-Apprentissage automatique/Generative Models/score based/im1-4.png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/im1-3.png]]
+> ![[images/3-Apprentissage automatique/05_Generative Models/score based/im1-4.png]]
 
 **Étape (iii) — le plot.**
 
@@ -135,7 +135,7 @@ Beaucoup de modèles de classification produisent des "probabilités" qui ne son
 > [!example] Exemple visuel
 > Bin $[0.9, 1]$ — la proba moyenne prédite est 0.95 ($x$-axis), mais la fréquence empirique est 0.78 → on remplace 0.95 par 0.78 dans la version calibrée.
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/2.Conformal/im3-1 (2).png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/2.Conformal/im3-1 (2).png]]
 
 **Variante quantile bins.** Définir les bins de sorte que chacun contienne $1/M$ des données d'entraînement. Plus stable quand la distribution des probas est inégale.
 
@@ -150,7 +150,7 @@ Les paramètres $a, b$ sont appris par MLE sur le calibration set (régression l
 > [!example] Adult dataset — calibration SVM
 > Le reliability diagram fit bien à une sigmoïde. SVM score $= -1$ → proba calibrée 0.2. SVM score entre 1 et 2 → proba 0.82.
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/2.Conformal/im3-2.png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/2.Conformal/im3-2.png]]
 
 > 💡 **Limite de Platt.** Suppose que le décalage est de **forme sigmoïdale**. Si la mauvaise calibration n'a pas cette forme, ça ne marche pas. → Isotonic regression.
 
@@ -172,7 +172,7 @@ Les paramètres $a, b$ sont appris par MLE sur le calibration set (régression l
 
 $$f(x_0) = f(x_{k-1}) + (x_0 - x_{k-1}) \cdot \frac{f(x_k) - f(x_{k-1})}{x_k - x_{k-1}}, \quad x_{k-1} \leq x_0 \leq x_k.$$
 
-![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/2.Conformal/im2-2.png]]
+![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/2.Conformal/im2-2.png]]
 
 #### F.4 Variantes avancées
 
@@ -187,7 +187,7 @@ $$f(x_0) = f(x_{k-1}) + (x_0 - x_{k-1}) \cdot \frac{f(x_k) - f(x_{k-1})}{x_k - x
 > [!example] Visualisation isotonic
 > Bin de tailles différentes avec proba empirique sur l'$y$-axis — c'est essentiellement un **binning adaptatif**.
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/2.Conformal/im3-3.png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/2.Conformal/im3-3.png]]
 
 #### F.5 Modèles avancés
 
@@ -237,7 +237,7 @@ $$f(x_0) = f(x_{k-1}) + (x_0 - x_{k-1}) \cdot \frac{f(x_k) - f(x_{k-1})}{x_k - x
 >
 > $$\mathbb{P}\big[\text{vrai diagnostic} \in \{\text{normal, concussion, cancer}\}\big] \geq 90\%.$$
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/2.Conformal/im2-1 (2).png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/2.Conformal/im2-1 (2).png]]
 
 ### C. Setup et garantie
 
@@ -256,7 +256,7 @@ $$f(x_0) = f(x_{k-1}) + (x_0 - x_{k-1}) \cdot \frac{f(x_k) - f(x_{k-1})}{x_k - x
 > [!example] Adaptive prediction sets
 > À gauche cas facile, prediction set d'une seule classe. À droite, image complexe (marmotte ?), prediction set large.
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/2.Conformal/im2-2.png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/2.Conformal/im2-2.png]]
 
 > [!warning] Trois objectifs pour un bon prediction set
 > - **Exact coverage** — au moins conservative, le plus proche possible d'exact.
@@ -270,13 +270,13 @@ $$f(x_0) = f(x_{k-1}) + (x_0 - x_{k-1}) \cdot \frac{f(x_k) - f(x_{k-1})}{x_k - x
 > 2. Pour chaque point de calibration, on récupère le **score de la vraie classe** depuis le softmax. C'est le **conformal score** $E_i$.
 > 3. On plotte la distribution des $[E_1, \ldots, E_n]$ et on prend le **quantile à 10%** (= $\hat q$).
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/2.Conformal/im3-1 (2).png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/2.Conformal/im3-1 (2).png]]
 >
 > 4. Sur la query $x_{n+1}$, on passe par le NN qui sort un softmax. On **threshold** avec $\hat q$. Le prediction set est l'ensemble des classes dont le score dépasse $\hat q$ :
 >
 > $$\tau(x_{n+1}) = \{2, 5, 8\}.$$
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/2.Conformal/im3-2.png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/2.Conformal/im3-2.png]]
 
 > [!warning] Garantie de coverage (encadrement)
 > $$1 - \alpha \leq \mathbb{P}[y_{n+1} \in \tau(X_{n+1})] \leq 1 - \alpha + \frac{1}{n + 1}$$
@@ -299,12 +299,12 @@ $$f(x_0) = f(x_{k-1}) + (x_0 - x_{k-1}) \cdot \frac{f(x_k) - f(x_{k-1})}{x_k - x
 
 > 💡 **Limite du score "vraie classe simple".** Sur MNIST ça marche, mais ne capte pas bien l'incertitude pour les images vraiment ambiguës. APS exploite **toutes** les classes du softmax.
 
-![[images/3-Apprentissage automatique/Generative Models/vae/im3-5 (1).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/vae/im3-5 (1).png]]
 
 > [!note]- APS — algorithme
 > **(1) Construction du score.** Pour chaque obs du calibration set, on **trie** le softmax par ordre décroissant. On somme les probabilités jusqu'à atteindre la vraie classe. Le score est cette **masse cumulée**.
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/2.Conformal/im3-3.png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/2.Conformal/im3-3.png]]
 >
 > **(2) Quantile** $\hat q$ comme avant.
 >
@@ -352,11 +352,11 @@ $$f(x_0) = f(x_{k-1}) + (x_0 - x_{k-1}) \cdot \frac{f(x_k) - f(x_{k-1})}{x_k - x
 > - **Marginal** (conformal de base) : 100% en haut, 80% en bas → moyenne 90%.
 > - **Conditional** : 90% partout — l'idéal.
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/2.Conformal/im4-1 (1).png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/2.Conformal/im4-1 (1).png]]
 >
 > En régression : sans coverage les bandes sont trop étroites ; conformal donne 90% en moyenne ; conditional adapte la largeur — large dans les régions difficiles, étroite dans les faciles.
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/2.Conformal/im4-2.png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/2.Conformal/im4-2.png]]
 
 > 💡 **Comment se rapprocher du conditional coverage.** Les méthodes APS et CQR sont conçues pour ça — leur score function dépend explicitement de $x$, ce qui leur permet d'adapter localement la taille du set.
 
@@ -432,17 +432,17 @@ $$\text{Percentile}_\tau(y \mid x) = x \beta_\tau.$$
 
 ### C. Visualisation
 
-![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/3.Quantile_reg/im1-1.png]]
+![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/3.Quantile_reg/im1-1.png]]
 **Figure 3.** Dataset d'illustration.
 
 Pour OLS on prend l'espérance conditionnelle. Ici on calcule plutôt les quantiles conditionnels à $\tau \in \{0, 5, 10, \ldots, 100\}$ :
 
-![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/3.Quantile_reg/im1-2.png]]
+![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/3.Quantile_reg/im1-2.png]]
 **Figure 4.** À droite : quantile conditionnel $\mu_\tau(x)$ pour différents $\tau$.
 
 Pour construire la régression de quantile, on répète pour chaque $x_i$ et on plotte la ligne de régression à $\tau = 0.95$ par exemple :
 
-![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/3.Quantile_reg/im1-3.png]]
+![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/3.Quantile_reg/im1-3.png]]
 
 ### D. Quantile loss (pinball loss)
 
@@ -467,8 +467,8 @@ $$L = \begin{cases} \tau (y - X\theta) & \text{si } y - X\theta \geq 0 \\ (\tau 
 >
 > $$\text{ATA} = \text{ETA} + \text{prediction error} < \text{Due Time}.$$
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/3.Quantile_reg/im2-1 (2).png]]
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/3.Quantile_reg/im2-2.png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/3.Quantile_reg/im2-1 (2).png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/3.Quantile_reg/im2-2.png]]
 >
 > **Le buffer.**
 >
@@ -478,7 +478,7 @@ $$L = \begin{cases} \tau (y - X\theta) & \text{si } y - X\theta \geq 0 \\ (\tau 
 >
 > Approche par quantile regression : entraîner $\tau \in \{0.1, 0.5, 0.9\}$. Donne directement un upper bound. Pour 10 miles → entre 45 et 65 min. L'intervalle s'élargit avec la distance (plus de variance, moins de données).
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/3.Quantile_reg/im2-3.png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/3.Quantile_reg/im2-3.png]]
 >
 > **Solution finale Instacart** : quantile regression à $q = 0.9$ pour avoir un upper bound, et on dispatche aux shoppers seulement si :
 >
@@ -493,11 +493,11 @@ $$L = \begin{cases} \tau (y - X\theta) & \text{si } y - X\theta \geq 0 \\ (\tau 
 > [!example] Données superconductivité
 > Target : température critique en Kelvin sous laquelle un matériau devient supraconducteur.
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/3.Quantile_reg/im3-1 (2).png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/3.Quantile_reg/im3-1 (2).png]]
 >
 > Distribution prédite par matériau :
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/3.Quantile_reg/im4-1 (1).png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/3.Quantile_reg/im4-1 (1).png]]
 >
 > **Prediction interval :**
 >
@@ -505,7 +505,7 @@ $$L = \begin{cases} \tau (y - X\theta) & \text{si } y - X\theta \geq 0 \\ (\tau 
 >
 > Avec $\alpha = 0.05$, on obtient des intervalles parfois larges (= les arbres sont en désaccord).
 >
-> ![[images/3-Apprentissage automatique/ML Fundamentals/Calibration/3.Quantile_reg/im4-2.png]]
+> ![[images/3-Apprentissage automatique/00_ML Fundamentals/Calibration/3.Quantile_reg/im4-2.png]]
 
 > [!warning] Applications
 > - **Mesurer l'incertitude** — en médecine ou anti-fraude, ne rien faire si l'intervalle est trop large.

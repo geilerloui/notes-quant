@@ -13,7 +13,7 @@ title: Variational Inference
 
 Soit le modèle graphique suivant :
 
-![[images/3-Apprentissage automatique/PGM/Représentation/im15.png]]
+![[images/3-Apprentissage automatique/09_PGM/Représentation/im15.png]]
 
 À partir des dépendances du graphe, on peut écrire la loi jointe :
 

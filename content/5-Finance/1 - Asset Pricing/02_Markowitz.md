@@ -19,7 +19,7 @@ order: 1
 > 
 > L'exemple canonique pour un agent averse au risque est $u(W) = \ln(W)$, avec $u' = 1/W > 0$ et $u'' = -1/W^2 < 0$.
 
-![[images/5-Finance/markowitz/im1.png]]
+![[images/5-Finance/A_markowitz/im1.png]]
 
 **Figure 1.** Fonction $u(W) = \ln(W)$ concave. Pour un pari 50/50 entre 100 € et 900 €, l'utilité espérée $E[u(W)] \approx 5.70$ est inférieure à $u(500\text{ €}) \approx 6.21$ : l'agent préfère 500 € certains au pari, bien que les deux aient la même espérance.
 
@@ -29,7 +29,7 @@ $$\pi = E(W) - C \;\geq\; 0$$
 
 la **prime de risque** : ce que l'agent sacrifie en espérance pour avoir la certitude. Par définition $u(C) = E[u(W)]$.
 
-![[images/5-Finance/markowitz/im2.png]]
+![[images/5-Finance/A_markowitz/im2.png]]
 
 **Figure 2.** La droite rouge relie $u(W_1)$ à $u(W_2)$ — son milieu donne $E[u(W)]$. La courbe bleue étant au-dessus, $u(E(W)) > E[u(W)]$ : l'agent préfère le certain. $C$ est l'équivalent certain tel que $u(C) = E[u(W)]$.
 
@@ -59,7 +59,7 @@ $W_0$ étant une constante, le passage de $W^x$ à $R(x)$ est **transparent pour
 **Hypothèse quadratique.** Travailler avec $E[u(W^x)]$ en toute généralité est trop complexe — il faudrait connaître toute la distribution de $W^x$. Markowitz suppose que $u$ est **quadratique** :
 
 $$u(W) = W - c\,W^2.$$
-![[images/5-Finance/markowitz/im3.png]]
+![[images/5-Finance/A_markowitz/im3.png]]
 
 
 **Figure 3.** La parabole $u(W) = W - cW^2$ croît jusqu'au sommet $W^* = 1/(2c)$ puis décroît — zone économiquement absurde (plus de richesse rendrait moins heureux). C'est le prix à payer pour la tractabilité : sous cette hypothèse, $E[u(W^x)]$ ne dépend que de l'espérance et de la variance du rendement.
@@ -124,7 +124,7 @@ Concrètement : quelle pondération des actifs (30 % Apple, 50 % Total, 20 % cas
 > 
 > Pour chaque $\sigma$ (resp. $m$), la solution $x^*$ est un portefeuille efficient. L'ensemble de ces solutions trace la frontière. Les deux formulations donnent la même frontière : (1) maximise le rendement à risque fixé, (2) minimise le risque à rendement fixé.
 
-![[images/5-Finance/markowitz/im4.png]]
+![[images/5-Finance/A_markowitz/im4.png]]
 
 **Figure 4.** Chaque point gris est un portefeuille possible. La courbe bleue pleine est la frontière efficiente (partie haute) ; la partie en pointillés est non efficiente (à $\sigma$ donné, on peut faire mieux en rendement). Le point $\lambda$ grand correspond à un investisseur très averse au risque (à gauche), $\lambda$ petit à un investisseur moins averse (à droite).
 
@@ -158,7 +158,7 @@ Il sépare deux zones : **au-dessus**, la frontière efficiente ; **en dessous**
 > 
 > où $\xi$ est le **portefeuille tangent** — le seul point où la droite touche la frontière courbe.
 
-![[images/5-Finance/markowitz/im5.png]]
+![[images/5-Finance/A_markowitz/im5.png]]
 
 **Figure 5.** La droite verte (CML) part de $r_f$ et est tangente à la frontière bleue en $\xi$. Elle domine la frontière courbe pour tout $\sigma$ : c'est l'avantage d'avoir accès à un actif sans risque — n'importe quel investisseur préfère un point sur la CML à un point de la frontière courbe à $\sigma$ égal.
 
@@ -168,7 +168,7 @@ $$S(x) = \frac{E[R(x)] - r_f}{\sigma(x)}.$$
 
 Géométriquement, c'est la **pente de la droite** depuis $(0, r_f)$ vers le point $(\sigma(x), E[R(x)])$.
 
-![[images/5-Finance/markowitz/im6.png]]
+![[images/5-Finance/A_markowitz/im6.png]]
 
 **Figure 6.** Parmi toutes les droites possibles depuis $r_f$, celle de pente maximale est la CML. Elle touche la frontière exactement en $\xi$ — donc le portefeuille tangent est le **portefeuille de Sharpe maximal**.
 

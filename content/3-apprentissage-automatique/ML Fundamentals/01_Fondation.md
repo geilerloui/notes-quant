@@ -98,7 +98,7 @@ Le résidu $\varepsilon = Y - \mathbb{E}(Y \mid X)$ est **orthogonal à $L^2_X$*
 
 Ces propriétés ne sont pas des hypothèses qu'on impose : elles **découlent directement de la géométrie**.
 
-![Interprétation géométrique dans L²|440](images/2-Statistiques/Frequentist/regression-lineaire/im2.png)
+![Interprétation géométrique dans L²|440](images/2-Statistiques/A_Frequentist/regression-lineaire/im2.png)
 **Figure 2.** Interprétation géométrique dans $L^2$. $\mathbb{E}(Y \mid X)$ est la projection orthogonale de $Y$ sur le sous-espace $L^2_X$ des fonctions (mesurables) de $X$. Le résidu $\varepsilon = Y - \mathbb{E}(Y \mid X)$ est orthogonal à tout le sous-espace $L^2_X$.
 
 #### B.2 MAE → médiane conditionnelle
@@ -193,7 +193,7 @@ On a vu en I.B.3 que le minimiseur théorique est le **classifieur de Bayes**. E
 | Approche | Stratégie | Exemples |
 |---|---|---|
 | **Génératifs** | Estimer $\hat P(X \mid Y=k)$ et $\hat P(Y=k)$, recombiner par Bayes : $\hat P(Y=k \mid X) \propto \hat P(X \mid Y=k) \hat P(Y=k)$ | Naive Bayes, LDA, QDA |
-| **Discriminatifs** | Estimer $\hat P(Y=k \mid X)$ directement, sans passer par $\hat P(X \mid Y=k)$ | Régression logistique, MLP avec sigmoïde/softmax (cf [[(ii) Perceptron]]) |
+| **Discriminatifs** | Estimer $\hat P(Y=k \mid X)$ directement, sans passer par $\hat P(X \mid Y=k)$ | Régression logistique, MLP avec sigmoïde/softmax (cf [[00_Perceptron]]) |
 | **Discriminant function** | Apprendre directement $\hat f : \mathcal{X} \to \{1, \ldots, K\}$, sans probabilités | Arbres (cf [[(i) Modèles d'Arbres]]), perceptron strict, SVM |
 
 > 💡 **Pourquoi cette distinction est importante.** Selon ce qu'on choisit de modéliser, on obtient des familles très différentes de méthodes. Les **génératifs** sont plus riches (on peut générer des données synthétiques) mais souvent moins précis pour la prédiction. Les **discriminatifs** sont focalisés sur la tâche de prédiction et généralement plus performants. Les **discriminant functions** sont les plus directs mais perdent l'information probabiliste.

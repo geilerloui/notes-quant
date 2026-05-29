@@ -47,7 +47,7 @@ Navigation : Classe ↔ Log-odds (linéaire) ↔ Probabilité
 
 | Définition des odds                            | Probabilité vs Odds                            | Probabilité de perdre                              |
 | ---------------------------------------------- | ---------------------------------------------- | -------------------------------------------------- |
-| ![[images/2-Statistiques/Frequentist/regression-logistique/im1.png\|242]] | ![[images/2-Statistiques/Frequentist/regression-logistique/im2.png\|299]] | ![[images/2-Statistiques/Frequentist/regression-logistique/im3 (1).png\|328]] |
+| ![[images/2-Statistiques/A_Frequentist/regression-logistique/im1.png\|242]] | ![[images/2-Statistiques/A_Frequentist/regression-logistique/im2.png\|299]] | ![[images/2-Statistiques/A_Frequentist/regression-logistique/im3 (1).png\|328]] |
 
 **Définition :** Les odds sont le rapport entre "quelque chose qui arrive" et "quelque chose qui n'arrive pas".
 
@@ -67,7 +67,7 @@ $$
 
 | Asymétrie des odds | Symétrie des log-odds |
 |-------------------|-------------------|
-| ![[images/2-Statistiques/Frequentist/regression-logistique/im4.png\|433]] | ![[images/2-Statistiques/Frequentist/regression-logistique/im5.png\|450]] |
+| ![[images/2-Statistiques/A_Frequentist/regression-logistique/im4.png\|433]] | ![[images/2-Statistiques/A_Frequentist/regression-logistique/im5.png\|450]] |
 
 **Problème d'asymétrie :** Les odds de perdre vs gagner créent une asymétrie (odds $< 1$ vs odds $> 1$).
 

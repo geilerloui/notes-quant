@@ -36,7 +36,7 @@ title: MCTS — Monte Carlo Tree Search
 
 Un **game tree** : nœuds = états du jeu, arêtes = actions possibles. Avec un arbre **complet**, calculer la meilleure action devient trivial.
 
-![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im3 (1).png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im3 (1).png]]
 
 > 💡 **Le problème.** L'arbre complet est faisable seulement avec un faible *branching factor*. Pour Go ($10^{172}$ états), aucun ordinateur ne peut tout simuler. **MCTS construit un arbre partiel** par simulations.
 
@@ -45,7 +45,7 @@ Un **game tree** : nœuds = états du jeu, arêtes = actions possibles. Avec un 
 > [!example] HAL joue au tic-tac-toe
 > Notre AI (HAL) réfléchit à son premier coup. Son arbre actuel :
 >
-> ![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im4.png]]
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im4.png]]
 >
 > Chaque nœud porte deux valeurs :
 > - $\boldsymbol n$ — nombre de fois où l'état a été considéré (visit count).
@@ -81,7 +81,7 @@ Quand HAL atteint un nœud feuille avec assez d'info, on **étend** l'arbre. On 
 - **Light rollout** — action aléatoire (utilisé en vanilla MCTS).
 - **Heavy rollout** — heuristique métier ou NN qui évalue la position. Convergence plus rapide, mais coûteux.
 
-![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im5.png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im5.png]]
 
 #### C.3 Phase 3 — Simulation (rollout)
 
@@ -89,7 +89,7 @@ On **simule** la fin de la partie depuis le nœud courant, actions aléatoires, 
 
 > 💡 **Important.** Les états visités pendant la simulation ne sont **pas ajoutés** à l'arbre. La simulation sert juste à évaluer la position du nœud courant.
 
-![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im6.png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im6.png]]
 
 #### C.4 Phase 4 — Backpropagation
 
@@ -100,16 +100,16 @@ On remonte le résultat le long du chemin parcouru :
 ### D. Pseudo-code
 
 > [!note]- Algorithme principal (selection + expansion)
-> ![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im1.png]]
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im1.png]]
 
 > [!note]- Algorithme du rollout
-> ![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im2.png]]
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im2.png]]
 
 ### E. Faire un coup en pratique
 
 Après quelques secondes, HAL a itéré ces 4 phases des **milliers de fois**. Chaque nœud a vu son $n$ et $w$ mis à jour de nombreuses fois. Voici les premiers nœuds d'un MCTS réel sur tic-tac-toe :
 
-![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im7.png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im7.png]]
 
 ### F. Exemple complet pas-à-pas
 
@@ -177,7 +177,7 @@ En vanilla MCTS, les **nœuds** stockaient $n$ et $w$. Avec NN, on déplace l'in
 
 Les nœuds stockent juste un "state value".
 
-![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im8.png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im8.png]]
 
 ### B. Phase 1 — Selection avec PUCT
 
@@ -193,7 +193,7 @@ Les nœuds stockent juste un "state value".
 
 > 💡 **Dirichlet noise.** Pour éviter que des priors trop forts écrasent toute randomness, on ajoute du bruit Dirichlet **uniquement à la racine** (AlphaGo). Ça garantit qu'on explore quand même un peu, sans casser les priors profonds.
 
-![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im9.png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im9.png]]
 
 ### C. Phase 2 — Expansion / Evaluation
 
@@ -201,14 +201,14 @@ Quand on atteint une feuille, on l'évalue avec le NN :
 - Output 1 : **vecteur de probabilités** $p_a$ pour chaque action.
 - Output 2 : **valeur scalaire** $v$ de l'état (estimation de qui va gagner).
 
-![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im10 (1).png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im10 (1).png]]
 
 > [!example] Tic-tac-toe
 > NN prédit state value $v = 0.6$ et 9 logits pour les 9 cases possibles. Ces logits deviennent les priors $P(s, a)$ des nouvelles arêtes.
 
 > 💡 **Validité des actions.** Le NN sort toujours 9 valeurs, mais certaines actions sont invalides (case déjà jouée). Le masquage des actions invalides est fait par l'implémentation MCTS.
 
-![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im11.png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im11.png]]
 
 ### D. Phase 3 — Update
 
@@ -219,22 +219,22 @@ Pour chaque arête $e_t$ traversée jusqu'à la feuille :
 > 2. **Cumul** : si le joueur owner de $e_t$ est le même que celui de la feuille, $W \leftarrow W + v$. Sinon $W \leftarrow W - v$.
 > 3. **Action-value** : $Q(s, a) \leftarrow W / N$.
 
-![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im12.png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im12.png]]
 
 ### E. Itération complète — un deuxième tour
 
 > [!note]- Cycle complet
 > **(1) Select with PUCT until a leaf.**
 >
-> ![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im13.png]]
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im13.png]]
 >
 > **(2) Expand and evaluate the leaf.**
 >
-> ![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im14.png]]
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im14.png]]
 >
 > **(3) Update all traversed edges.**
 >
-> ![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im15.png]]
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im15.png]]
 
 ### F. Choix final de l'action
 
@@ -254,7 +254,7 @@ Le paramètre **temperature** $\tau$ contrôle le compromis :
 
 Après chaque partie complète (self-play) :
 
-![[images/3-Apprentissage automatique/Reinforcement learning/MCTS/im16.png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/MCTS/im16.png]]
 
 > [!warning] Datapoints générés par coup
 > Pour chaque coup joué :

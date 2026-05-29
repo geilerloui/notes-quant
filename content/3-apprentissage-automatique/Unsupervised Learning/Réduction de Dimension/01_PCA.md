@@ -126,7 +126,7 @@ C'est tout ce dont on a besoin pour faire la PCA.
 
 Géométriquement, le dataset $X$ est un **nuage de $n$ points** dans $\mathbb{R}^d$. Centrer ramène le centroïde à l'origine ; standardiser le rend "rond" en termes d'unités.
 
-![[images/3-Apprentissage-automatique/Unsupervised Learning/Réduction de Dimension/fig01_nuage_donnees.png|400]]
+![[fig01_nuage_donnees.png|400]]
 *Figure 1. Nuage de points 2D centré. Visuellement, on voit immédiatement une direction d'étirement principale (l'axe rouge) et une direction transverse (l'axe vert). La PCA va retrouver ces deux axes par diagonalisation de $\Sigma$.*
 
 **L'intuition** : ce nuage a une **forme**. Il s'étire dans certaines directions et est compact dans d'autres. On veut une **description efficace** de cette forme — un repère adapté qui aligne les axes de coordonnées sur les directions principales d'étirement.
@@ -193,7 +193,7 @@ $$
 
 La colonne $\text{PC}_k = X v_k$ donne, pour chaque individu, sa **coordonnée le long de l'axe propre $v_k$**.
 
-![[images/3-Apprentissage-automatique/Unsupervised Learning/Réduction de Dimension/fig02_rotation.png|550]]
+![[fig02_rotation.png|550]]
 *Figure 2. À gauche : le nuage dans le repère original $(e_1, e_2)$, avec les vecteurs propres $v_1, v_2$ en rouge (obliques). À droite : le même nuage après changement de base $Y = XV$ — les axes propres deviennent les axes de coordonnées. Les données sont décorrélées et les axes sont classés par variance décroissante.*
 
 ### (iv) Variance le long de chaque axe propre
@@ -334,7 +334,7 @@ $$
 
 Comme les corrélations sont entre $-1$ et $1$, tous les points tombent dans le **disque unité**. Plus une variable est proche du bord du cercle (norme $\approx 1$), mieux elle est représentée par les deux premières composantes.
 
-![[images/3-Apprentissage-automatique/Unsupervised Learning/Réduction de Dimension/fig03_cercle_correlations.png|400]]
+![[fig03_cercle_correlations.png|400]]
 *Figure 3. Cercle des corrélations pour le dataset météo. Les deux températures $t_{\max}$ et $t_{\min}$ sont fortement corrélées entre elles (vecteurs quasi-superposés) et alignées sur l'axe PC1. La pluie est presque orthogonale aux températures et alignée sur l'axe PC2. Toutes les variables sont proches du bord du cercle ⇒ bien représentées par le plan factoriel (PC1, PC2).*
 
 **Lecture du cercle** :
@@ -477,7 +477,7 @@ Le seuil le plus commun : on choisit $k$ tel que la variance expliquée cumulée
 
 Tracer les valeurs propres $\lambda_k$ en fonction de $k$. Souvent on observe une **chute brutale** entre quelques grandes valeurs propres et le reste — c'est le **"coude"** du graphique. On garde les composantes **avant** le coude.
 
-![[images/3-Apprentissage-automatique/Unsupervised Learning/Réduction de Dimension/fig04_scree_plot.png|450]]
+![[fig04_scree_plot.png|450]]
 *Figure 4. Scree plot pour un dataset à 10 dimensions. Les 3 premières valeurs propres sont nettement plus grandes que les 7 suivantes — coude marqué à $k = 3$. Choix raisonnable : garder $k = 3$ composantes.*
 
 ### (iv) Limites de ces règles
@@ -513,7 +513,7 @@ Si les données vivent sur un **manifold non-linéaire** (genre une spirale ou u
 - **t-SNE** ou **UMAP** : méthodes non-linéaires basées sur des préservations locales de voisinage.
 - **Autoencodeurs** : version "deep" — les encodeur/décodeur peuvent apprendre des manifolds courbes.
 
-![[images/3-Apprentissage-automatique/Unsupervised Learning/Réduction de Dimension/fig05_pca_vs_nonlineaire.png|500]]
+![[fig05_pca_vs_nonlineaire.png|500]]
 *Figure 5. Limite de la PCA. À gauche : un swiss roll en 3D. La PCA (au centre) écrase brutalement la spirale en projetant linéairement, perdant la structure de manifold. UMAP (à droite) préserve la connectivité locale et déroule proprement la spirale en 2D.*
 
 ### (v) Le piège du signe
@@ -553,7 +553,7 @@ $$
 
 La covariance des données blanchies est l'**identité** — toutes les directions sont équivalentes statistiquement.
 
-![[images/3-Apprentissage-automatique/Unsupervised Learning/Réduction de Dimension/fig06_whitening.png|550]]
+![[fig06_whitening.png|550]]
 *Figure 6. Trois nuages 2D : à gauche les données brutes (axes obliques, variances inégales). Au milieu : après PCA (axes alignés, variances toujours inégales). À droite : après whitening (nuage isotrope, toutes les directions équivalentes).*
 
 ### (iii) Quand l'utiliser ?

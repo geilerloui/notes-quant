@@ -73,7 +73,7 @@ La formule de König-Huyghens s'interprète comme le **théorème de Pythagore**
 
 $$E\left[(X - a)^2\right] = \underbrace{V(X)}_{\|X - E(X)\|^2} + \underbrace{(E(X) - a)^2}_{\text{distance}^2}$$
 
-![Projection de X sur Δ](images/1-Mathématiques/Probabilité/geometrie-L2/im2.png)
+![Projection de X sur Δ](images/1-Mathématiques/F_Probabilité/geometrie-L2/im2.png)
 *Figure 2. Projection orthogonale de $X$ sur $\Delta$. Le pied de la perpendiculaire est $E(X)$, la constante qui minimise $E[(X-a)^2]$. La formule de König-Huyghens est le théorème de Pythagore appliqué à ce triangle rectangle.*
 
 ### (ii) La corrélation comme cosinus
@@ -113,7 +113,7 @@ Le coefficient de corrélation est le **cosinus de l'angle** entre $\tilde{X}$ e
 - $X$ et $Y$ non corrélés $\Longleftrightarrow$ $\tilde{X} \perp \tilde{Y}$ dans $L^2$
 - $|\rho| = 1$ $\Longleftrightarrow$ $\tilde{X}$ et $\tilde{Y}$ colinéaires $\Longleftrightarrow$ relation linéaire parfaite
 
-![Corrélation comme cosinus](images/1-Mathématiques/Probabilité/geometrie-L2/im3.png)
+![Corrélation comme cosinus](images/1-Mathématiques/F_Probabilité/geometrie-L2/im3.png)
 *Figure 3. Angle $\theta$ entre les variables centrées $\tilde{X}$ et $\tilde{Y}$ dans $L^2$. Note : le dessin original utilise $X$ et $Y$ non centrés — leurs projections sur $\Delta$ devraient tomber en $0$ pour être cohérentes avec $E(\tilde{X}) = E(\tilde{Y}) = 0$.*
 
 ### (iii) L'espérance conditionnelle comme projection
@@ -130,5 +130,5 @@ $$\underbrace{V(Y)}_{\|Y - E(Y)\|^2} = \underbrace{V(E(Y \mid X))}_{\|E(Y|X) - E
 
 Le théorème de l'espérance totale $E(Y) = E(E(Y \mid X))$ est un cas particulier du **théorème des trois perpendiculaires** : la projection de $Y$ sur $\Delta$ passe par la projection de $Y$ sur $L^2_X$.
 
-![Espérance conditionnelle — projection sur L²_X](images/1-Mathématiques/Probabilité/geometrie-L2/im4.png)
+![Espérance conditionnelle — projection sur L²_X](images/1-Mathématiques/F_Probabilité/geometrie-L2/im4.png)
 *Figure 4. Projection orthogonale de $Y$ sur $L^2_X$. Le résidu $Y - E(Y \mid X)$ est perpendiculaire à tout le sous-espace $L^2_X$. Le théorème de la variance totale est le théorème de Pythagore appliqué au triangle $Y$, $E(Y)$, $E(Y \mid X)$.*

@@ -42,7 +42,7 @@ JAI PERDU LIMAGE
 ![[Pasted image 20260419194323.png|307]]
 
 3e représentation
-![[images/1-Mathématiques/Probabilité/Échantillonage/im2.png|95]]
+![[images/1-Mathématiques/F_Probabilité/Échantillonage/im2.png|95]]
 
 # I - RNN : Fondements des Réseaux Récurrents
 
@@ -203,7 +203,7 @@ Si $\|W_{aa}\| < 1$ et $\tanh'(z) \leq 1$, ce produit tends vers 0 quand $t-k$ a
 
 ### Classifications selon input/output
 
-![[images/2-Statistiques/Frequentist/Inférence statistique/im10 (1).png|517]]
+![[images/2-Statistiques/A_Frequentist/Inférence statistique/im10 (1).png|517]]
 
 - **One-to-One** : RNN classique (comme FFNN)
 - **One-to-Many** : Génération de texte (ex: légendage d'image)
@@ -262,9 +262,9 @@ Contrôle quelles parties de l'état de cellule sont exposées comme état cach�
 $$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$
 $$a_t = o_t \odot \tanh(C_t)$$
 
-![[images/3-Apprentissage automatique/PGM/Représentation/im13.png]]
+![[images/3-Apprentissage automatique/09_PGM/Représentation/im13.png]]
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im12.png|306]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im12.png|306]]
 
 > [!tip]- 🔑 Intuition des portes LSTM
 > - **Forget gate** : "Dois-je oublier que le sujet était au singulier ?"
@@ -279,10 +279,10 @@ $$a_t = o_t \odot \tanh(C_t)$$
 
 ### Architecture GRU
 
-![[images/2-Statistiques/Frequentist/Inférence statistique/im11.png|275]]
+![[images/2-Statistiques/A_Frequentist/Inférence statistique/im11.png|275]]
 
 cc
-![[images/3-Apprentissage automatique/PGM/Représentation/im14.png]]
+![[images/3-Apprentissage automatique/09_PGM/Représentation/im14.png]]
 
 GRU utilise seulement **deux portes** :
 
@@ -361,11 +361,11 @@ JAI PERDU LAIMAGE
 
 **Rappel** : Un modèle de langage classique estime la probabilité d'une phrase :
 
-![[images/3-Apprentissage automatique/PGM/Introduction/im7 (1).png]]
+![[images/3-Apprentissage automatique/09_PGM/Introduction/im7 (1).png]]
 
 **Seq2seq** : La traduction automatique fonctionne différemment :
 
-![[images/2-Statistiques/Frequentist/Inférence statistique/im8.png]]
+![[images/2-Statistiques/A_Frequentist/Inférence statistique/im8.png]]
 
 > [!info]- 🎯 L'insight révolutionnaire
 > **Réseau vert** : **Encoder** qui transforme la phrase d'entrée en représentation latente
@@ -400,7 +400,7 @@ $$\underset{y^1, \ldots, y^{T_y}}{\arg \max} \, P(y^1, \ldots, y^{T_y} | x)$$
 
 jai perdu l'image
 
-![[images/2-Statistiques/Frequentist/Inférence statistique/im5 (1).png|490]]
+![[images/2-Statistiques/A_Frequentist/Inférence statistique/im5 (1).png|490]]
 
 ### Alternatives Softmax
 

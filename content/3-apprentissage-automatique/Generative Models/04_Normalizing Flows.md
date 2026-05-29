@@ -95,7 +95,7 @@ En entraînant, $f_\theta$ apprend à "redresser" la bimodale : les $x$ projeté
 > [!todo] IMAGE — fit bimodale 1-D
 > *(les 3 panneaux : à gauche les $x$, au milieu la CDF du mélange, à droite l'histogramme des $z$ uniformes une fois le flow appris ; + éventuellement la courbe de la pdf apprise)*
 > `![[...]]`
-![[images/3-Apprentissage automatique/Generative Models/flow models/im1-3.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/flow models/im1-3.png]]
 ### B. Flows autorégressifs
 
 On garde l'idée de la chain rule des `[[01_Modèles autoregressifs|autorégressifs]]`, mais chaque composante devient une transformation inversible. En 2-D :

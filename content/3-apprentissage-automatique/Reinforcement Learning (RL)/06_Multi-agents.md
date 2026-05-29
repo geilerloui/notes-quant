@@ -26,7 +26,7 @@ Stochastic games (jeux de Shapley) = généralisation à la fois du **MDP** et d
 > - **Murs épais** = passage impossible.
 > - **Semi-murs** = si A va au nord, 50% il monte, 50% il reste.
 >
-> ![[images/3-Apprentissage automatique/Reinforcement learning/multi-agents/im1.png|325]]
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/multi-agents/im1.png|325]]
 >
 > Le but : atteindre `$` pour gagner $100. **Premier arrivé gagne**. Si les deux arrivent en même temps, pile ou face.
 
@@ -178,7 +178,7 @@ Espérance : $\frac{1}{9}(4 \cdot 6 + 2 \cdot 2 + 2 \cdot 7 + 1 \cdot 0) = \frac
 > [!example] Curly et Smooth
 > Curly est trop petit pour atteindre les bananes. Smooth peut prendre 2 bananes seul. **Coopération** : ils peuvent obtenir 4 bananes au total.
 >
-> ![[images/3-Apprentissage automatique/Reinforcement learning/multi-agents/im2.png]]
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/multi-agents/im2.png]]
 
 **Analyse Nash :**
 - NE 1 : "don't boost - reach" (Smooth se sert seul, prend 2).

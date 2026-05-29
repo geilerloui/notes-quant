@@ -66,7 +66,7 @@ La façon la plus claire de saisir la dualité, c'est de **visualiser concrètem
 
 On part de deux distributions discrètes $P_r$ et $P_\theta$ (notation équivalente à $\mu$ et $\nu$ — c'est le vocabulaire qu'utilise WGAN) reliées par un plan de transport $\gamma$ :
 
-![[images/1-Mathématiques/Optimal transport/im1.png|273]]
+![[images/1-Mathématiques/E_Optimal transport/im1.png|273]]
 *Plan de transport $\gamma$ entre deux distributions discrètes. Chaque élément $\gamma(x_i, y_j)$ donne la masse transportée de $x_i$ vers $y_j$.*
 
 Pour mettre ça sous forme LP standard, on **vectorise** la matrice $\gamma \in \mathbb{R}^{n \times n}$ : on empile ses colonnes les unes sur les autres pour obtenir un vecteur de taille $n^2$. Même chose pour la matrice de coût. On obtient :
@@ -82,7 +82,7 @@ $$\min_x \, c^\top x \quad \text{s.c.} \quad Ax = b, \quad x \geq 0$$
 
 **En mots** : on minimise le coût total $c^\top x = \sum_{ij} c_{ij} \gamma_{ij}$, sous les contraintes que le plan de transport ait les bonnes marginales $P_r$ et $P_\theta$.
 
-![[images/1-Mathématiques/Optimal transport/im2 (1).png]]
+![[images/1-Mathématiques/E_Optimal transport/im2 (1).png]]
 *Schéma matriciel du LP primal. À gauche : le vecteur $x$ des variables (chaque entrée est un $\gamma(x_i, y_j)$). On multiplie la matrice $A^\top$ par $x$ (le schéma utilise $A^\top$ par souci de lisibilité) pour obtenir le vecteur de contraintes $b$. **Lecture clé** : la première colonne de $A^\top$ multipliée par $x$ donne $\sum_i \gamma(x_1, y_i)$, c'est-à-dire la masse totale qui part du point $x_1$ — ce qui doit égaler $P_r(x_1)$. Les colonnes de $A^\top$ encodent donc directement les contraintes de marginales.*
 
 #### Limites du primal
@@ -99,7 +99,7 @@ La **solution** à ces trois problèmes : passer au LP dual.
 
 Dans le dual, on n'a plus besoin de regarder l'espace produit $\Omega_s \times \Omega_t$ (de dimension $n^2$). On travaille uniquement sur l'espace de base (dimension $2n$, une variable par contrainte du primal) :
 
-![[images/1-Mathématiques/Optimal transport/im3 (2).png]]
+![[images/1-Mathématiques/E_Optimal transport/im3 (2).png]]
 *Schéma matriciel du LP dual. Le vecteur $y$ de variables duales contient deux fonctions : $f$ (sur le support de $P_r$) et $g$ (sur le support de $P_\theta$). La contrainte $A^\top y \leq c$ donne, ligne par ligne, $f(x_i) + g(x_j) \leq d(x_i, x_j)$ pour toute paire $(i, j)$.*
 
 **Lecture de la contrainte.** Si on regarde la première colonne de $A$, on obtient :

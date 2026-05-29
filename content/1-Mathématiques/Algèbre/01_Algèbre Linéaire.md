@@ -29,7 +29,7 @@ Quand on parlera de "loi du spectre" en RMT, on parlera de **l'histogramme de ce
 > $$M = Q \Lambda Q^\top$$
 > avec $Q = [v_1 | \cdots | v_N]$ orthogonale ($Q^\top Q = I$) et $\Lambda = \text{diag}(\lambda_1, \dots, \lambda_N)$. Les vecteurs propres forment une base orthonormale de $\mathbb{R}^N$ — tout vecteur $w$ se décompose uniquement comme $w = \sum_i (v_i^\top w)\, v_i$.
 
-![[images/1-Mathématiques/Random Matrix Theory/figA_vecteurs_propres.png]]
+![[figA_vecteurs_propres.png]]
 *Figure A. Chaque vecteur bleu (sur le cercle unité) est transformé en un vecteur rouge par $M$ — en général il change de direction. Seuls les deux vecteurs propres (vert foncé) restent sur leur droite : $\lambda_1 = 3.0$ étire, $\lambda_2 = 0.4$ compresse.*
 
 ### (ii) Invariance orthogonale, sans algèbre
@@ -48,7 +48,7 @@ Conséquence concrète qu'on utilisera : les **vecteurs propres** d'une telle ma
 >
 > Pour une matrice GOE, ce n'est pas seulement le spectre mais aussi **toute la distribution** de la matrice qui est invariante par $M \mapsto OMO^\top$ : si on rejoue le tirage de $M$ après rotation, on retombe sur la même loi.
 
-![[images/1-Mathématiques/Random Matrix Theory/figB_ellipse.png|289]]
+![[figB_ellipse.png|289]]
 *Figure B. Le cercle unité est transformé en ellipse par $M$. Les axes de l'ellipse coïncident exactement avec les vecteurs propres, et leur longueur est proportionnelle à la valeur propre correspondante : la valeur propre mesure l'étirement dans la direction propre.*
 
 ### (iii) Diagonalisation et changement de base
@@ -75,10 +75,10 @@ $P^\top x$ c'est une **rotation pure** ($P$ est orthogonale, elle préserve dist
 > [!warning] Pourquoi c'est central en RMT
 > Les matrices de covariance $\Sigma$ sont toujours symétriques. Leur diagonalisation $\Sigma = P\Lambda P^\top$ décompose le risque d'un portefeuille en directions indépendantes — les vecteurs propres sont les **facteurs de risque**, les valeurs propres leur **variance**. La question de RMT est précisément : quand $\Sigma$ est estimée sur des données finies, quels $\lambda_i$ et $v_i$ sont du signal, et lesquels sont du bruit statistique ?
 
-![[images/1-Mathématiques/Random Matrix Theory/figC_diagonalisation.png]]
+![[figC_diagonalisation.png]]
 *Figure C. À gauche : l'ellipse de $\Sigma$ dans le repère original — les axes propres sont obliques. À droite : après le changement de base $P^\top x$, l'ellipse est alignée sur les axes de coordonnées. Les directions sont décorrélées, chaque axe porte une variance $\lambda_i$.*
 
-![[images/1-Mathématiques/Random Matrix Theory/figD_pca_nuage.png]]
+![[figD_pca_nuage.png]]
 *Figure D. À gauche : nuage de données corrélées dans le repère original, avec les vecteurs propres en rouge. À droite : le même nuage après projection $P^\top x$ — les données sont décorrélées et les axes de variance maximale sont alignés sur les axes de coordonnées. C'est exactement ce que fait la PCA.*
 
 ### (iv) Matrices PSD et matrices de projection
@@ -98,12 +98,12 @@ Une matrice symétrique $A$ est caractérisée par le signe de la **forme quadra
 >
 > **Indéfinie** : le signe de $x^\top Ax$ dépend de $x$ — des valeurs propres positives et négatives coexistent.
 
-![[images/1-Mathématiques/Random Matrix Theory/figPSD1_transformation.png]]
+![[figPSD1_transformation.png]]
 *Figure PSD-1. Les 4 catégories vues comme transformations : en PD, $Ax$ reste dans la même demi-sphère que $x$ (angle aigu). En PSD, certaines directions sont écrasées. En ND, $Ax$ retourne systématiquement $x$. En indéfinie, le signe dépend de la direction.*
 
 La forme quadratique $f(x) = x^\top A x$ peut être tracée en 3D en faisant varier $x$ — elle révèle immédiatement la catégorie. La connexion avec la vision "transformation" : $x^\top (Ax)$ est le produit scalaire entre $x$ et son image $Ax$, donc son signe dit si l'angle entre les deux est aigu ou obtus.
 
-![[images/1-Mathématiques/Random Matrix Theory/figPSD2_quadratique.png]]
+![[figPSD2_quadratique.png]]
 *Figure PSD-2. La forme quadratique $f(x) = x^\top A x$ tracée en 3D pour les 4 catégories. PD → bol convexe avec un unique minimum global. PSD → gouttière, minimum sur toute une droite (direction nulle). ND → bol concave, unique maximum. Indéfinie → point de selle, ni minimum ni maximum.*
 
 #### Pourquoi les matrices de covariance sont toujours PSD
@@ -128,7 +128,7 @@ $$\Sigma = \sum_{i=1}^N \lambda_i P_i = \sum_{i=1}^N \lambda_i v_i v_i^\top$$
 
 $\Sigma$ est une **somme pondérée de projections** — chaque direction propre contribue à hauteur de sa variance $\lambda_i$. La troncature rang $k$ garde les $k$ termes dominants et écarte les $N-k$ directions de faible variance (ou de bruit).
 
-![[images/1-Mathématiques/Random Matrix Theory/figProjection.png]]
+![[figProjection.png]]
 *Figure E. Décomposition de $w$ via les matrices de projection. Gauche : $P_1 w = (v_1^\top w) v_1$ — projection orthogonale sur $v_1$. Milieu : $P_2 w = (v_2^\top w) v_2$ — projection sur $v_2$. Droite : $w = P_1 w + P_2 w = \alpha_1 v_1 + \alpha_2 v_2$ — reconstruction exacte par somme des deux projections.*
 
 ### (v) Déterminant
@@ -146,7 +146,7 @@ Cette identité est fondamentale. Elle relie directement déterminant et spectre
 >
 > **$\det(A) < 0$** : la transformation retourne l'orientation (comme un miroir). Au moins une valeur propre est négative — la matrice est indéfinie.
 
-![[images/1-Mathématiques/Random Matrix Theory/figDet.png]]
+![[figDet.png]]
 *Figure F. Le déterminant comme facteur de volume. Gauche : $\det > 0$, le carré unité est étiré en parallélogramme, volume augmenté. Milieu : $\det = 0$, le carré est écrasé sur une droite — la matrice est singulière. Droite : $\det < 0$, l'orientation est retournée (miroir).*
 
 En pratique, $\det(\Sigma)$ mesure le "volume total de risque" d'un portefeuille — le produit de toutes les variances directionnelles. Si une direction de risque est nulle ($\lambda_i = 0$), le déterminant s'annule et $\Sigma$ n'est plus inversible, ce qui bloque l'optimisation de Markowitz.
@@ -164,7 +164,7 @@ La confusion surgit parce que $\Sigma = \frac{1}{T} X^\top X$ utilise $X$ comme 
 > [!example] En finance
 > $X \in \mathbb{R}^{T \times N}$ : $T = 500$ jours, $N = 200$ actifs. Chaque ligne de $X$ est un vecteur de rendements journaliers — c'est une **donnée**. $\Sigma = \frac{1}{T} X^\top X \in \mathbb{R}^{N \times N}$ est la covariance empirique — c'est une **fonction** qui transforme des portefeuilles (vecteurs de poids $w \in \mathbb{R}^N$) en vecteurs de risque $\Sigma w$. Appliquer $P^\top$ à $X$ (changer de base) opère sur les données : chaque observation est réexprimée dans le repère propre.
 
-![[images/1-Mathématiques/Random Matrix Theory/figDeuxVisions.png]]
+![[figDeuxVisions.png]]
 *Figure G. Gauche : matrice comme fonction — des vecteurs $x$ sont transformés en $Ax$, les colonnes de $A$ définissent où vont les vecteurs de base. Droite : matrice comme données — chaque point est une observation, les axes sont des features. Même notation $A$, deux objets conceptuellement différents.*
 
 ### (vii) Décomposition en valeurs singulières (SVD)
@@ -193,14 +193,14 @@ L'interprétation géométrique est limpide. Appliquer $X = U\Sigma V^\top$ à u
 
 Bref : *toute* application linéaire est une rotation, suivie d'un étirement axe par axe, suivi d'une autre rotation. C'est universel.
 
-![[images/1-Mathématiques/Algèbre/figSVD1_trois_etapes.png]]
+![[figSVD1_trois_etapes.png]]
 *Figure SVD-1. Les trois étapes de la SVD sur le cercle unité (cas carré 2×2). Le cercle reste un cercle après $V^\top$ (rotation pure), devient une ellipse alignée sur les axes après $\Sigma$ (étirement de facteur $\sigma_1$ et $\sigma_2$), puis tourne sous l'effet de $U$. Les vecteurs $e_1, e_2$ suivent la même séquence.*
 
 #### Cas rectangulaire : sphère $\to$ ellipsoïde dans un sous-espace
 
 Le vrai pouvoir de la SVD apparaît quand $X$ est rectangulaire. Prenons $X : \mathbb{R}^2 \to \mathbb{R}^3$ (matrice $3 \times 2$). La sphère unité de $\mathbb{R}^2$ — un cercle — est envoyée dans $\mathbb{R}^3$, mais comme l'image de $X$ est au plus de dimension 2, on obtient une **ellipse plate vivant dans un plan oblique** de $\mathbb{R}^3$. Les axes de cette ellipse sont $\sigma_1 u_1$ et $\sigma_2 u_2$. La troisième direction $u_3$ est perpendiculaire à ce plan — c'est une direction de l'espace d'arrivée que $X$ **n'atteint jamais**.
 
-![[images/1-Mathématiques/Algèbre/figSVD2_rectangulaire.png]]
+![[figSVD2_rectangulaire.png]]
 *Figure SVD-2. Cas rectangulaire $X : \mathbb{R}^2 \to \mathbb{R}^3$. À gauche : le cercle unité dans $\mathbb{R}^2$, avec les directions singulières droites $v_1, v_2$ (pointillés). À droite : l'image — une ellipse plate dans $\mathbb{R}^3$, vivant dans le plan engendré par $u_1, u_2$. Les longueurs des demi-axes valent $\sigma_1$ et $\sigma_2$. Le vecteur $u_3$ est hors de l'image : $X$ ne peut produire aucun vecteur dans cette direction.*
 
 Plus généralement : le **rang** de $X$ vaut $r = $ nombre de $\sigma_i > 0$. Les $u_1, \dots, u_r$ engendrent l'image de $X$, les $u_{r+1}, \dots, u_T$ engendrent son complément orthogonal (les directions "inaccessibles"). Les $v_1, \dots, v_r$ engendrent l'orthogonal du noyau, les $v_{r+1}, \dots, v_N$ engendrent le noyau (les directions que $X$ écrase à zéro). La SVD décrit complètement la structure d'une application linéaire.
@@ -213,7 +213,7 @@ $$X \;=\; \underbrace{U_r}_{T \times r}\; \underbrace{\Sigma_r}_{r \times r}\; \
 
 Le résultat sur $X$ est strictement identique, mais on stocke et calcule $O(rTN)$ au lieu de $O(T^2)$ — gain énorme dès que $T \gg N$.
 
-![[images/1-Mathématiques/Algèbre/figSVD3_dimensions.png]]
+![[figSVD3_dimensions.png]]
 *Figure SVD-3. Diagramme des dimensions. Gauche : full SVD — $U$ est $T \times T$, $\Sigma$ a un bloc diagonal $N \times N$ en haut et des zéros en bas, $V^\top$ est $N \times N$. Droite : thin SVD — on garde seulement les $r = N$ premières colonnes de $U$. La reconstruction de $X$ est exacte dans les deux cas.*
 
 > [!warning] Convention en pratique
@@ -244,7 +244,7 @@ où $\Sigma_N^2 = \mathrm{diag}(\sigma_1^2, \dots, \sigma_N^2)$ (et idem pour $\
 
 Ce lien donne **deux routes** pour obtenir les axes principaux à partir de $X$ : (1) former $X^\top X$ et diagonaliser, (2) faire directement la SVD de $X$. Les deux donnent le même résultat en arithmétique exacte, **mais pas en arithmétique flottante** — voir plus bas.
 
-![[images/1-Mathématiques/Algèbre/figSVD5_conditionnement.png]]
+![[figSVD5_conditionnement.png]]
 *Figure SVD-4. Gauche : les deux routes pour obtenir les axes principaux. Droite : démonstration numérique. Quand la plus petite valeur singulière de $X$ vaut $\sigma_{\min} = 10^{-8}$, la diagonalisation de $X^\top X$ donne une erreur relative de ~25% sur $\sigma_{\min}$, alors que la SVD directe donne $\sim 10^{-10}$. L'écart entre les deux courbes croît systématiquement à mesure que $\sigma_{\min}$ diminue : c'est le **carré du conditionnement**. Former $X^\top X$ élève les rapports $\sigma_i / \sigma_j$ au carré, ce qui dégrade la précision relative des petites valeurs singulières.*
 
 En pratique : utiliser la SVD directement sur $X$ (`numpy.linalg.svd`), pas diagonaliser $X^\top X$. Coût comparable, précision incomparable.
@@ -275,7 +275,7 @@ Chacune $\sigma_i u_i v_i^\top$ est une matrice de **rang 1** (extérieurement, 
 
 Ce théorème est **central**. Il transforme la SVD d'un objet algébrique abstrait en outil de compression optimal : pour compresser $X$ en rang $k$, on ne peut pas faire mieux que de garder les $k$ premières composantes singulières. C'est ce qui justifie en aval la PCA, la compression d'images, le débruitage, les systèmes de recommandation à bas rang.
 
-![[images/1-Mathématiques/Algèbre/figSVD4_compression.png]]
+![[figSVD4_compression.png]]
 *Figure SVD-5. Théorème d'Eckart-Young appliqué à la compression d'image. Une image $400 \times 400$ est reconstruite par troncature SVD à $k = 1, 5, 20, 50$ composantes. À $k=1$ on n'a qu'un dégradé grossier (rang 1 = produit extérieur d'un vecteur ligne et d'un vecteur colonne). À $k=5$ les formes principales (cercle, rectangle) apparaissent. À $k=50$ l'image est quasi indistinguable de l'originale ($k=400$), tout en occupant 4× moins de mémoire. Le spectre des $\sigma_i$ en bas montre la décroissance rapide qui rend la compression efficace.*
 
 > [!example] Une image = une matrice

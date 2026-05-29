@@ -41,7 +41,7 @@ Sur la période suivante, on mesure le rendement moyen de chaque bucket.
 
 
 
-![Effet taille — Banz (1981)](images/5-Finance/anomalies/im1.png)
+![Effet taille — Banz (1981)](images/5-Finance/C_anomalies/im1.png)
 
 
 
@@ -71,7 +71,7 @@ En regardant les données mois par mois, Keim et Roll remarquent que la surperfo
 
 
 
-![Effet janvier — Keim & Roll (1983)](images/5-Finance/anomalies/im2.png)
+![Effet janvier — Keim & Roll (1983)](images/5-Finance/C_anomalies/im2.png)
 
 
 
@@ -89,7 +89,7 @@ On trie les actions par leur ratio **book-to-market (BM)** : valeur comptable di
 
 
 
-![Effet value — Rosenberg et al. (1985)](images/5-Finance/anomalies/im3.png)
+![Effet value — Rosenberg et al. (1985)](images/5-Finance/C_anomalies/im3.png)
 
 
 *Figure 3. Rendement moyen annuel par quintile de ratio book-to-market. Les actions value (Q5, haut BM) surperforment les actions growth (Q1, bas BM) d'environ 10% par an, indépendamment de leur beta.*
@@ -113,7 +113,7 @@ Ils observent ensuite les rendements sur les **6 mois suivants** (période de d�
 
 
 
-![Momentum — Jegadeesh & Titman (1993)](images/5-Finance/anomalies/im4.png)
+![Momentum — Jegadeesh & Titman (1993)](images/5-Finance/C_anomalies/im4.png)
 
 
 

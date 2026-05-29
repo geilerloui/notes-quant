@@ -29,7 +29,7 @@ Jusqu'ici on représentait $V(s)$ ou $Q(s, a)$ par une table de lookup. Cette ap
 
 **Choix d'approximateurs courants** : combinaisons linéaires de features, réseaux de neurones, decision trees, k-NN, bases Fourier/wavelet.
 
-![[images/3-Apprentissage automatique/Reinforcement learning/Deep RL/Value based/im1.png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/Deep RL/Value based/im1.png]]
 
 > 💡 **On va se concentrer sur deux familles différentiables** : représentations linéaires de features et réseaux de neurones. La différentiabilité est requise pour faire de la descente de gradient.
 
@@ -174,7 +174,7 @@ Comme on n'a pas $q_\pi$, on substitue un target :
 > [!example] Robot dans une grille
 > Grille avec stations de charge (vert, $+1$), escaliers (rouge, $-1$), neutre ailleurs. 4 actions (forward, backward, left, right) avec proba 0.2 d'erreur.
 >
-> ![[images/3-Apprentissage automatique/Reinforcement learning/Deep RL/Value based/im2.png]]
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/Deep RL/Value based/im2.png]]
 >
 > **Initialisation.**
 >
@@ -203,7 +203,7 @@ Comme on n'a pas $q_\pi$, on substitue un target :
 
 $$U^\sim(s_0) = \mathbf w^T (0, 0, 1) = -0.72.$$
 
-![[images/3-Apprentissage automatique/Reinforcement learning/Deep RL/Value based/im3 (1).png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/Deep RL/Value based/im3 (1).png]]
 
 > [!note]- Implémentation Python (extrait)
 > ```python
@@ -569,17 +569,17 @@ $$P(\text{rock}) = P(\text{paper}) = P(\text{scissors}) = \tfrac{1}{3}.$$
 #### B.2 Aliased gridworld
 
 > [!example] Environnement partiellement observable
-> ![[images/3-Apprentissage automatique/Reinforcement learning/Deep RL/Policy based/im1.png]]
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/Deep RL/Policy based/im1.png]]
 >
 > Agent senses uniquement les murs autour. Les **deux cases grises sont indistinguables**. Domaine non-Markovien.
 >
 > Une policy déterministe doit choisir "toujours gauche" ou "toujours droite" dans les cases grises → l'agent peut rester coincé :
 >
-> ![[images/3-Apprentissage automatique/Reinforcement learning/Deep RL/Policy based/im2.png]]
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/Deep RL/Policy based/im2.png]]
 >
 > Une **stochastic policy** (E ou W avec proba 1/2 dans les cases grises) atteint le but avec haute proba :
 >
-> ![[images/3-Apprentissage automatique/Reinforcement learning/Deep RL/Policy based/im3 (1).png]]
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/Deep RL/Policy based/im3 (1).png]]
 
 > 💡 **Conclusion.** Stochastic policies utiles dans des domaines :
 > - **Adversariaux** ou non-stationnaires.

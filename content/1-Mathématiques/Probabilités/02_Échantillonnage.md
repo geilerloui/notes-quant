@@ -54,7 +54,7 @@ L'étape (1) revient à exprimer l'événement $\{g(X) \le y\}$ en termes de $X$
 
 > [!example] Exemple — $Y = X^3$ avec $X \sim \mathrm{Unif}([0,2])$
 >
-> ![[images/1-Mathématiques/Probabilité/Échantillonage/im2.png]]
+> ![[images/1-Mathématiques/F_Probabilité/Échantillonage/im2.png]]
 > **Figure 2.** À gauche, la densité de $X$ uniforme sur $[0,2]$ (constante à $1/2$). À droite, le support attendu de $Y$, qui ira de $0$ à $8$.
 >
 > *(1)* La fonction $x \mapsto x^3$ est strictement croissante donc inversible. Pour $0 \le y \le 8$ :
@@ -62,7 +62,7 @@ L'étape (1) revient à exprimer l'événement $\{g(X) \le y\}$ en termes de $X$
 > $$F_Y(y) = \mathbb{P}(X^3 \le y) = \mathbb{P}(X \le y^{1/3}) = \frac{y^{1/3}}{2}$$
 >
 > où la dernière égalité vient de la CDF de l'uniforme : $F_X(x) = x/2$ sur $[0,2]$. Car pour rappel $F(x)=\frac{(x-a)}{(b-a)}$ où $a \le x \le b$
->![[images/1-Mathématiques/Probabilité/Échantillonage/im3 (1).png]]
+>![[images/1-Mathématiques/F_Probabilité/Échantillonage/im3 (1).png]]
 > *(2)* On dérive :
 >
 > $$f_Y(y) = \frac{1}{2} \cdot \frac{1}{3} y^{-2/3} = \frac{1}{6 \, y^{2/3}}, \qquad y \in [0, 8].$$

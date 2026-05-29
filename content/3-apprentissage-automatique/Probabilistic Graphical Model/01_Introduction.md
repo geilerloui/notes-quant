@@ -71,19 +71,19 @@ On définit le dataset avec les paramètres suivants — c'est ce qu'on appeller
 >
 > Avec sa loi jointe $P(I, D, G)$.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im1 (3).png|263]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im1 (3).png|263]]
 **Figure 1.** Loi jointe $P(I, D, G)$ de l'exemple de l'étudiant.
 
 **Opération de conditionnement** sur $g^1$ : c'est un processus en **deux étapes** : (i) **réduction** et (ii) **renormalisation**, où l'on part d'une mesure non normalisée $p(I, D, g^1)$ pour aboutir à la probabilité conditionnelle $p(I, D \mid g^1)$.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im2 (3).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im2 (3).png]]
 **Figure 2.** Conditionnement sur $g^1$ : on extrait la tranche $g = g^1$ (réduction), puis on renormalise pour que la somme fasse 1.
 
 **Opération de marginalisation** par rapport à $I$ :
 
 $$p(D) \;=\; \sum_I p(I, D)$$
 
-![[images/3-Apprentissage automatique/Generative Models/vae/im3 (3).png|490]]
+![[images/3-Apprentissage automatique/05_Generative Models/vae/im3 (3).png|490]]
 **Figure 3.** Marginalisation : on somme sur les valeurs de la variable qu'on veut éliminer.
 
 ---
@@ -107,7 +107,7 @@ $$p(D) \;=\; \sum_I p(I, D)$$
 
 Une **distribution conditionnelle** (Conditional Probability Distribution, CPD) est un type particulier de facteur.
 
-![[im4 (2).png|300]]
+![[images/3-Apprentissage automatique/09_PGM/Introduction/im4 (2).png|300]]
 **Figure 4.** Une CPD pour la note $G$ sachant l'intelligence $I$ et la difficulté $D$.
 
 Lecture : si j'ai un étudiant intelligent $i^1$ dans un cours difficile $d^1$, sa probabilité d'obtenir une bonne note est de $0.5$.
@@ -121,7 +121,7 @@ Lecture : si j'ai un étudiant intelligent $i^1$ dans un cours difficile $d^1$, 
 
 **(a) Produit de facteurs.**
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im6 (2).png|549]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im6 (2).png|549]]
 **Figure 6.** Produit de facteurs.
 
 > [!example] Scope du produit de facteurs
@@ -129,10 +129,10 @@ Lecture : si j'ai un étudiant intelligent $i^1$ dans un cours difficile $d^1$, 
 
 **(b) Marginalisation de facteurs.**
 
-![[images/3-Apprentissage automatique/PGM/Introduction/im7 (1).png|342]]
+![[images/3-Apprentissage automatique/09_PGM/Introduction/im7 (1).png|342]]
 **Figure 7.** Marginalisation d'un facteur — on somme sur les valeurs de la variable qu'on veut éliminer, exactement comme pour une distribution.
 
 **(c) Réduction de facteurs.** *(Exactement la même opération que celle utilisée pour le conditionnement.)*
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im8 (1).png|388]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im8 (1).png|388]]
 **Figure 8.** Réduction d'un facteur sur une assignation : on ne garde que les lignes compatibles avec l'assignation choisie.

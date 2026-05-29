@@ -86,17 +86,17 @@ Bibliographie :
 
 **(i) Graphe avec chaîne de latentes.**
 
-![[images/3-Apprentissage automatique/PGM/Inférence/HMM/im1.png|431]]
+![[images/3-Apprentissage automatique/09_PGM/Inférence/HMM/im1.png|431]]
 **Figure 1.** Représentation graphique : la chaîne de Markov des $z_t$ avec les observations $x_t$ qui en dépendent.
 
 **(ii) Diagramme de transition** (3 états cachés possibles).
 
-![[images/3-Apprentissage automatique/PGM/Inférence/HMM/im2.png|335]]
+![[images/3-Apprentissage automatique/09_PGM/Inférence/HMM/im2.png|335]]
 **Figure 2.** Diagramme de transition entre les états latents.
 
 **(iii) Représentation en treillis (lattice / trellis).**
 
-![[images/3-Apprentissage automatique/PGM/Inférence/HMM/im3 (1).png|436]]
+![[images/3-Apprentissage automatique/09_PGM/Inférence/HMM/im3 (1).png|436]]
 **Figure 3.** Représentation en treillis — déroulement temporel des états latents.
 
 **Distribution jointe.**

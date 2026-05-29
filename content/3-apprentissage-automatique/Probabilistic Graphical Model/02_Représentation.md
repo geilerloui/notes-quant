@@ -19,7 +19,7 @@ title: Représentation - PGM
 > - Student **S**AT (score SAT)
 > - Reference **L**etter (lettre de recommandation)
 
-![[images/3-Apprentissage automatique/Generative Models/vae/im9 (1).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/vae/im9 (1).png]]
 **Figure 1.** Bayesian Network de l'exemple de l'étudiant, avec les CPD (conditional probability distributions) attachées à chaque nœud.
 
 Pour obtenir la **factorisation** du graphe, on applique d'abord la chain rule :
@@ -63,12 +63,12 @@ $$P(D, I, G, S, L) = P(D) \, P(I) \, P(G \mid I, D) \, P(S \mid I) \, P(L \mid G
 
 **(a) Raisonnement causal** (causal reasoning).
 
-![[images/3-Apprentissage automatique/Generative Models/energy models/im10 (2).png|426]]
+![[images/3-Apprentissage automatique/05_Generative Models/energy models/im10 (2).png|426]]
 **Figure 2.** Raisonnement causal — on propage de la cause vers l'effet.
 
 **(b) Raisonnement évidentiel** (evidential reasoning) — on remonte du bas vers le haut, on demande comment varient les ancêtres de la note.
 
-![[images/3-Apprentissage automatique/Generative Models/energy models/im11 (1).png|431]]
+![[images/3-Apprentissage automatique/05_Generative Models/energy models/im11 (1).png|431]]
 **Figure 3.** Raisonnement évidentiel — observer l'effet change la croyance sur la cause.
 
 **(c) Raisonnement intercausal** (intercausal reasoning) — l'information entre deux causes ayant un effet commun. L'étudiant a un C, et on apprend que ce cours est en fait difficile : la probabilité d'être intelligent **augmente** :
@@ -91,7 +91,7 @@ $$p(i^1 \mid g^3, d^1) \approx 0.11.$$
 - $X \leftarrow W \rightarrow Y$ : cause commune $W$. Si on observe le SAT, ça change la croyance sur l'intelligence et donc sur la note.
 - $X \rightarrow W \leftarrow Y$ : la **V-structure**. C'est la **seule exception** où $X$ n'influence pas $Y$.
 
-![[images/3-Apprentissage automatique/PGM/Représentation/im15.png]]
+![[images/3-Apprentissage automatique/09_PGM/Représentation/im15.png]]
 **Figure 5.** Les six configurations possibles entre $X$, $W$ et $Y$. Seule la V-structure (dernière) bloque par défaut le flot d'influence.
 
 > [!warning] Définition (Active trail)
@@ -115,7 +115,7 @@ $$p(i^1 \mid g^3, d^1) \approx 0.11.$$
 > - $P(X \mid Y) = P(X)$
 > - $P(Y \mid X) = P(Y)$
 
-![[images/3-Apprentissage automatique/PGM/Représentation/im13.png]]
+![[images/3-Apprentissage automatique/09_PGM/Représentation/im13.png]]
 **Figure 6.** L'indépendance pure correspond à un graphe sans aucune connexion — cas très rare.
 
 L'indépendance pure se produit très rarement. On va définir une notion bien plus utile : l'**indépendance conditionnelle**.
@@ -133,7 +133,7 @@ L'indépendance pure se produit très rarement. On va définir une notion bien p
 > [!example] Indépendance conditionnelle — exemple des deux pièces
 > On a deux pièces : une équilibrée, l'autre biaisée renvoyant pile 90% du temps. *Coin* est la pièce qu'on choisit, et $X_1, X_2$ sont les deux lancers. Sachant la pièce, les deux lancers sont indépendants — sans cette information, ils ne le sont pas.
 
-![[images/3-Apprentissage automatique/PGM/Représentation/im14.png]]
+![[images/3-Apprentissage automatique/09_PGM/Représentation/im14.png]]
 **Figure 7.** Indépendance conditionnelle dans le BN de l'étudiant.
 
 > 💡 **Important.** On a montré que $P(S, G \mid i^0) = P(S \mid i^0) \, P(G \mid i^0)$. Pour vérifier que $S$ et $G$ sont conditionnellement indépendants **sachant $I$**, il faut aussi vérifier l'égalité pour $i^1$. L'énoncé est que $S \perp G \mid I$, pas que $S \perp G \mid i^0$ uniquement — l'indépendance doit tenir **pour toutes les valeurs** de $I$.
@@ -256,7 +256,7 @@ La factorisation d'une distribution $P$ implique les indépendances qui tiennent
 > - Si $P_1$ satisfait $D \perp I$, alors $G_1$ est un I-map pour $P_1$ et $G_2$ aussi (vacuously).
 > - Si $P_2$ ne satisfait **pas** $D \perp I$, alors $G_1$ n'est **pas** un I-map pour $P_2$. $G_2$ reste un I-map (vacuously).
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im16.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im16.png]]
 **Figure 10.** Deux graphes candidats $G_1$ et $G_2$, et deux distributions $P_1, P_2$.
 
 > [!warning] Théorème (Factorisation ⟹ I-map)

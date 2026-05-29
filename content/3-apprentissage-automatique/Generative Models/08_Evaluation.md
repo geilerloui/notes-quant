@@ -48,7 +48,7 @@ Soit un modèle $p_\theta(x)$ dont la densité est mal définie ou intractable. 
 
 **Approche binning.** Diviser l'axe en bins (ici largeur $2$). Pour chaque bin, compter les points et diviser par $N \times \text{largeur}$ pour normaliser :
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im1 (3).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im1 (3).png]]
 
 > [!warning] Problème du binning
 > Très sensible aux **frontières** : $p_\theta(-1.99) = 1/6$ mais $p_\theta(-2.01) = 1/12$, alors qu'ils sont quasi-identiques. Discontinuités absurdes, haute variance.
@@ -70,15 +70,15 @@ $$p(0) = \frac{1}{5 \times 10}\, (0.8 + 0.9 + 1 + 0.9 + 0.8) = 0.088.$$
 
 **Exemple 2 — noyau gaussien.** $K(u) = (1/\sqrt{2\pi})\, \exp(-u^2/2)$. On pose une gaussienne par point, on les somme :
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im22.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im22.png]]
 
 Résultat lisse, $p(-1.99) \approx p(-2.01)$ — plus de discontinuités.
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im2 (3).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im2 (3).png]]
 
 **Choix de $\sigma$.** Critique : trop petit, on sur-fitte les points ; trop grand, on lisse trop et la densité devient plate. On **cross-valide** sur un set de validation.
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im3 (4).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im3 (4).png]]
 
 Sur la figure : courbe noire = $\sigma$ optimal, recouvre presque parfaitement la vraie densité (grise). Vert = $\sigma$ trop grand (squashed), trop petit = oscille.
 
@@ -105,7 +105,7 @@ Pour un modèle latent on a $p(x) = \mathbb{E}_{p(z)}[p(x \mid z)]$. Estimateur 
 
 Comment dire qu'une image générée est meilleure qu'une autre ?
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im4 (1).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im4 (1).png]]
 
 - **Évaluations humaines** (Mechanical Turk, etc.) : chères, biaisées, dures à reproduire.
 - **Mémorisation du training set** donnerait des samples parfaits — clairement indésirable. Difficile de définir formellement la généralisation.
@@ -119,33 +119,33 @@ Un bon modèle génératif doit produire des samples qui satisfont **deux critè
 
 **(i) Sharpness (Fidélité, $S$).** Le classifieur est confiant sur chaque image générée — sa distribution prédictive $c(y \mid x)$ a une **entropie faible** :
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im5.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im5.png]]
 
 Mathématiquement : on tire $x$ depuis le générateur, on regarde l'entropie négative de $c(y \mid x)$ — plus elle est élevée, plus le modèle est sharp.
 
 **(ii) Diversité ($D$).** L'**ensemble** des prédictions doit être varié — la marginale $c(y) = \mathbb{E}_{x \sim p}[c(y \mid x)]$ doit avoir une **entropie élevée** (on ne génère pas que des chiens) :
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im6 (2).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im6 (2).png]]
 
 ### C. Distance pixel vs distance feature
 
 **Distance pixel.** Difference brute des pixels — parfaite ici (distance nulle) :
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im13.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im13.png]]
 
 **Mais non-fiable.** Décaler de un pixel donne une distance de $900$ pour des images sémantiquement identiques :
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im14.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im14.png]]
 
 **Distance feature.** Plutôt comparer des **features haut niveau** (l'image a-t-elle deux yeux ? de la fourrure ?) qui sont **insensibles** aux petits décalages. On extrait ces features depuis un **classifieur pré-entraîné** (typiquement **Inception-v3**, entraîné sur **ImageNet** — 14M images, 20k catégories).
 
 **Architecture Inception-v3.** 42 couches, conçue pour la classification mais utile comme feature extractor. On coupe le softmax final et on récupère l'embedding de la dernière couche de pooling, de dimension $2048$ :
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im15.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im15.png]]
 
 On note $\Phi(x) \in \mathbb{R}^{2048}$ l'embedding d'une image $x$. Pour comparer real vs fake dogs : on compare leurs distributions d'embeddings.
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im16.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im16.png]]
 
 ### D. Fréchet Inception Distance (FID)
 
@@ -175,11 +175,11 @@ Proposé par [Salimans et al. 2016](https://arxiv.org/abs/1606.03498). Plus util
 
 On garde Inception-v3 intact (incluant le softmax) — pour chaque sample on a une distribution de classe $p(y \mid x)$ :
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im17.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im17.png]]
 
 **Objectif** : combiner haute fidélité (entropie de $p(y \mid x)$ basse, le modèle est sûr) et haute diversité (entropie de $p(y) = \mathbb{E}_x[p(y \mid x)]$ haute, on couvre toutes les classes) :
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im23.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im23.png]]
 
 $$\boxed{\;\mathrm{IS} = \exp\!\Big(\mathbb{E}_{x \sim p_g}\, \mathrm{KL}\big(p(y \mid x)\, \|\, p(y)\big)\Big)\;}$$
 
@@ -197,13 +197,13 @@ Espérance : $\overline{\mathrm{KL}} = 0.15$, puis $\mathrm{IS} = e^{0.15} \appr
 
 **Intuition de la marginale.** On veut que la marginale soit **uniforme** (= maximum d'entropie) — c'est exactement la diversité :
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im24.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im24.png]]
 
 ### F. Kernel Inception Distance (KID)
 
 **Maximum Mean Discrepancy (MMD).** Comparer deux distributions $p$ et $q$ uniquement par leur **moyenne** est insuffisant — deux distributions de même moyenne mais variances différentes seraient considérées identiques.
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im25.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im25.png]]
 
 L'idée MMD : mapper chaque point dans un espace de plus haute dimension où les moments d'ordre supérieur sont capturés, par exemple $x \mapsto (x, x^2)$. La distance entre les moyennes dans cet espace devient :
 
@@ -236,7 +236,7 @@ $$K(x_i, x_j) = \exp\!\Big(\!-\frac{\|x_i - x_j\|^2}{\gamma}\Big).$$
 
 Astuce post-entraînement qui **trade fidélité contre diversité**. On échantillonne le vecteur de bruit $z \sim \mathcal{N}(0, I)$, mais on **tronque** la distribution : on rejette les $z$ dont la norme dépasse un seuil.
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im26.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im26.png]]
 
 - **Tronquer fort** (rester près de $0$) → **haute fidélité**, faible diversité. Le générateur a beaucoup de pratique dans cette zone.
 - **Tronquer peu** (queues complètes) → **haute diversité**, mais beaucoup de samples bizarres ($z$ dans les queues, peu vus à l'entraînement).
@@ -247,7 +247,7 @@ Le FID empire avec une troncature forte (manque de diversité), mais pour une ap
 
 Pour décomposer fidélité et diversité en deux mesures séparées (analogues au précision/rappel supervisé). Soit $P_r$ la distribution réelle et $P_g$ celle du générateur. Le scénario idéal : $P_g = P_r$.
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im18.png|348]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im18.png|348]]
 
 **Precision.** Fraction des samples générés qui sont dans le support réel :
 
@@ -255,7 +255,7 @@ $$\mathrm{Precision} = \frac{|\text{samples générés} \cap P_r|}{|\text{sample
 
 Reflète la **fidélité** : haute precision = ce qu'on génère a l'air réel (peu de tennis-ball-dogs ou autres bidules).
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im19.png|396]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im19.png|396]]
 
 **Recall.** Fraction des données réelles couvertes par le générateur :
 
@@ -263,11 +263,11 @@ $$\mathrm{Recall} = \frac{|\text{samples générés} \cap P_r|}{|\text{samples r
 
 Reflète la **diversité** : haut recall = on couvre toutes les variations du dataset, pas juste un sous-mode.
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im20.png|434]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im20.png|434]]
 
 **Constat empirique** : les state-of-the-art GAN ont souvent un **bon recall** mais une **précision médiocre** (ils couvrent tout le manifold avec beaucoup de gunk). Le truncation trick aide à corriger la précision au prix du recall.
 
-![[images/3-Apprentissage automatique/Generative Models/evaluation/im21.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/evaluation/im21.png]]
 
 ### I. Perceptual Path Length
 

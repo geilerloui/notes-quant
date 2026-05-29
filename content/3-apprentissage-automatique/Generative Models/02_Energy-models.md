@@ -156,7 +156,7 @@ Pour la suite, on suppose $V \in \{0, 1\}^m$ et $H \in \{0, 1\}^n$ (variables bi
 
 **Boltzmann vs Restricted Boltzmann.**
 
-![[images/3-Apprentissage automatique/Generative Models/energy models/im8 (1).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/energy models/im8 (1).png]]
 
 Dans une RBM, on **restreint les connexions** : pas d'arêtes entre nœuds visibles, ni entre nœuds cachés. Seulement des arêtes visible-caché. C'est cette restriction qui rend l'inférence tractable.
 
@@ -166,7 +166,7 @@ Sur un graphe biparti $V$-$H$ (RBM), les cliques maximales sont les paires $(v_i
 
 $$P(V, H) = \frac{1}{Z} \prod_i \prod_j \phi_{ij}(v_i, h_j)\, \prod_i \psi_i(v_i)\, \prod_j \xi_j(h_j).$$
 
-![[images/3-Apprentissage automatique/Generative Models/energy models/im9 (2).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/energy models/im9 (2).png]]
 
 La fonction de partition $Z$ somme sur les $2^m \times 2^n$ configurations possibles — **intractable** dès que $m, n$ sont raisonnables.
 
@@ -240,9 +240,9 @@ $$P(V_i = 1 \mid V_{-i}, H) = \sigma\!\Big(\sum_j w_{ij}\, v_j + c_i\Big).$$
 
 Donc on tire $z$ avec cette proba et on met $V_i$ à $1$ avec probabilité $z$, à $0$ sinon. Idem pour $H_j$ par symétrie.
 
-![[images/3-Apprentissage automatique/Generative Models/energy models/im11 (1).png]]
+![[images/3-Apprentissage automatique/05_Generative Models/energy models/im11 (1).png]]
 
-![[images/3-Apprentissage automatique/Generative Models/energy models/im20.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/energy models/im20.png]]
 
 ![[im11 (1) 1.png]]
 
@@ -256,9 +256,9 @@ $$\mathbb{E}_v\!\big[\sigma(Wv + c)\, v^\top\big] \approx \frac{1}{k} \sum_{i=1}
 2. Gibbs : $v^{(0)} \to h^{(0)}$ via $\sigma$ + tirage Bernoulli, puis $h^{(0)} \to v^{(1)}$, etc.
 3. Update : appliquer les formules de gradient avec les espérances estimées.
 
-![[images/3-Apprentissage automatique/Generative Models/energy models/im12.png|372]]
+![[images/3-Apprentissage automatique/05_Generative Models/energy models/im12.png|372]]
 
-![[images/3-Apprentissage automatique/Generative Models/energy models/im13.png|227]]
+![[images/3-Apprentissage automatique/05_Generative Models/energy models/im13.png|227]]
 
 **Contrastive Divergence (CD-$k$).** En pratique Gibbs est trop lent : à chaque pas de SGD on devrait relancer une chaîne longue. L'astuce de **Hinton 2002** :
 
@@ -268,7 +268,7 @@ $$\mathbb{E}_v\!\big[\sigma(Wv + c)\, v^\top\big] \approx \frac{1}{k} \sum_{i=1}
 
 $$\mathbb{E}_{p(V, H)}\!\big[v_j h_i\big] \approx \sigma(w_i\, \tilde{v} + c_i)\, \tilde{v}_j.$$
 
-![[images/3-Apprentissage automatique/Generative Models/energy models/im14.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/energy models/im14.png]]
 
 Le gradient approximé devient :
 
@@ -276,4 +276,4 @@ $$\frac{\partial \mathcal{L}(\theta)}{\partial w_{ij}} \approx \sigma(w_i\, v + 
 
 **Intuition.** Au fur et à mesure que le modèle s'améliore, $\tilde{v}$ ressemble de plus en plus aux données — et le gradient tend naturellement vers zéro. CD est biaisé mais beaucoup plus rapide que Gibbs complet, et marche très bien en pratique.
 
-![[images/3-Apprentissage automatique/Generative Models/energy models/im15.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/energy models/im15.png]]

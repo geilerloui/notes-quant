@@ -184,7 +184,7 @@ $J(\theta)=\frac{1}{2n}\sum_{i=1}^{n}(y^{(i)} - g_2(g_1(XW^{(1)})W^{(2)} ))^2$
 ### B. Architecture de Base
 
 #### Fonctions d'activation
-![[images/3-Apprentissage automatique/Supervised learning/im5.png]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im5.png]]
 
 
 Le choix de la fonction d'activation dans les couches cachées est crucial pour les performances du réseau. Chaque fonction a ses avantages et inconvénients :
@@ -204,7 +204,7 @@ Lorsque la matrice de poids $W$ est initialisée avec des valeurs trop important
 
 Le problème est que le gradient local de la sigmoid $z \times (1-z)$ devient alors **proche de zéro** ("vanish"), rendant les gradients pour $x$ et $W$ également nuls. Le reste de la rétropropagation sera nul à cause de la multiplication dans la chain rule.
 
-![[images/3-Apprentissage automatique/Supervised learning/im6.png|494]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im6.png|494]]
 
 *2. Diminution systématique du gradient*
 
@@ -218,7 +218,7 @@ Si un neurone est "clampé" à zéro lors du forward pass (i.e., $z = 0$, il ne 
 
 Il arrive qu'en passant tout le dataset d'entraînement dans un réseau entraîné, une large fraction (ex: 40%) des neurones soient restés à zéro tout le temps.
 
-![[images/3-Apprentissage automatique/Supervised learning/im7.png|598]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im7.png|598]]
 
 **Solutions possibles** :
 - **Leaky ReLU** : pente légère (0.01) pour les valeurs négatives
@@ -270,7 +270,7 @@ We see that according to this equation the weight matrix independently of backpr
 
 \textbf{Why Regularization reduces overfitting ?} If we increase the $\lambda>>0$ regularization parameter well enough, the weights will be close to zero $W_l \approx 0$. Thus, not exactly on the image we still keep all the nodes, but their influence will be reduced. As such, we will be working on a smaller neural nets and we will get high bias:
 
-![[images/3-Apprentissage automatique/00_Neural_nets_MLP/im24.png]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im24.png]]
 
 
 To be more concrete on a specific cell, if we consider the tanh activation function as below and the equation:
@@ -280,20 +280,20 @@ $$
 As well as a large $\lambda$ which entails a reduction in $W_l$, we notice that the equation of $z_l$ becomes linear. Which entails a linear neural network.
 
 
-![[images/3-Apprentissage automatique/00_Neural_nets_MLP/im25.png]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im25.png]]
 
 
 
 \textbf{Debugging Tool:} Note that when plotting the cost function of $J$ you should keep into account the cost function and its regularizer:
 
-![[images/3-Apprentissage automatique/00_Neural_nets_MLP/im23.png]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im23.png]]
 
 #### Dropout
 
 
 \textbf{Core idea:} For each node we will have a certain probability to cancel some nodes, you end up with a diminished network as depicted on the right:
 
-![[images/3-Apprentissage automatique/00_Neural_nets_MLP/im21.png]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im21.png]]
 
 
 \textbf{Implementation of Dropout:} There are few ways to coding dropout, let's focus on the \textcolor{cornellred}{"Inverted dropout"} technique. We will illustrate this with a \textcolor{officegreen}{layer $l=3$} and with an hyperparameter that we call \textcolor{officegreen}{$keep\_prob=0.8$} which is the probability that a given hidden unit we'll be kept:
@@ -339,12 +339,12 @@ Intuition 2: Let's look at the perspective at a single unit. By considering drop
 
 \textbf{Another detail:} We had to choose the keep\_prob parameter, here $W_2$ is the biggest set of matrix, to reduce overfitting of that matrix you might have a \textcolor{officegreen}{$keep\_prob$} that is around 0.5, and for the other you can have a higher \textcolor{officegreen}{$keep\_prob$} . And also 1.0 for those you don't want to loose any connection like at the end.
 
-![[images/3-Apprentissage automatique/00_Neural_nets_MLP/im22.png|503]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im22.png|503]]
 
 
 \textbf{Downside of dropout:} the cost fct J is not well defined, at each iteration you cut off some of the nodes, it is here harder to verify that the cost function is always decreasing (like on the plot below). Because it less well defined, you loose this debugging tool. What he usually do is adding dropout only at the end once you are sure everything is working well.
 
-![[images/3-Apprentissage automatique/00_Neural_nets_MLP/im23.png]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im23.png]]
 
 
 
@@ -354,24 +354,24 @@ Intuition 2: Let's look at the perspective at a single unit. By considering drop
 
 You can augment your train set, by flipping horizontally your images, you can also takes random crops of the image, ; Those fakes images won't bring as much information as a new image but this can be an inexpensive way to your algorithm more data. And basically you tell your algorithm that a zoom or a vertical transformation is still a cat. 
 
-![[images/3-Apprentissage automatique/00_Neural_nets_MLP/im26.png|554]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im26.png|554]]
 
 
 On digits you can apply distortion on the image
 
-![[images/3-Apprentissage automatique/00_Neural_nets_MLP/im27.png|543]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im27.png|543]]
 
 
 #### Early Stopping
 
 We start with random weights in our first epoch and we get model like this one which is underfitting. As we train, let's say for 20 epochs we get a pretty good model. But then let's say we keep going for a 100 epochs, we'll get something that fits the data much better, but we can see that this is starting to overfit. If we go for even more the model heavy overfits. 
 
-![[images/3-Apprentissage automatique/00_Neural_nets_MLP/im2 (3).png|436]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im2 (3).png|436]]
 
 
 Let's try to evaluate these models by adding a testing set such a the gray points. We make a plot of the error in the training set and the testing set with respect to each epoch. For the first epoch, since the model is completely random, then it badly missclassifies both the training and the testing sets.
 
-![[images/3-Apprentissage automatique/00_Neural_nets_MLP/im3 (4).png|430]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im3 (4).png|430]]
 
 
 Based on the model complexity graph we can determine the number of epochs we'll be using. Where on the right, we have a high testing error and low training error, so we're overfitting. On the left we have high testing error and training error so we're underfitting.\\
@@ -443,12 +443,12 @@ Finally you apply $z_{norm}$ ..
 
 Covariate shift: Imagine we train our dataset on black cats, and in our test we have all sort of cats. 
 
-![[images/3-Apprentissage automatique/00_Neural_nets_MLP/im29.png]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im29.png]]
 
 
 Then our training set is on the left with positive example in red; and we want to generalize it to a dataset on the right:
 
-![[images/3-Apprentissage automatique/00_Neural_nets_MLP/im30.png]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im30.png]]
 
 We might not expect a model trained with the data on the left to generalize to the one on the right. This idea of the data distribution changing comes by the name "Covariate Shift". It means if we learn some $x \rightarrow y$ , if $x$ change we have to relearn our model.\\
 
@@ -478,7 +478,7 @@ conclusion: one more detail next time, batch norm handles data one mini batch at
 
 \textbf{Core idea:} Suppose we apply mini-batch 64, as you iterate the steps will be a bit noisy it will tends toward the minimum but it might not convergence and rather wandering around. Because you use some fixed values for $\alpha$. But if you were to reduce the $\alpha$ parameters as we get closer to the minimum we start oscillating in a tighter region instead.
 
-![[images/3-Apprentissage automatique/00_Neural_nets_MLP/im32.png|397]]
+![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im32.png|397]]
 
 
 

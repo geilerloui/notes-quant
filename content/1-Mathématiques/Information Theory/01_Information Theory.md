@@ -128,7 +128,7 @@ C'est exactement la longueur moyenne de notre code optimal ! L'entropie **n'est 
 
 #### Propriétés fondamentales
 
-![[images/1-Mathématiques/Optimal transport/im2-3.png|364]]
+![[images/1-Mathématiques/E_Optimal transport/im2-3.png|364]]
 *Figure : Entropie d'une distribution binaire*
 
 **Minimum** : $H(X) = 0$ si et seulement si $X$ est déterministe (une seule valeur possible)

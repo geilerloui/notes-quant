@@ -17,13 +17,13 @@ title: Message Passing - Graph ML
 > [!example] Exemple — détection de fraudeurs
 > Dans un réseau, certains nœuds sont des fraudeurs et d'autres sont totalement fiables. Comment trouver les autres fraudeurs et personnes de confiance ?
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/1.introduction/im1.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/1.introduction/im1.png]]
 
 ### A. L'intuition — corrélations dans les graphes
 
 L'intuition centrale : **il existe des corrélations dans les réseaux**, c'est-à-dire que les nœuds similaires ont tendance à être connectés. La **collective classification** résout ce problème en assignant des labels à tous les nœuds simultanément, où les nœuds proches ont la même couleur.
 
-![[images/3-Apprentissage automatique/Graph ML/Message passing/1.introduction/im2.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Message passing/1.introduction/im2.png]]
 **Figure 1.** L'idée de la collective classification : étiqueter tous les nœuds ensemble en exploitant les corrélations.
 
 > [!warning] Trois techniques principales
@@ -41,7 +41,7 @@ Deux types principaux de dépendances qui mènent à des corrélations :
 > - *Exemple 1.* Des chercheurs travaillant dans le même domaine sont plus susceptibles d'établir des connexions (rencontres en conférences, échanges en séminaires...).
 > - *Exemple 2.* Dans un réseau social en ligne, les nœuds sont des personnes, les arêtes des amitiés, les couleurs des centres d'intérêt (sports, arts...). Les personnes partageant des intérêts communs sont plus densément connectées par homophilie.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/im3 (1).png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/im3 (1).png]]
 
 > [!warning] Influence
 > Les **connexions sociales peuvent influencer** les caractéristiques individuelles.
@@ -69,7 +69,7 @@ L'algorithme se déroule en trois étapes :
 
 > 💡 **Objectif graphique.** On cherche $P(Y_v)$ étant donnés toutes les features et la structure du réseau.
 
-![[images/3-Apprentissage automatique/Graph ML/Message passing/1.introduction/im2.png]]
+![[images/3-Apprentissage automatique/08_Graph ML/Message passing/1.introduction/im2.png]]
 
 ---
 
@@ -93,41 +93,41 @@ L'algorithme se déroule en trois étapes :
 >
 > **(i) Initialisation.** Pour les nœuds labellisés, on utilise les ground-truth $Y$. Pour les non-labellisés, on initialise uniformément.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/2.Relational/im1.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/2.Relational/im1.png]]
 >
 > **(ii) Update — première itération.** Pour le nœud 3, $N_3 = \{1, 2, 4\}$ :
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/2.Relational/im2.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/2.Relational/im2.png]]
 >
 > Pour le nœud 4, $N_4 = \{1, 3, 5, 6\}$ :
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/2.Relational/im3 (1).png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/2.Relational/im3 (1).png]]
 >
 > Pour le nœud 5, $N_5 = \{4, 6, 7, 8\}$ :
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/2.Relational/im4.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/2.Relational/im4.png]]
 >
 > Après une itération complète :
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/2.Relational/im5.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/2.Relational/im5.png]]
 >
 > **(iii) Après itération 2.**
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/2.Relational/im6.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/2.Relational/im6.png]]
 >
 > **(iv) Après itération 3.**
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/2.Relational/im7.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/2.Relational/im7.png]]
 >
 > **(v) Après itération 4.** Tous les scores se stabilisent.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/2.Relational/im8.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/2.Relational/im8.png]]
 >
 > **Conclusion.**
 > - Nœuds 4, 5, 8, 9 → classe 1 ($P_{Y_v} > 0.5$).
 > - Nœud 3 → classe 0 ($P_{Y_v} < 0.5$).
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/2.Relational/im9.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/2.Relational/im9.png]]
 
 ---
 
@@ -167,7 +167,7 @@ L'algorithme se déroule en trois étapes :
 >
 > **(i) Baseline — features seules.** Classifieur linéaire sur les attributs binaires.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/3.Iterative/im1.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/3.Iterative/im1.png]]
 >
 > **(ii) Baseline avec features de voisinage.** Chaque nœud maintient des vecteurs $z_v$ de labels du voisinage :
 > - $I$ = vecteur des labels des voisins **entrants**.
@@ -175,35 +175,35 @@ L'algorithme se déroule en trois étapes :
 >
 > $I_0 = 1$ si au moins un voisin entrant a le label 0. Définitions similaires pour $I_1$, $O_0$, $O_1$.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/3.Iterative/im2.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/3.Iterative/im2.png]]
 >
 > **(iii) Étape 1 — entraînement des classifieurs.** Sur un training set séparé, entraîner :
 > - $\phi_1$ : sur les features de nœud uniquement (cercles verts).
 > - $\phi_2$ : sur features + vecteurs de liens (cercles rouges).
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/3.Iterative/im3 (1).png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/3.Iterative/im3 (1).png]]
 >
 > **(iv) Étape 2 — application sur le test.** Utiliser $\phi_1$ pour fixer les $Y_v$ initiaux.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/3.Iterative/im4.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/3.Iterative/im4.png]]
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/3.Iterative/im5.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/3.Iterative/im5.png]]
 >
 > **Étape 3.1 — Update $z_v$ pour tous les nœuds.**
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/3.Iterative/im6.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/3.Iterative/im6.png]]
 >
 > **Étape 3.2 — Re-classifier tous les nœuds avec $\phi_2$.**
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/3.Iterative/im7.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/3.Iterative/im7.png]]
 >
 > **Itération.** Continuer jusqu'à convergence : update $z_v$, update $Y_v = \phi_2(f_v, z_v)$.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/3.Iterative/im8.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/3.Iterative/im8.png]]
 >
 > **Prédiction finale.** Stop après convergence ou max iterations.
 >
-> ![[images/3-Apprentissage automatique/Graph ML/Message passing/3.Iterative/im9.png]]
+> ![[images/3-Apprentissage automatique/08_Graph ML/Message passing/3.Iterative/im9.png]]
 
 ### B. Application — détection de faux avis (REV2)
 
@@ -225,7 +225,7 @@ L'algorithme se déroule en trois étapes :
 
 **Sortie** = ensemble d'utilisateurs donnant des fausses notes.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im18.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im18.png]]
 
 **Trois quantités à apprendre simultanément.**
 
@@ -242,25 +242,25 @@ L'algorithme se déroule en trois étapes :
 > [!warning] Reliability $R(u, p)$ d'une note
 > En fixant Fairness et Goodness, on mesure à quel point la note diverge de l'opinion commune sur ce produit.
 >
-> ![[images/3-Apprentissage automatique/Generative Models/score based/im19.png]]
+> ![[images/3-Apprentissage automatique/05_Generative Models/score based/im19.png]]
 
 **Itérations.**
 1. Initialiser $F(u)$, $R(u, p)$, $G(p)$ au max ($= 1$).
 2. Appliquer la formule de $G(p)$.
 3. Appliquer celle de $R(u, p)$.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im20.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im20.png]]
 
 4. Appliquer celle de $F(u)$.
 5. Répéter jusqu'à convergence.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im21.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im21.png]]
 
 > 💡 **Propriétés.** L'algorithme **converge garanti**, le nombre d'itérations est **borné**, et la complexité est **linéaire** en le nombre d'arêtes du graphe.
 
 **Performance.** Dataset Flipkart (Inde). Sur le top 80, **précision = 100%**. **127 des 150 utilisateurs avec la fairness la plus basse** étaient effectivement des fraudeurs réels.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im22.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im22.png]]
 
 ---
 
@@ -279,19 +279,19 @@ L'algorithme se déroule en trois étapes :
 >
 > **Cas linéaire.**
 >
-> ![[images/3-Apprentissage automatique/Generative Models/score based/im23.png]]
+> ![[images/3-Apprentissage automatique/05_Generative Models/score based/im23.png]]
 >
 > **Solution :** chaque nœud écoute le message de son voisin, l'incrémente, et le passe au suivant.
 >
-> ![[images/3-Apprentissage automatique/Generative Models/score based/im24.png]]
+> ![[images/3-Apprentissage automatique/05_Generative Models/score based/im24.png]]
 >
 > Zoom sur un nœud :
 >
-> ![[images/3-Apprentissage automatique/Generative Models/score based/im25.png]]
+> ![[images/3-Apprentissage automatique/05_Generative Models/score based/im25.png]]
 >
 > **Cas arborescent.** Chaque nœud reçoit des reports de toutes les branches de l'arbre.
 >
-> ![[im30.png]]
+> ![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im30.png]]
 
 > 💡 **En pratique.** Dans cet exemple les nœuds renvoient des **valeurs exactes**, mais en cas réel ce sont des **probabilités** sur de très grands graphes — par exemple, "il y a environ un million de nœuds dans cette branche".
 
@@ -301,10 +301,10 @@ L'algorithme se déroule en trois étapes :
 
 **Itération.** Répéter pour chaque label $Y_j \in \mathcal{L}$, pour tous les nœuds :
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im26.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im26.png]]
 
 > [!warning] Trois types de paramètres
-> ![[images/3-Apprentissage automatique/Generative Models/score based/im28.png]]
+> ![[images/3-Apprentissage automatique/05_Generative Models/score based/im28.png]]
 >
 > - **Label-Label potential matrix** $\psi$ : dépendance entre un nœud et son voisin. $\psi(Y_i, Y_j)$ = probabilité qu'un nœud $j$ soit dans l'état $Y_j$ sachant qu'il a un voisin $i$ dans l'état $Y_i$.
 > - **Prior belief** $\phi$ : probabilité $\phi_i(Y_i)$ que le nœud $i$ soit dans l'état $Y_i$.
@@ -314,12 +314,12 @@ L'algorithme se déroule en trois étapes :
 
 **Convergence.** $b_i(Y_i)$ = belief finale de $i$ d'être dans l'état $Y_i$.
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im27.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im27.png]]
 
 #### A.3 Que peut-il mal se passer ?
 
 > [!warning] Le problème des cycles
-> ![[im29.png]]
+> ![[images/3-Apprentissage automatique/01_Supervised-Learning/00_Neural_nets_MLP/im29.png]]
 >
 > Si le graphe a des **cycles**, les messages venant de différents sous-graphes ne sont **plus indépendants**. Mais on peut quand même faire tourner BP : c'est un algorithme local qui ne "voit" pas les cycles.
 >
@@ -357,12 +357,12 @@ L'algorithme se déroule en trois étapes :
 
 **Objectif.** Trouver les rôles (honest, accomplice, fraudster) via Loopy BP. On définit les paramètres $\psi$ comme suit :
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im32.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im32.png]]
 **Figure 3.** Label-label potential matrix encodant la structure bipartite fraudeur/accomplice.
 
 **Résultat après plusieurs itérations.**
 
-![[images/3-Apprentissage automatique/Generative Models/score based/im33.png]]
+![[images/3-Apprentissage automatique/05_Generative Models/score based/im33.png]]
 **Figure 4.** Sortie de l'algorithme — identification des rôles dans le graphe.
 
 > 💡 **L'idée à retenir.** Quand la fraude se cache derrière une **structure relationnelle** plutôt que dans des features individuelles (cas typique de la fraude organisée), les algorithmes de message passing sur graphe sont l'outil naturel — et historiquement très utilisés en détection de fraude bancaire, e-commerce et antiblanchiment.

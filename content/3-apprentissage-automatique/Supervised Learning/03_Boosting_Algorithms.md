@@ -427,131 +427,453 @@ Récapitulatif des hyperparamètres de `GradientBoostingRegressor` (scikit-learn
 
 ---
 
-## V. XGBoost Chen & Guestrin 2016
+## V. XGBoost — Chen & Guestrin, 2016
 
+XGBoost (*eXtreme Gradient Boosting*, [Chen & Guestrin, KDD 2016](https://arxiv.org/abs/1603.02754)) est l'implémentation moderne dominante du gradient boosting. Sur le fond, c'est du GBM (§IV) ; sur la forme, **trois différences clés** :
 
-## VI. LightGBM - Ke et al 2017 Microsoft
+1. **Régularisation explicite** dans la loss (terme $\gamma T + \tfrac{1}{2}\lambda \sum w_j^2$).
+2. **Approximation de la loss au second ordre** (Taylor 2) — au lieu de juste suivre le gradient, on utilise aussi la Hessienne, ce qui permet de calculer la valeur optimale par feuille en fermé.
+3. **Optimisations algorithmiques massives** (greedy approché, weighted quantile sketch, sparsity-aware, parallel/cache/out-of-core) qui rendent l'algorithme scalable à des datasets de millions de lignes.
 
+### V.1 La loss XGBoost et ses hyperparamètres
 
+> [!warning] Définition — Loss XGBoost régularisée
+> Pour un ensemble de $T$ arbres $\{f_k\}_{k=1}^T$ produisant la prédiction $\hat{y}_i = \sum_k f_k(x_i)$ :
+> 
+> $$\mathcal{L} = \frac{1}{n} \sum_{i=1}^n \ell\!\left(y_i,\, \hat{y}_i\right) + \sum_{k=1}^T \Omega(f_k), \qquad \Omega(f) = \gamma T_f + \frac{1}{2}\lambda \sum_{j=1}^{T_f} w_j^2$$
+> 
+> où $T_f$ est le nombre de feuilles de l'arbre $f$ et $w_j$ la valeur prédite par la feuille $j$. **Deux pénalités** : $\gamma$ pénalise le nombre de feuilles (complexité), $\lambda$ pénalise les valeurs par feuille (shrinkage L2).
 
-https://www.youtube.com/watch?v=A2Xf8YgFdko
+**Hyperparamètres principaux** :
 
+| Paramètre | Défaut | Rôle |
+|:---|:---:|:---|
+| `eta` ($\eta$) | $0.3$ | Learning rate (shrinkage) — analogue du $\nu$ de GBM |
+| `gamma` ($\gamma$) | $0$ | Coût minimum pour ouvrir une nouvelle branche (pruning) |
+| `lambda` ($\lambda$) | $1$ | Régularisation L2 sur les valeurs de feuille |
+| `max_depth` | $6$ | Profondeur maximale de chaque arbre |
+| `min_child_weight` | $1$ | Cover minimum par feuille (cf §V.2) |
+| `subsample` | $1$ | Fraction des observations échantillonnée par arbre |
+| `colsample_bytree` | $1$ | Fraction des features échantillonnée par arbre |
 
+`colsample_bytree` est emprunté à Random Forest et est, selon les auteurs, **plus efficace que le sous-échantillonnage en lignes** pour prévenir l'overfitting.
 
-## VII. CatBoost Prokorenkova 2018 Yandex
+### V.2 Régression — fil rouge Drug Dosage
 
-il rappelle que target encoding est pas ouf car on fait du leakage; modèle efficace on training data mais pas testing data. Donc on a parlé de k-fold target encoding pour réduire le leakage. Après si tu lis le manuscript Catboost ils disent que si tu as que une seule catégorie eg tt le monde a "favorite color" qui est a blue - bon pas très claire mais en gros le mec te dit que la tu vois bien que classe 1 c'est favorite color = 0.33 sinon c'est 0.5 donc on a un méga leakage
+> [!example] Fil rouge — Drug Dosage
+> On utilise un dataset à 4 observations : abscisse Drug Dosage, ordonnée Drug Effectiveness. On veut un XGBoost de régression qui prédit l'efficacité du médicament selon la dose. La loss est le MSE.
 
-![[Pasted image 20260510215629.png|225]]
-![[Pasted image 20260510215847.png|229]]
+#### Étape 1 — Prédiction initiale
 
+Par défaut, XGBoost commence avec une **prédiction constante de $0.5$** pour tous les points — convention bizarre mais sans importance (n'importe quelle constante marche, on convergera vers la même solution). On calcule les résidus initiaux $r_i = y_i - 0.5$.
 
-il dit que c un exemple débile qui devrait pas se produire car si ta favorite color = blue pr tt le monde ben tu mets tt le monde a 1 et c tout. Mais les mecs qui ont fait le papier de catboost eux se sont dit que ça fait pas sens donc ils vont trouver une façon pr résoudre ce pb. Catboost = categorical boosting, 
+![[xgb-1.png|275]]
+*Figure. Les 4 points du dataset (effectiveness vs dosage) avec la prédiction initiale constante à $0.5$ et les résidus en pointillés.*
 
-catboost évite le leakge en etranine chaque row data as it it were fed recursively in the algorithm. 
-Par exemple au lieu d'utiliser an overall mean it uses a user defined prior that in the examples I saw was set to 0.05 aussi le dénominateur on rajoute +1 lutot qu'un weight
+#### Étape 2 — Construction d'un arbre XGBoost
 
-$$
-\begin{aligned}
-& \text { CatBoost } \\
-& \text { Encoding }
-\end{aligned}=\frac{\text { OptionCount }+0.05}{n+1}
-$$$n=$ Number of rows that have already been seen that have the same value for Favorite Color
+À chaque tour, XGBoost fit un arbre **sur les résidus** — comme GBM. Mais le critère de split n'est ni Gini, ni MSE classique : c'est un **score de similarité** qui tombe directement de la dérivation Taylor (cf §V.4).
 
-il dit ligne 1 j'ai 0+0.05/(0+1) = 0.05
-il dit ligne 2 = 0+0.05/(0+1)=0.05
-il dit ligne 3 = 0+0.05/(0+1)=0.05
-il dit ligne 4 = 1+0.05/(1+1)=0.525
+> [!warning] Définition — Similarity Score et Gain
+> Pour un nœud contenant les observations d'indices $I$ :
+> 
+> $$\text{Similarity}(I) = \frac{1}{2} \cdot \frac{\big(\sum_{i \in I} g_i\big)^2}{\sum_{i \in I} h_i + \lambda}$$
+> 
+> où $g_i, h_i$ sont les dérivées première et seconde de la loss au point $i$. Pour le MSE : $g_i = -(y_i - \hat{y}_i)$ et $h_i = 1$, donc la similarity se réduit à $(\text{somme des résidus})^2 / (\text{nombre de résidus} + \lambda)$.
+> 
+> Le **Gain** d'un split (parent $I$ → gauche $I_L$, droite $I_R$) est :
+> 
+> $$\boxed{\;\text{Gain} = \text{Similarity}(I_L) + \text{Similarity}(I_R) - \text{Similarity}(I)\;}$$
+> 
+> On retient le split qui maximise le Gain — exactement comme on retient le split qui maximise la réduction d'impureté en CART.
 
+**(i) Similarity au nœud racine.** On met tous les résidus dans une seule feuille initiale et on calcule sa similarity :
 
-![[Pasted image 20260510220326.png|220]]
+![[xgb2.png]]
+*Figure. Tous les résidus du dataset dans la feuille initiale. Avec $\lambda = 0$, on a $\text{Similarity} = (-10.5 + 6.5 + 7.5 - 7.5)^2 / 4 = 4$.*
 
-![[Pasted image 20260510220248.png|225]]
+**(ii) Calcul du Gain pour chaque candidat de split.** On teste différents seuils sur Dosage et on calcule le Gain pour chacun. Sur cet exemple, le premier split optimal donne :
 
-et c'est comme ça comme catboost perform target encoding - on dit Ordered Target encoding.
+$$\text{Gain} = \text{Sim}_L + \text{Sim}_R - \text{Sim}_{\text{root}} = 110.25 + 14.08 - 4 = 120.33$$
 
-![[Pasted image 20260510220404.png|228]]
+**(iii) Splitting récursif.** On continue à splitter la feuille de droite tant que `max_depth` n'est pas atteint :
 
-je pense le trucr qui est pas expliqué c'est comme tu fais sur le validation/test set ? 
+![[xgb4.png]]
+*Figure. Split récursif de la feuille de droite. Nouveau Gain : $98 + 56.25 - 14.08 = 140.17$.*
 
-#### Using trees
+**(iv) Pruning par $\gamma$.** Une fois l'arbre construit, on **prune** en remontant des feuilles vers la racine : pour chaque branche, on calcule $\text{Gain} - \gamma$. Si c'est **négatif**, on supprime la branche ; sinon, on la garde. Avec $\gamma = 130$ :
 
+$$\text{Gain} - \gamma = 140.17 - 130 = 10.17 > 0 \implies \text{on garde}$$
 
-Gross différence par rapport à avant maintenant (y) est continu et pas catégorielle. il dit en gros on va définir deux bins déjà et ensuite on pourra utiliser notre ordered target encoding qu'on a vu
+![[xgb5.png]]
+*Figure. Arbre final après pruning par $\gamma = 130$ : toutes les branches sont conservées.*
 
-![[Pasted image 20260510220626.png|173]]
+#### Étape 3 — Prédiction avec learning rate
 
+Une fois l'arbre construit, **la valeur prédite par la feuille $j$** est donnée par la même formule qui sort de la dérivation Taylor :
 
-![[Pasted image 20260510220818.png|181]]
+$$w_j^\star = -\frac{\sum_{i \in I_j} g_i}{\sum_{i \in I_j} h_i + \lambda}$$
 
-Une fois qu'on a fait le preprocessing du ordered target encoding on vire la colonne Bin # et on rajoute deux colonnes supplémentaires : Predictions et Residuals = y - \hat{y} mais vu que \hat{y} est est à zero au début on a égalité entre y et residuals
+Pour le MSE, c'est essentiellement la **moyenne des résidus** dans la feuille (à un signe et un facteur de régularisation près). La prédiction est ensuite shrinkée par le **learning rate** $\eta = 0.3$ (défaut) :
 
-![[Pasted image 20260510220907.png|315]]
+$$\hat{y}^{\text{new}}_i = \hat{y}^{\text{old}}_i + \eta \cdot w_j^\star \quad \text{si } x_i \in \text{feuille } j$$
 
-Puis on va définir un arbre au début il prenne la colonne X il la sort par ordre et on calcule la moyenne des deux valeurs successives : 
+![[xgb6.png]]
+*Figure. Après ajout du premier arbre scalé par $\eta = 0.3$ : la nouvelle prédiction (ligne noire) s'approche du point. Le résidu devient plus petit.*
 
-![[Pasted image 20260510221118.png|388]]
+On répète le processus pour construire le second arbre sur les nouveaux résidus, puis le troisième, etc.
 
+![[xgb7.png]]
+*Figure. Après plusieurs arbres : la prédiction (en escalier, somme de tous les arbres) suit progressivement la cible.*
 
-Après cest un peu random les mecs te mettent les residuals dans chacune des feuilles et ils calculenet la moyenne ce qu'ils appellent Leaf output
+### V.3 Classification — log-loss et Cover
 
+Pour la classification binaire, on change la loss en **log-loss** (cross-entropy binaire) :
 
+$$\ell(y_i, \hat{y}_i) = -\big[y_i \log p_i + (1 - y_i)\log(1 - p_i)\big]$$
 
-![[Pasted image 20260510221243.png|313]]
-ok
-![[Pasted image 20260510221339.png|352]]
+où $p_i = \sigma(\hat{y}_i)$ est la probabilité prédite via sigmoïde, et $\hat{y}_i$ vit dans l'espace des **log-odds** (logit). L'arbre prédit donc dans l'espace logit, et on convertit en probabilité à la prédiction finale.
 
-puis pour mesurer si la prédiction est bonne il calcule cosinus(residuals, leaf output)
+#### Dérivées de la log-loss
 
+> [!warning] $g_i, h_i$ pour la classification
+> $$g_i = -(y_i - p_i), \qquad h_i = p_i (1 - p_i)$$
+> 
+> Conséquence importante : $h_i$ **n'est plus constant à 1** comme en régression. Il dépend de la prédiction courante $p_i$. Et il est **maximal** ($= 0.25$) quand $p_i = 0.5$ (point indécis) et **minimal** ($\to 0$) quand $p_i \to 0$ ou $1$ (point bien classé).
 
-![[Pasted image 20260510221449.png|250]]
+#### Construction de l'arbre
 
-et 
-![[Pasted image 20260510221508.png|242]]
+Le processus est identique à la régression — similarity score, Gain, splitting récursif — mais avec les nouveaux $g_i, h_i$.
 
-conclusion on choisit le second car il a une cosinus plus élevé
+![[xgb8.png]]
+*Figure. Setup classification : 4 observations (Dosage en x, P(effective) en y), prédiction initiale constante $p = 0.5$ et résidus.*
 
-apres je sais pas ce qu'il raconte: it doesnt make a lot of sense to include leaf output values taht are not based on data in the cosine similairty calculation. So in practice when you have a lot of data, catbost simply ignores the first bunch of rows when calculating the cosine similarity
+**Feuille initiale.** Avec $p_i = 0.5$ pour tous, les résidus s'annulent (autant de positifs que de négatifs) et la similarity de la racine est nulle :
 
-une fois qu'on a fait le choix on va updater les predictions 
+![[xgb9.png]]
+*Figure. Tous les résidus dans la feuille racine. Numérateur = $(-0.5 + 0.5 + 0.5 - 0.5)^2 = 0$, donc Similarity $= 0$.*
 
-new prediction = prediction + (learning rate x leaf output) ici lr=0.1
+**Premier split.** On teste $\text{Dosage} < 15$. Le calcul de la similarity de la feuille de gauche (3 résidus à $-0.5, +0.5, +0.5$) donne :
 
-il dit on a une amélioration faible mais c'est toujours mieux que de prédire que tout le monde a height=0 qui est ce qu'on prédisait au tout début.
+$$\frac{(-0.5 + 0.5 + 0.5)^2}{3 \times (0.5)(1 - 0.5) + \lambda} = \frac{0.25}{0.75 + \lambda} = 0.33 \text{ pour } \lambda = 0$$
 
-puis en gros il te dit que apres maintenant qu'on a choisi l'arbre on va pouvoir update la colonne Predictions et donc aussi les residuals  et comme on a fait précédemement on remets Favorite color pas en mode ordered target encoding
+![[xgb10.png]]
+*Figure. Premier split à $\text{Dosage} < 15$. Gain = $0.33 + 1 - 0 = 1.33$.*
 
-![[Pasted image 20260510221913.png|508]]
+On teste les autres seuils, aucun ne donne un meilleur Gain — on retient $\text{Dosage} < 15$.
 
+**Splitting récursif sur la feuille gauche** :
 
-on refait le orderd target encoding en ayant remodifier les bins
+![[xgb11.png]]
+*Figure. Split supplémentaire $\text{Dosage} < 5$ sur la feuille de gauche. La profondeur est limitée à 2, on s'arrête.*
 
+**Pruning** : avec $\gamma = 2$, $\text{Gain} - \gamma = 2.66 - 2 = 0.66 > 0$ — on garde l'arbre.
 
-![[Pasted image 20260510222152.png|525]]
+![[xgb13.png]]
+*Figure. Arbre final après pruning par $\gamma = 2$.*
 
-et on refait le sorting on onbtient un seuil a 0.29
-![[Pasted image 20260510222222.png|371]]
+#### Prédiction : logit → probabilité
 
+L'arbre prédit dans l'espace logit. Pour un point qui tombe dans une feuille de valeur $w^\star$ :
 
+$$\text{logit}_{\text{new}} = \text{logit}_{\text{old}} + \eta \cdot w^\star, \qquad p_{\text{new}} = \sigma(\text{logit}_{\text{new}}) = \frac{1}{1 + e^{-\text{logit}_{\text{new}}}}$$
 
-oué l'arbre
-![[Pasted image 20260510222249.png|364]]
+| Étape | Figure |
+|:---|:---:|
+| Conversion proba initiale $0.5$ → log-odds $0$ | ![[xgb14.png\|280]] |
+| Ajout du terme $\eta \cdot w^\star = 0.3 \times (-2) = -0.6$ | ![[xgb15.png\|280]] |
+| Conversion log-odds $-0.6$ → proba $0.35$ via sigmoïde | ![[xgb16.png\|280]] |
 
-et la table
-![[Pasted image 20260510222313.png|361]]
+#### Cover en classification — un point délicat
 
-ensuite prédiction
-![[Pasted image 20260510222419.png]]
+> [!warning] Cover = $\sum h_i$
+> En **régression** : $h_i = 1$ pour tout $i$, donc $\text{Cover} = $ nombre de résidus dans la feuille. La contrainte par défaut `min_child_weight = 1` est triviale (au moins 1 résidu par feuille).
+> 
+> En **classification** : $h_i = p_i(1 - p_i)$, donc $\text{Cover} = \sum_{i \in I} p_i(1 - p_i)$. Plus les prédictions courantes sont **confiantes** ($p_i$ proche de $0$ ou $1$), plus le Cover est petit — et la contrainte `min_child_weight = 1` devient **très restrictive**.
 
-et ensuite on add up les values des trees : c'est très mauvaois mais c'est que des moini arbres 
+Pour le premier arbre où tous les $p_i = 0.5$, chaque résidu apporte $0.25$ au Cover. Une feuille avec 3 résidus a $\text{Cover} = 0.75 < 1$ — XGBoost refuse de la créer avec la valeur par défaut.
 
-![[Pasted image 20260510222451.png|448]]
+![[xgb12.png]]
+*Figure. Effet du Cover en classification : avec `min_child_weight = 1` (défaut), aucune feuille n'est autorisée (toutes ont $\text{Cover} < 1$). Solution pratique pour ce petit exemple : mettre `min_child_weight = 0`.*
 
+### V.4 Dérivation Taylor à l'ordre 2
 
+> [!note]- D'où viennent Similarity et $w^\star$ ?
+> XGBoost approxime la loss à l'ordre 2 autour de la prédiction courante $\hat{y}_i$. En écrivant le **prochain arbre** comme $f_t$ qui ajoute $w_{q(x_i)}$ à $\hat{y}_i$ (où $q(x_i)$ est la feuille où tombe $x_i$ et $w_j$ sa valeur) :
+> 
+> $$\ell(y_i, \hat{y}_i + w_{q(x_i)}) \approx \ell(y_i, \hat{y}_i) + g_i\, w_{q(x_i)} + \tfrac{1}{2} h_i\, w_{q(x_i)}^2$$
+> 
+> En sommant sur les observations et en regroupant par feuille $j$ (avec $I_j$ l'ensemble des observations qui tombent dans la feuille $j$) :
+> 
+> $$\mathcal{L}_t \approx \text{cste} + \sum_{j=1}^{T} \left[\Big(\sum_{i \in I_j} g_i\Big) w_j + \tfrac{1}{2} \Big(\sum_{i \in I_j} h_i + \lambda\Big) w_j^2\right] + \gamma T$$
+> 
+> **Optimal par feuille** (dérivée par rapport à $w_j$, annulée) :
+> 
+> $$\boxed{w_j^\star = -\frac{\sum_{i \in I_j} g_i}{\sum_{i \in I_j} h_i + \lambda}}$$
+> 
+> **En substituant $w_j^\star$ dans la loss approchée** :
+> 
+> $$\mathcal{L}_t^\star = -\frac{1}{2}\sum_{j=1}^T \frac{\big(\sum_{i \in I_j} g_i\big)^2}{\sum_{i \in I_j} h_i + \lambda} + \gamma T$$
+> 
+> Chaque feuille contribue à la loss par $-\tfrac{1}{2} \cdot \frac{(\sum g_i)^2}{\sum h_i + \lambda}$ — c'est exactement la **Similarity** (au signe et facteur $\tfrac{1}{2}$ près).
+> 
+> **Gain d'un split** = gain de Similarity dû au split, moins le coût $\gamma$ d'ouvrir une feuille supplémentaire :
+> 
+> $$\text{Gain} = \tfrac{1}{2}\!\left[\frac{(\sum_{I_L} g_i)^2}{\sum_{I_L} h_i + \lambda} + \frac{(\sum_{I_R} g_i)^2}{\sum_{I_R} h_i + \lambda} - \frac{(\sum_I g_i)^2}{\sum_I h_i + \lambda}\right] - \gamma$$
+> 
+> En pratique XGBoost compare juste les Similarity (sans le $-\gamma$ pendant la construction), et applique le pruning par $\gamma$ après coup. $\square$
 
-il dit que catboost builds oblivious or symmetric decision trees - a symmetric = uses the exact the same threshold for the same node in the same level eg both node uses the same threshold age <12 
+Ce qui sort de cette dérivation, en résumé : **XGBoost n'est pas qu'un wrapper de GBM**, c'est un GBM avec une approximation au second ordre qui permet de calculer $w_j^\star$ **en fermé** et d'utiliser un critère de split (Similarity) qui colle exactement à la loss régularisée.
+
+### V.5 Optimisations algorithmiques
+
+C'est ce qui rend XGBoost scalable.
+
+#### (a) Approximate Greedy Algorithm
+
+Pour trouver le meilleur split sur une feature continue, l'algorithme exact teste **tous les seuils possibles** — coûteux dès que $n$ est grand. La solution XGBoost : tester seulement les **quantiles** de la feature comme candidats de split (environ **33 quantiles** par défaut). On ne teste plus que ~33 seuils par feature, gain énorme en performance avec perte négligeable de qualité.
+
+#### (b) Weighted Quantile Sketch
+
+Petit raffinement subtil : les quantiles habituels mettent **autant d'observations** par bin. Mais en classification, les observations à fort $h_i = p_i(1 - p_i)$ (les "indécises") portent plus de signal pour le split. XGBoost utilise donc des **quantiles pondérés par les Hessiens** $h_i$ — la somme des poids est constante par bin, pas le nombre d'observations.
+
+![[xgb22.png|544]]
+*Figure. Quantile sketch sur dataset distribué : chaque machine calcule un histogramme local, on les combine pour obtenir un histogramme global approximatif sur lequel les quantiles sont calculés.*
+
+| Régression ($h_i = 1$) | Classification ($h_i = p_i(1-p_i)$) |
+|:---:|:---:|
+| ![[xgb23.png\|400]] | ![[xgb24.png\|279]] |
+
+*Figures. En régression, $h_i = 1$ uniforme ⇒ quantiles pondérés = quantiles normaux. En classification, les points "incertains" ($p_i \approx 0.5$, $h_i$ grand) attirent les bornes de bins, et les points "confiants" ($p_i \approx 0$ ou $1$, $h_i$ petit) en attirent peu.*
+
+#### (c) Sparsity-Aware Split Finding
+
+Sur du sparse data ou avec des valeurs manquantes, XGBoost a une astuce : pour chaque split candidat, il teste **deux orientations par défaut** pour les manquants (envoyer tous les manquants à gauche, vs tous à droite), garde celle qui donne le meilleur Gain, et la **mémorise** dans l'arbre. À la prédiction, un point avec valeur manquante suit automatiquement l'orientation apprise.
+
+![[xgb25.png|497]]
+*Figure. Dataset avec valeurs manquantes (Dosage non-renseigné pour certains points). Les résidus restent calculables (basés sur la prédiction initiale $0.5$).*
+
+![[xgb26.png|535]]
+*Figure. On split le dataset en deux tables : observations avec Dosage connu (qu'on trie pour tester les seuils) et observations à Dosage manquant (qu'on traite séparément).*
+
+![[xgb27.png|449]]
+*Figure. Pour chaque seuil candidat, on calcule deux Gains : un en envoyant les manquants à gauche ($\text{Gain}_L$), un en les envoyant à droite ($\text{Gain}_R$).*
+
+![[xgb28.png|491]]
+*Figure. Arbre final : à chaque nœud, on a appris **l'orientation par défaut** (flèche bleue) à suivre pour un point à valeur manquante. À la prédiction, un nouveau point sans Dosage suit automatiquement cette direction.*
+
+#### (d) Parallel Learning, Cache-Aware Access, Out-of-Core Computation
+
+Trois optimisations bas-niveau :
+
+- **Parallel Learning** : la recherche du split optimal sur chaque feature est indépendante ⇒ paralléliser sur les features (un thread par feature). Important : c'est la recherche de **split** qui est parallélisée, pas la construction de plusieurs arbres en même temps (séquentiel par nature).
+- **Cache-Aware Access** : XGBoost organise les gradients et hessiens en mémoire pour maximiser les hits dans le cache L1/L2 du CPU pendant le calcul des Similarity.
+- **Blocks for Out-of-Core Computation** : quand le dataset ne tient pas en RAM, XGBoost le stocke en blocs **compressés** sur disque et streame en utilisant les CPU en parallèle pour la décompression. Lecture disque = goulot d'étranglement, donc on compresse le plus possible.
+
+---
+
+## VI. LightGBM — Ke et al., 2017 (Microsoft)
+
+[Ke et al., NeurIPS 2017](https://papers.nips.cc/paper/2017/hash/6449f44a102fde848669bdd9eb6b76fa-Abstract.html) — viser le même résultat que XGBoost (gradient boosting régularisé) mais **beaucoup plus vite**. Trois innovations algorithmiques structurantes : **histogram-based splitting**, **GOSS** (gradient sampling), **EFB** (feature bundling). Plus un détail de stratégie d'arbre : **leaf-wise growth** au lieu du level-wise.
+
+### VI.1 Histogram-based splitting
+
+Pour chaque feature continue, on **bucketise** une fois pour toutes les valeurs dans (typiquement) $255$ bins. Pendant la construction des arbres, on cherche le meilleur split **uniquement sur les bornes des bins**, pas sur toutes les valeurs uniques.
+
+- **Coût de recherche d'un split** : $O(\text{\#data} \times \text{\#features})$ pour XGBoost exact, $O(\text{\#bins} \times \text{\#features})$ pour LightGBM.
+- **Coût mémoire** : on stocke des `uint8` (256 bins) au lieu de `float32`, soit **4× moins de RAM**.
+
+XGBoost a ajouté un mode `hist` (équivalent algorithmiquement) en 2017 en réponse à LightGBM.
+
+### VI.2 GOSS — Gradient-based One-Side Sampling
+
+**Idée** : les observations à **fort gradient** $|g_i|$ sont mal modélisées par les arbres actuels (résidus élevés), elles portent donc beaucoup d'information pour le prochain arbre. Les observations à **faible gradient** sont déjà bien modélisées, contribuent peu.
+
+**Procédure** :
+1. Trier les observations par $|g_i|$ décroissant.
+2. Garder les **top $a\%$** systématiquement (typiquement $a = 20$).
+3. Sampler aléatoirement $b\%$ parmi les $(1-a)\%$ restantes (typiquement $b = 10$).
+4. Pour préserver l'estimateur du Gain, **multiplier les gradients du subsample** par $(1-a)/b$.
+
+**Effet** : on entraîne sur ~30% des données mais avec quasi pas de perte de qualité — speedup typique 2-3×.
+
+### VI.3 EFB — Exclusive Feature Bundling
+
+**Constat** : dans les datasets très sparse (one-hot encoding, texte, RecSys…), beaucoup de features sont **mutuellement exclusives** — elles ne sont jamais non-nulles en même temps. Par exemple, dans un one-hot à 100 catégories, exactement **une** feature est non-nulle par observation.
+
+**Idée** : on peut "fusionner" plusieurs features mutuellement exclusives en **une seule feature combinée** sans perte d'information. Si feature A prend des valeurs dans $\{0, 1, 2\}$ et feature B mutuellement exclusive dans $\{0, 1, 2, 3\}$, on les combine en une feature unique dans $\{0, 1, 2, 3, 4, 5, 6\}$ : valeurs $1$–$2$ = A non-nul, $3$–$6$ = B non-nul. Plus de combinaisons que de bins individuels mais **bien moins** que les features séparées.
+
+**Effet** : sur du sparse, peut diviser le nombre effectif de features par 5-10×.
+
+### VI.4 Leaf-wise vs level-wise growth
+
+| | Level-wise (XGBoost classique) | Leaf-wise (LightGBM) |
+|:---|:---:|:---:|
+| Stratégie | Tous les nœuds d'une profondeur sont splittés avant de passer à la suivante | À chaque étape, on splitte **la feuille qui donne le plus grand Gain**, peu importe sa profondeur |
+| Arbres typiques | Équilibrés (BFS) | Asymétriques (best-first) |
+| Profondeur effective | Bornée par `max_depth` | Bornée par `num_leaves` (plus naturel) |
+| Overfitting | Moins sensible | Plus prone à overfitter sur petit dataset |
+
+LightGBM atteint typiquement la **même loss en moins d'arbres** que XGBoost level-wise — mais demande plus de prudence sur les hyperparamètres (limiter `num_leaves`, augmenter `min_data_in_leaf`) sur petit dataset.
+
+### VI.5 Quand préférer LightGBM ?
+
+- **Très gros dataset** (millions+ de lignes) : LightGBM scale typiquement 5-10× plus vite que XGBoost.
+- **Beaucoup de features sparse** ou one-hot : EFB est très efficace.
+- **Compétition Kaggle** sur dataset tabulaire moyen-gros : LightGBM gagne souvent en pratique grâce à sa vitesse d'itération.
+
+XGBoost reste préférable sur **petits datasets** (overfitting plus facile à contrôler en level-wise) et quand on a besoin de **stabilité numérique maximale**.
+
+---
+
+## VII. CatBoost — Prokhorenkova et al., 2018 (Yandex)
+
+[Prokhorenkova et al., NeurIPS 2018](https://arxiv.org/abs/1706.09516). Le pitch CatBoost : *"on prend GBM, on règle le problème du leakage des variables catégorielles avec une astuce d'ordonnancement, et on utilise des arbres oblivious pour aller vite"*. Deux contributions majeures : **Ordered Target Encoding** et **Ordered Boosting**.
+
+### VII.1 Le problème du target leakage
+
+Pour encoder une variable catégorielle (couleur préférée, ville, métier…) en numérique, le **target encoding** classique remplace chaque catégorie par la **moyenne de la cible** sur les observations de cette catégorie :
+
+$$\text{encoded}(\text{cat}) = \frac{1}{n_{\text{cat}}} \sum_{i :\, \text{cat}_i = \text{cat}} y_i$$
+
+**Problème** : on utilise $y_i$ pour encoder la feature de l'observation $i$. **Leakage direct**. Le modèle peut "tricher" et le test score s'effondre.
+
+> [!example] Exemple jouet du leakage
+> Dataset à 4 lignes, feature `Favorite Color` (3 lignes "blue", 1 ligne "red"), cible binaire :
+> 
+> ![[Pasted image 20260510215629.png|225]] ![[Pasted image 20260510215847.png|229]]
+> 
+> Le target encoding naïf encode "blue" par la moyenne de $y$ sur les 3 lignes blue = $0.33$, et "red" par $1.0$. Le classifieur apprend trivialement la règle *"si encoded = 0.33 alors classe 1, sinon classe 0"* — qui est en réalité juste *"si Favorite Color = blue alors classe 1, sinon classe 0"*. Le modèle a appris une règle qui inclut $y$ dans son input.
+
+Le **k-fold target encoding** réduit le leakage (on encode chaque fold avec les autres folds), mais ne l'élimine pas complètement.
+
+### VII.2 Ordered Target Encoding
+
+**Idée** : ordonner aléatoirement les observations, puis encoder chaque ligne en utilisant **uniquement les lignes précédentes** dans l'ordre. C'est essentiellement un *"online learning du target encoding"*.
+
+> [!warning] Formule — Ordered Target Encoding
+> Pour la ligne $i$ dans l'ordre aléatoire, avec catégorie $\text{cat}_i$ :
+> 
+> $$\text{encoded}_i = \frac{\text{OptionCount}_i + \alpha}{n_i + 1}$$
+> 
+> où
+> - $n_i$ = nombre de lignes **précédentes** (j < i dans l'ordre) ayant la même catégorie $\text{cat}_i$
+> - $\text{OptionCount}_i$ = nombre de ces lignes précédentes pour lesquelles $y_j = 1$ (classification binaire)
+> - $\alpha$ = **prior** ($\approx 0.05$ par défaut), évite que les premières lignes (sans historique) aient un encoding dégénéré
+
+**Calcul pas à pas sur l'exemple** (avec $\alpha = 0.05$) :
+
+| Ligne (ordre aléatoire) | Favorite Color | $y$ | $n_i$ (prev. blue) | OptionCount | Encoded |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| 1 | blue | 1 | $0$ | $0$ | $(0 + 0.05)/(0 + 1) = 0.05$ |
+| 2 | blue | 1 | $1$ | $1$ | $(1 + 0.05)/(1 + 1) = 0.525$ |
+| 3 | blue | 0 | $2$ | $2$ | $(2 + 0.05)/(2 + 1) = 0.683$ |
+| 4 | red  | 1 | $0$ | $0$ | $(0 + 0.05)/(0 + 1) = 0.05$ |
+
+![[Pasted image 20260510220326.png|188]] ![[Pasted image 20260510220248.png|183]]
+*Figure. Table avant / après application de l'Ordered Target Encoding. Chaque encoding n'utilise que les valeurs de $y$ des lignes précédentes ⇒ pas de leakage.*
+
+![[Pasted image 20260510220404.png|188]]
+*Figure. Résultat final : la colonne `Favorite Color` est remplacée par sa version encodée, qu'on peut ensuite traiter comme une feature numérique standard.*
+
+> [!important] Pourquoi ça résout le leakage
+> Comme l'encoding de la ligne $i$ ne dépend **pas** de $y_i$, il n'y a plus de contamination directe target → feature. L'algorithme est l'analogue exact de la **validation par série temporelle** appliquée à l'encoding catégoriel.
+
+### VII.3 Construction d'un arbre — exemple à la main
+
+Une fois les catégorielles encodées, on construit les arbres GBM. Reprenons un fil rouge avec une feature continue $X$ et une cible continue $y$.
+
+**Préparation.** On découpe $y$ en bins (pour appliquer l'Ordered Target Encoding même si la cible est continue) :
+
+![[Pasted image 20260510220626.png|119]] ![[Pasted image 20260510220818.png|153]]
+*Figure. Découpage de $y$ en deux bins pour permettre l'encoding ordonné même sur cible continue.*
+
+On ajoute les colonnes **Predictions** (initialisée à $0$) et **Residuals** ($= y - \hat{y}$, donc initialement $= y$) :
+
+![[Pasted image 20260510220907.png|238]]
+*Figure. Table augmentée avec Predictions et Residuals à $t = 0$.*
+
+**Construction de l'arbre.** On trie les valeurs de $X$ et on calcule la moyenne entre paires successives — ce sont les **seuils candidats** :
+
+![[Pasted image 20260510221118.png|253]]
+*Figure. Seuils candidats sur la feature $X$ (moyennes entre valeurs successives triées).*
+
+Pour chaque seuil, on construit un stump et on calcule le **Leaf Output** par feuille = moyenne des résidus dans la feuille :
+
+![[Pasted image 20260510221243.png|265]] ![[Pasted image 20260510221339.png|270]]
+*Figure. Deux stumps candidats (deux seuils différents) avec leurs Leaf Outputs respectifs.*
+
+### VII.4 Cosine similarity pour comparer les arbres
+
+> [!warning] Critère de sélection CatBoost
+> Pour choisir entre plusieurs stumps candidats, CatBoost utilise la **similarité cosinus** entre le vecteur des résidus et le vecteur des Leaf Outputs (dupliqué par appartenance à chaque feuille) :
+> 
+> $$\cos\big(\vec{r},\, \vec{w}\big) = \frac{\vec{r}^\top \vec{w}}{\|\vec{r}\| \, \|\vec{w}\|}$$
+> 
+> On retient le stump qui **maximise** ce cosinus — c'est celui dont les Leaf Outputs *pointent dans la même direction* que les résidus à corriger.
+
+|                  Stump 1                  |                  Stump 2                  |
+| :---------------------------------------: | :---------------------------------------: |
+| ![[Pasted image 20260510221449.png\|250]] | ![[Pasted image 20260510221508.png\|242]] |
+
+*Figure. Calcul de la similarité cosinus pour les deux stumps candidats. On retient celui qui donne le plus grand cosinus.*
+
+> [!note]- Pourquoi cosine et pas juste somme des carrés des résidus améliorée ?
+> Intuitivement, le cosinus mesure l'**alignement directionnel** entre la correction proposée et le résidu à corriger, indépendamment de l'amplitude. Comme l'amplitude sera ensuite contrôlée par le learning rate $\eta$, l'amplitude du Leaf Output est moins importante que sa **direction**. Le cosinus capture exactement cette intuition.
+> 
+> En pratique, quand on a beaucoup de données, les premières lignes (peu d'historique pour l'encoding ordonné) sont des estimations bruitées des Leaf Outputs. CatBoost **les ignore** dans le calcul du cosinus — il ne prend en compte que les lignes "stables" avec assez d'historique.
+
+### VII.5 Mise à jour et tour suivant
+
+Une fois le stump retenu (avec son Leaf Output $w^\star$), on met à jour les prédictions :
+
+$$\hat{y}_i^{\text{new}} = \hat{y}_i^{\text{old}} + \eta \cdot w^\star \quad \text{(avec } \eta = 0.1 \text{ typiquement)}$$
+
+Puis on recalcule les résidus, on refait le ré-encoding ordonné (les bins de $y$ peuvent avoir changé), et on construit le stump suivant :
+
+![[Pasted image 20260510221913.png|333]]
+*Figure. Update des prédictions et des résidus après le premier arbre.*
+
+![[Pasted image 20260510222152.png|341]]
+*Figure. Ré-encoding ordonné pour le tour 2 avec les bins mis à jour.*
+
+![[Pasted image 20260510222222.png|253]] ![[Pasted image 20260510222249.png|287]] ![[Pasted image 20260510222313.png|305]]
+*Figures. Tour 2 — recherche du nouveau seuil optimal, construction de l'arbre, table mise à jour.*
+
+![[Pasted image 20260510222419.png|496]] ![[Pasted image 20260510222451.png|394]]
+*Figures. Prédiction additive et mise à jour cumulative après plusieurs arbres.*
+
+### VII.6 Symmetric (Oblivious) Trees
+
+> [!warning] Définition — Oblivious tree
+> Un arbre est **symétrique** (ou **oblivious**) si **tous les nœuds d'un même niveau utilisent le même split**. À profondeur 3, l'arbre n'a que 3 seuils (un par niveau) au lieu de $1 + 2 + 4 = 7$ comme un arbre CART classique.
 
 ![[Pasted image 20260510222552.png|280]]
-y'a deux raisons : 
-* ça empire les prédictions de l'arbres
-* remember teh whole idea of gradient boostin si to combine a bunch of weak learners to make decisions and symmetric decision trees are just a weaker type of learner
+*Figure. Arbre oblivious de profondeur 2 : les deux nœuds du niveau 1 utilisent exactement le même split (Age < 12). On obtient des arbres très réguliers, équivalents à un **vote pondéré sur quelques tests indépendants**.*
+
+**Pourquoi cette restriction** :
+
+1. **Vitesse de prédiction** : un oblivious tree peut être implémenté comme une **table de lookup** indexée par les $d$ tests binaires — $O(d)$ avec $d$ = profondeur, sans branche dynamique. Hyperprévisible pour le CPU, très rapide.
+2. **Régularisation implicite** : l'oblivious est un weak learner plus faible (moins flexible). En accord avec la philosophie boosting *"combiner beaucoup de learners très faibles"*, c'est en fait un atout pour la généralisation.
+3. **Robustesse à l'overfitting** : moins de degrés de liberté ⇒ moins de capacité à mémoriser le bruit.
+
+### VII.7 Quand préférer CatBoost ?
+
+- **Données avec beaucoup de catégorielles à haute cardinalité** (villes, produits, IDs…) : l'Ordered Target Encoding fait des miracles.
+- **Datasets petits-moyens** où le leakage est un risque réel : CatBoost est plus robuste que XGBoost/LightGBM avec target encoding naïf.
+- **Latence de prédiction critique** (déploiement temps réel) : les oblivious trees sont 2-10× plus rapides à évaluer que des arbres CART classiques de même profondeur.
+
+XGBoost et LightGBM gardent l'avantage sur des datasets purement numériques où l'encoding catégoriel n'est pas un enjeu, et sur des stacks Kaggle où la diversité de modèles est valorisée.
+
+### VII.8 Comparatif final
+
+| | XGBoost | LightGBM | CatBoost |
+|:---|:---:|:---:|:---:|
+| Année / Auteurs | 2016, Chen & Guestrin | 2017, Ke et al. (Microsoft) | 2018, Prokhorenkova et al. (Yandex) |
+| Innovation principale | Régularisation L1/L2 explicite + Taylor 2 | Histogram + GOSS + EFB | Ordered TE + Oblivious trees |
+| Croissance d'arbre | Level-wise (défaut) | Leaf-wise (best-first) | Oblivious / symmetric |
+| Catégorielles natives | Non (encoding externe) | Partiel (`category` dtype) | **Oui, ordered TE intégré** |
+| Sparse / missing | Sparsity-aware | EFB | Standard |
+| Vitesse training | Référence | **~5-10× plus rapide** | Comparable XGBoost |
+| Vitesse prédiction | Standard | Standard | **Très rapide (oblivious)** |
+| Robustesse petit dataset | Bonne | Plus prone overfit (leaf-wise) | **Très bonne** |

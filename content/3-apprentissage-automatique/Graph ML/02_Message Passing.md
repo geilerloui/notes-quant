@@ -225,7 +225,7 @@ L'algorithme se déroule en trois étapes :
 
 **Sortie** = ensemble d'utilisateurs donnant des fausses notes.
 
-![[im18.png]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im18.png]]
 
 **Trois quantités à apprendre simultanément.**
 
@@ -242,25 +242,25 @@ L'algorithme se déroule en trois étapes :
 > [!warning] Reliability $R(u, p)$ d'une note
 > En fixant Fairness et Goodness, on mesure à quel point la note diverge de l'opinion commune sur ce produit.
 >
-> ![[im19.png]]
+> ![[images/3-Apprentissage automatique/Generative Models/score based/im19.png]]
 
 **Itérations.**
 1. Initialiser $F(u)$, $R(u, p)$, $G(p)$ au max ($= 1$).
 2. Appliquer la formule de $G(p)$.
 3. Appliquer celle de $R(u, p)$.
 
-![[im20.png]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im20.png]]
 
 4. Appliquer celle de $F(u)$.
 5. Répéter jusqu'à convergence.
 
-![[im21.png]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im21.png]]
 
 > 💡 **Propriétés.** L'algorithme **converge garanti**, le nombre d'itérations est **borné**, et la complexité est **linéaire** en le nombre d'arêtes du graphe.
 
 **Performance.** Dataset Flipkart (Inde). Sur le top 80, **précision = 100%**. **127 des 150 utilisateurs avec la fairness la plus basse** étaient effectivement des fraudeurs réels.
 
-![[im22.png]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im22.png]]
 
 ---
 
@@ -279,15 +279,15 @@ L'algorithme se déroule en trois étapes :
 >
 > **Cas linéaire.**
 >
-> ![[im23.png]]
+> ![[images/3-Apprentissage automatique/Generative Models/score based/im23.png]]
 >
 > **Solution :** chaque nœud écoute le message de son voisin, l'incrémente, et le passe au suivant.
 >
-> ![[im24.png]]
+> ![[images/3-Apprentissage automatique/Generative Models/score based/im24.png]]
 >
 > Zoom sur un nœud :
 >
-> ![[im25.png]]
+> ![[images/3-Apprentissage automatique/Generative Models/score based/im25.png]]
 >
 > **Cas arborescent.** Chaque nœud reçoit des reports de toutes les branches de l'arbre.
 >
@@ -301,10 +301,10 @@ L'algorithme se déroule en trois étapes :
 
 **Itération.** Répéter pour chaque label $Y_j \in \mathcal{L}$, pour tous les nœuds :
 
-![[im26.png]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im26.png]]
 
 > [!warning] Trois types de paramètres
-> ![[im28.png]]
+> ![[images/3-Apprentissage automatique/Generative Models/score based/im28.png]]
 >
 > - **Label-Label potential matrix** $\psi$ : dépendance entre un nœud et son voisin. $\psi(Y_i, Y_j)$ = probabilité qu'un nœud $j$ soit dans l'état $Y_j$ sachant qu'il a un voisin $i$ dans l'état $Y_i$.
 > - **Prior belief** $\phi$ : probabilité $\phi_i(Y_i)$ que le nœud $i$ soit dans l'état $Y_i$.
@@ -314,7 +314,7 @@ L'algorithme se déroule en trois étapes :
 
 **Convergence.** $b_i(Y_i)$ = belief finale de $i$ d'être dans l'état $Y_i$.
 
-![[im27.png]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im27.png]]
 
 #### A.3 Que peut-il mal se passer ?
 
@@ -357,12 +357,12 @@ L'algorithme se déroule en trois étapes :
 
 **Objectif.** Trouver les rôles (honest, accomplice, fraudster) via Loopy BP. On définit les paramètres $\psi$ comme suit :
 
-![[im32.png]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im32.png]]
 **Figure 3.** Label-label potential matrix encodant la structure bipartite fraudeur/accomplice.
 
 **Résultat après plusieurs itérations.**
 
-![[im33.png]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im33.png]]
 **Figure 4.** Sortie de l'algorithme — identification des rôles dans le graphe.
 
 > 💡 **L'idée à retenir.** Quand la fraude se cache derrière une **structure relationnelle** plutôt que dans des features individuelles (cas typique de la fraude organisée), les algorithmes de message passing sur graphe sont l'outil naturel — et historiquement très utilisés en détection de fraude bancaire, e-commerce et antiblanchiment.

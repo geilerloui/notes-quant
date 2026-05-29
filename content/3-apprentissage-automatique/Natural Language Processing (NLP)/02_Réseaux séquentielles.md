@@ -264,7 +264,7 @@ $$a_t = o_t \odot \tanh(C_t)$$
 
 ![[images/3-Apprentissage automatique/PGM/Représentation/im13.png]]
 
-![[im12.png|306]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im12.png|306]]
 
 > [!tip]- 🔑 Intuition des portes LSTM
 > - **Forget gate** : "Dois-je oublier que le sujet était au singulier ?"

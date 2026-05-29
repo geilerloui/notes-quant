@@ -121,7 +121,7 @@ Lecture : si j'ai un étudiant intelligent $i^1$ dans un cours difficile $d^1$, 
 
 **(a) Produit de facteurs.**
 
-![[im6 (2).png|549]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im6 (2).png|549]]
 **Figure 6.** Produit de facteurs.
 
 > [!example] Scope du produit de facteurs
@@ -134,5 +134,5 @@ Lecture : si j'ai un étudiant intelligent $i^1$ dans un cours difficile $d^1$, 
 
 **(c) Réduction de facteurs.** *(Exactement la même opération que celle utilisée pour le conditionnement.)*
 
-![[im8 (1).png|388]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im8 (1).png|388]]
 **Figure 8.** Réduction d'un facteur sur une assignation : on ne garde que les lignes compatibles avec l'assignation choisie.

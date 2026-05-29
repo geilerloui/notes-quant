@@ -63,12 +63,12 @@ $$P(D, I, G, S, L) = P(D) \, P(I) \, P(G \mid I, D) \, P(S \mid I) \, P(L \mid G
 
 **(a) Raisonnement causal** (causal reasoning).
 
-![[im10 (2).png|426]]
+![[images/3-Apprentissage automatique/Generative Models/energy models/im10 (2).png|426]]
 **Figure 2.** Raisonnement causal — on propage de la cause vers l'effet.
 
 **(b) Raisonnement évidentiel** (evidential reasoning) — on remonte du bas vers le haut, on demande comment varient les ancêtres de la note.
 
-![[im11 (1).png|431]]
+![[images/3-Apprentissage automatique/Generative Models/energy models/im11 (1).png|431]]
 **Figure 3.** Raisonnement évidentiel — observer l'effet change la croyance sur la cause.
 
 **(c) Raisonnement intercausal** (intercausal reasoning) — l'information entre deux causes ayant un effet commun. L'étudiant a un C, et on apprend que ce cours est en fait difficile : la probabilité d'être intelligent **augmente** :
@@ -256,7 +256,7 @@ La factorisation d'une distribution $P$ implique les indépendances qui tiennent
 > - Si $P_1$ satisfait $D \perp I$, alors $G_1$ est un I-map pour $P_1$ et $G_2$ aussi (vacuously).
 > - Si $P_2$ ne satisfait **pas** $D \perp I$, alors $G_1$ n'est **pas** un I-map pour $P_2$. $G_2$ reste un I-map (vacuously).
 
-![[im16.png]]
+![[images/3-Apprentissage automatique/Generative Models/score based/im16.png]]
 **Figure 10.** Deux graphes candidats $G_1$ et $G_2$, et deux distributions $P_1, P_2$.
 
 > [!warning] Théorème (Factorisation ⟹ I-map)

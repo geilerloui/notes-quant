@@ -3,7 +3,7 @@ title: MCMC
 ---
 # MCMC — Markov Chain Monte Carlo
 
-> Quand le posterior bayésien n'est pas conjugué, on ne peut ni l'écrire en forme fermée ni en échantillonner directement (cf. les méthodes de [[02_Échantillonnage]]). **MCMC** résout ce problème en construisant une chaîne de Markov dont la distribution stationnaire est exactement le posterior ciblé. Au lieu de tirer des échantillons i.i.d. (impossible), on génère une trajectoire corrélée qui finit par "explorer" le posterior dans les bonnes proportions.
+> Quand le posterior bayésien n'est pas conjugué, on ne peut ni l'écrire en forme fermée ni en échantillonner directement (cf. les méthodes de [[03_Échantillonnage]]). **MCMC** résout ce problème en construisant une chaîne de Markov dont la distribution stationnaire est exactement le posterior ciblé. Au lieu de tirer des échantillons i.i.d. (impossible), on génère une trajectoire corrélée qui finit par "explorer" le posterior dans les bonnes proportions.
 
 ## I. Pourquoi MCMC ?
 

@@ -57,13 +57,13 @@ Et deux régimes selon les données disponibles :
 
 *À développer.*
 
-> 💡 **Mini-intuition.** Au lieu d'un point estimate, on met un prior sur les paramètres et on intègre. Pour les CPD multinomiales, le prior conjugué est la **distribution de Dirichlet**, ce qui donne des updates en fermée. C'est l'analogue PGM de ce que tu as fait en [[Inférence Bayésienne|stats bayésiennes]].
+> 💡 **Mini-intuition.** Au lieu d'un point estimate, on met un prior sur les paramètres et on intègre. Pour les CPD multinomiales, le prior conjugué est la **distribution de Dirichlet**, ce qui donne des updates en fermée. C'est l'analogue PGM de ce que tu as fait en [[01_Inférence Bayésienne|stats bayésiennes]].
 
 À aborder :
 - Prior Dirichlet pour les CPD multinomiales.
 - Posterior Dirichlet et MAP estimate.
 - Hyperparamètres et prior knowledge.
-- Rejoint le cadre [[Inférence Bayésienne]] et [[Modèles Bayésiens]].
+- Rejoint le cadre [[01_Inférence Bayésienne]] et [[03_Modèles Bayésiens]].
 
 ---
 
@@ -145,7 +145,7 @@ Et deux régimes selon les données disponibles :
 > EM converge vers un maximum local de la vraisemblance des observations.
 
 À aborder :
-- Dérivation via l'ELBO (lien direct avec [[Variational Inference]] — EM est un cas particulier de VI où l'E-step est exact).
+- Dérivation via l'ELBO (lien direct avec [[04_Variational Inference]] — EM est un cas particulier de VI où l'E-step est exact).
 - Convergence : monotone mais pas vers le global.
 - Cas mixture de gaussiennes comme fil rouge.
 - Cas HMM → c'est exactement [[03_Inférence#A.7 Apprentissage des paramètres — Baum-Welch|Baum-Welch]].
@@ -163,7 +163,7 @@ Et deux régimes selon les données disponibles :
 
 *À développer.*
 
-> 💡 **Quand EM ne suffit pas.** Si l'E-step exact est intractable (latentes continues complexes, structure trop riche), on remplace par une approximation variationnelle — voir [[Variational Inference#II. Mean field|mean field VI]] et VB-EM.
+> 💡 **Quand EM ne suffit pas.** Si l'E-step exact est intractable (latentes continues complexes, structure trop riche), on remplace par une approximation variationnelle — voir [[04_Variational Inference#II. Mean field|mean field VI]] et VB-EM.
 
 ---
 

@@ -142,12 +142,13 @@ où :
 
 > 💡 **Ce que ça résout.** La décomposition $\pi = F \cdot \eta$ sépare proprement *l'agressivité* ($F$ : à quelle vitesse on consomme la liquidité) de *l'étalement* ($\eta$ : combien de temps on étale). Reprenons l'exemple VWAP vs agressif :
 > 
-> | Stratégie | $Q/V_D$ | $F$ | $\eta$ |
-> |---|:---:|:---:|:---:|
-> | (a) VWAP étalé sur la journée | 0.10 | $\approx 0.10$ | $\approx 1$ |
-> | (b) Agressif sur 5 min | 0.10 | $\approx 1$ | $\approx 0.01$ |
-> 
 > Maintenant les deux stratégies sont **distinctes** dans l'espace $(F, \eta)$ : (b) a un participation rate dramatiquement plus élevé, et c'est précisément ça qui fait son coût plus élevé.
+
+| Stratégie                     | $Q/V_D$ |      $F$       |     $\eta$     |
+| ----------------------------- | :-----: | :------------: | :------------: |
+| (a) VWAP étalé sur la journée |  0.10   | $\approx 0.10$ |  $\approx 1$   |
+| (b) Agressif sur 5 min        |  0.10   |  $\approx 1$   | $\approx 0.01$ |
+
 
 ### C. La forme fonctionnelle
 

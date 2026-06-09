@@ -3,7 +3,7 @@ title: Modèles Bayésiens
 ---
 # Modèles Bayésiens
 
-> Ce fichier construit les **modèles bayésiens classiques** à partir des fondations vues dans [[Inférence Bayésienne]] et des techniques de simulation de [[MCMC]]. On commence par formaliser ce qu'est un modèle hiérarchique (forme et représentation graphique), puis on traite les trois régressions bayésiennes (linéaire, logistique, Poisson) et on finit par les modèles hiérarchiques propres — *partial pooling*, random intercept et leurs effets de *shrinkage*.
+> Ce fichier construit les **modèles bayésiens classiques** à partir des fondations vues dans [[01_Inférence Bayésienne]] et des techniques de simulation de [[02_MCMC]]. On commence par formaliser ce qu'est un modèle hiérarchique (forme et représentation graphique), puis on traite les trois régressions bayésiennes (linéaire, logistique, Poisson) et on finit par les modèles hiérarchiques propres — *partial pooling*, random intercept et leurs effets de *shrinkage*.
 
 ## I. Modélisation bayésienne — concepts généraux
 
@@ -29,7 +29,7 @@ y_i \mid \mu, \sigma^2 &\overset{iid}{\sim} \mathcal{N}(\mu, \sigma^2) \\
 \sigma^2 &\sim \mathrm{IG}(\nu_0, \beta_0)
 \end{aligned}
 $$
-Ici $\mu$ dépend de $\sigma^2$ via sa variance — c'est le prior **conjugué conditionnel** vu dans [[Inférence Bayésienne]] section VII.G.
+Ici $\mu$ dépend de $\sigma^2$ via sa variance — c'est le prior **conjugué conditionnel** vu dans [[01_Inférence Bayésienne]] section VII.G.
 
 ### B. Représentation graphique — DAG et plate notation
 
@@ -67,7 +67,7 @@ $$f(\mu, \sigma^2) = f(\mu \mid \sigma^2) \cdot f(\sigma^2).$$
 
 1. **Conjugaison** : le posterior est dans une famille standard, on lit ses paramètres directement. C'est le cas pour les régressions linéaire (avec variance connue) et Poisson.
 2. **Pas de conjugaison mais semi-tractable** : on peut approximer (ex. Laplace approximation pour la régression logistique).
-3. **Pas de conjugaison du tout** : on échantillonne via [[MCMC]]. C'est le cas général pour les modèles hiérarchiques complexes.
+3. **Pas de conjugaison du tout** : on échantillonne via [[02_MCMC]]. C'est le cas général pour les modèles hiérarchiques complexes.
 
 Les trois sections suivantes illustrent ces trois régimes.
 
@@ -90,7 +90,7 @@ Choix typiques : $\boldsymbol{m}_0 = \boldsymbol{0}$ (prior centré sur 0, on n'
 
 ### B. Posterior — forme fermée
 
-Le Normal-Normal est conjugué (cf. [[Inférence Bayésienne]] section VII.G étendu en multivarié). Le posterior est gaussien :
+Le Normal-Normal est conjugué (cf. [[01_Inférence Bayésienne]] section VII.G étendu en multivarié). Le posterior est gaussien :
 
 $$\boxed{\; \boldsymbol{w} \mid \boldsymbol{y}, \boldsymbol{\Phi} \sim \mathcal{N}(\boldsymbol{m}_N, \boldsymbol{S}_N) \;}$$
 avec
@@ -160,7 +160,7 @@ $$f(\boldsymbol{w} \mid \boldsymbol{y}, \boldsymbol{\Phi}) \propto \left[\prod_{
 Pas de forme fermée. Trois options :
 
 1. **Laplace approximation** — approximer le posterior par une gaussienne autour du MAP.
-2. **MCMC** — échantillonner via [[MCMC]] (Metropolis-Hastings ou HMC).
+2. **MCMC** — échantillonner via [[02_MCMC]] (Metropolis-Hastings ou HMC).
 3. **Variational inference** — approximer par une famille paramétrique tractable.
 
 On détaille la Laplace approximation, la plus simple et historiquement la plus utilisée.
@@ -220,7 +220,7 @@ $$Y_i \mid \lambda \overset{iid}{\sim} \mathrm{Poisson}(\lambda), \quad i = 1, \
 $$\lambda \sim \mathrm{Gamma}(\alpha, \beta).$$
 ### B. Posterior — forme fermée
 
-La Gamma est conjuguée à la Poisson (cf. [[Inférence Bayésienne]] section VII.E). Le posterior est :
+La Gamma est conjuguée à la Poisson (cf. [[01_Inférence Bayésienne]] section VII.E). Le posterior est :
 
 $$\boxed{\; \lambda \mid \boldsymbol{y} \sim \mathrm{Gamma}\!\left(\alpha + \sum_{i=1}^n y_i, \; \beta + n\right) \;}$$
 **Lecture des paramètres :**
@@ -289,7 +289,7 @@ Lectures niveau par niveau :
 - **Niveau 2** : les 5 moyennes par usine $\lambda_1, \dots, \lambda_5$ sont elles-mêmes tirées d'une Gamma commune. C'est ce qui *lie* les usines entre elles.
 - **Niveau 3 (hyperpriors)** : $\alpha, \beta$ ont leurs propres priors.
 
-**Inférence.** Le posterior conjoint $f(\lambda_1, \dots, \lambda_5, \alpha, \beta \mid \boldsymbol{y})$ n'a pas de forme fermée (mélange Gamma + hyperpriors complexes). On utilise [[MCMC]], typiquement Gibbs sampling parce que les conditionnelles complètes sont presque toutes dans des familles connues.
+**Inférence.** Le posterior conjoint $f(\lambda_1, \dots, \lambda_5, \alpha, \beta \mid \boldsymbol{y})$ n'a pas de forme fermée (mélange Gamma + hyperpriors complexes). On utilise [[02_MCMC]], typiquement Gibbs sampling parce que les conditionnelles complètes sont presque toutes dans des familles connues.
 
 ![[bayes_hierarchical_dag.png|296]]
 **Figure 5.** DAG du modèle hiérarchique cookies. Les hyperparamètres $(\alpha, \beta)$ contrôlent la distribution des moyennes par usine $\lambda_\ell$, qui contrôlent à leur tour les comptes observés $y_i$. La plate interne regroupe les 30 biscuits par usine, la plate externe regroupe les 5 usines. Les flèches descendantes encodent la structure générative.
@@ -347,4 +347,4 @@ où $\bar{y}_g$ est la moyenne empirique du groupe $g$ et $\mu$ la moyenne globa
 > 4. **Régression logistique bayésienne** : pas de conjugaison → Laplace approximation (gaussienne autour du MAP). Prédictif via probit approximation, qui atténue les prédictions selon l'incertitude posterior.
 > 5. **Régression Poisson bayésienne** : conjuguée (Gamma-Poisson), posterior et prédictif (Negative Binomial) en forme fermée. Le prédictif bayésien capture l'overdispersion qu'une Poisson MLE rate.
 > 6. **Modèles hiérarchiques = partial pooling.** On laisse les paramètres par groupe varier autour d'une moyenne commune apprise depuis les données. Effet de **shrinkage** : les groupes avec peu de données sont stabilisés par les autres.
-> 7. **Inférence en pratique** : conjugué → forme fermée ; quasi-conjugué → Laplace ; cas général (notamment hiérarchiques) → [[MCMC]] (Gibbs si conditionnelles standard, sinon NUTS via Stan/PyMC).
+> 7. **Inférence en pratique** : conjugué → forme fermée ; quasi-conjugué → Laplace ; cas général (notamment hiérarchiques) → [[02_MCMC]] (Gibbs si conditionnelles standard, sinon NUTS via Stan/PyMC).

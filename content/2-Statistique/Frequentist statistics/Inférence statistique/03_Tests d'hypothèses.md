@@ -22,7 +22,7 @@ Le point central : **on observe un échantillon, mais on veut tirer des conclusi
 
 > 💡 **L'idée du test d'hypothèse en une phrase.** Un test est une procédure pour décider si un effet observé dans les données est *trop gros pour être du hasard* — auquel cas on conclut qu'il existe vraiment dans la population.
 
-![[Pasted image 20260506185601.png|609]]
+![[samples.png|609]]
 
 **Figure 1.** Distribution de la mpg pour les voitures **américaines** (rouge, $n = 245$) et **japonaises** (vert, $n = 79$). Les losanges noirs marquent les moyennes empiriques : $\bar{y}_{\text{USA}} = 20.03$ et $\bar{y}_{\text{Japon}} = 30.45$, soit un écart observé $\Delta = +10.42$ mpg. **Le point clé** : les deux nuages se recouvrent largement — il existe des voitures américaines plus économes que beaucoup de japonaises, et inversement. La vraie question n'est donc pas *"est-ce que les moyennes diffèrent ?"* (oui, manifestement), mais *"l'écart de $10.42$ mpg est-il assez grand pour exclure le hasard d'échantillonnage ?"*
 
@@ -271,8 +271,8 @@ $$H_0: \theta = \theta_0 \qquad H_1: \theta > \theta_0$$
 On rejette $H_0$ uniquement quand $T_{\text{obs}}$ est **trop grand**. La p-value est l'aire de la queue **droite** au-delà de $T_{\text{obs}}$ :
 
 $$\text{p-value} = \mathbb{P}_{H_0}[T \ge T_{\text{obs}}]$$
+![[images/2-Statistiques/A_Frequentist/01_Inference statistique/03_Tests d'hypothèses/im8.png]]
 
-![[images/3-Apprentissage automatique/05_Generative Models/introduction/im9.png|307]]
 
 ### B. Test unilatéral à gauche
 
@@ -282,7 +282,7 @@ Symétriquement, on rejette uniquement quand $T_{\text{obs}}$ est **trop petit**
 
 $$\text{p-value} = \mathbb{P}_{H_0}[T \le T_{\text{obs}}]$$
 
-![[images/2-Statistiques/A_Frequentist/Inférence statistique/im10 (1).png]]
+![[images/2-Statistiques/A_Frequentist/01_Inference statistique/03_Tests d'hypothèses/im10 (1).png]]
 
 ### C. Test bilatéral
 
@@ -294,7 +294,7 @@ $$\text{p-value} = \mathbb{P}_{H_0}[|T| \ge |T_{\text{obs}}|] = 2 \cdot \mathbb{
 
 (La dernière égalité utilise la symétrie de la distribution de $T$ sous $H_0$ — vraie pour la gaussienne, vraie pour Student.)
 
-![[images/2-Statistiques/A_Frequentist/Inférence statistique/im11.png]]
+![[images/2-Statistiques/A_Frequentist/01_Inference statistique/03_Tests d'hypothèses/im11.png]]
 
 > 💡 **Cas Auto.** L'hypothèse alternative est $H_1: \mu_J \neq \mu_U$ → **test bilatéral** → on multiplie par 2. Et c'est ce qu'on a fait dans la figure 4 (les deux zones orange hachurées des deux côtés).
 

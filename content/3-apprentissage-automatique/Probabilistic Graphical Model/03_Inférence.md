@@ -42,8 +42,8 @@ $$P(Y, E = e) = \sum_W P(Y, W, E = e) = \sum_W \frac{1}{Z} \prod_k \phi_k(D_k, E
 > [!warning] Familles d'algorithmes
 > - **Variable Elimination** (élimination de variables)
 > - **Belief Propagation** (passage de messages) — généralisation, avec ses variantes : sum-product et max-product
-> - **Approximations variationnelles** ([[Variational Inference]])
-> - **Sampling-based** (méthodes Monte-Carlo, [[MCMC]])
+> - **Approximations variationnelles** ([[04_Variational Inference]])
+> - **Sampling-based** (méthodes Monte-Carlo, [[02_MCMC]])
 
 ---
 
@@ -403,7 +403,7 @@ Pour trouver la séquence optimale $z_{1:T}^*$, une fois $\alpha^*$ complétée,
 
 ## V. Inférence par échantillonnage
 
-> 💡 **L'idée générale.** Au lieu de calculer une espérance exactement, on tire des échantillons de la distribution et on moyenne. Famille complémentaire aux méthodes déterministes (Variable Elimination, BP) et aux approximations variationnelles ([[Variational Inference]]).
+> 💡 **L'idée générale.** Au lieu de calculer une espérance exactement, on tire des échantillons de la distribution et on moyenne. Famille complémentaire aux méthodes déterministes (Variable Elimination, BP) et aux approximations variationnelles ([[04_Variational Inference]]).
 
 ### A. Ancestral sampling
 
@@ -432,6 +432,6 @@ On obtient un échantillon $\{x_1, x_2, x_3, x_4\}$ de la distribution jointe.
 
 ### B. Gibbs sampling (graphes non orientés)
 
-*Voir [[MCMC]] — Gibbs sampling y est traité en détail comme cas particulier de MCMC.*
+*Voir [[02_MCMC]] — Gibbs sampling y est traité en détail comme cas particulier de MCMC.*
 
 > 💡 **L'idée en une phrase.** À chaque itération, on échantillonne une variable conditionnellement à toutes les autres : $x_i^{(t+1)} \sim p(x_i \mid x_{-i}^{(t)})$. Pour un MRF, ces conditionnelles ne dépendent que des voisins de $x_i$ dans le graphe, donc le calcul est local.

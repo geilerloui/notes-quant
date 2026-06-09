@@ -139,7 +139,7 @@ $\hat{\beta} = \arg\min_\beta \|y - X\beta\|^2$
 > 
 > Si $X^T X$ est inversible : $\hat{\beta} = (X^T X)^{-1} X^T y$.
 
-#### Vue géométrique dans $\mathbb{R}^n$
+#### Vue géométrique dans R^n
 
 
 COURS DE : geometric interpretaiton of linear regression Nipun Batra
@@ -187,7 +187,7 @@ Maximiser $\ell$ par rapport à $\beta$ revient à **minimiser** $\sum (y_i - x_
 
 
 
-![[Pasted image 20260506225403.png]]
+![[Pasted image 20260506225403.png|490]]
 
 > 💡 **OLS = MLE sous bruit gaussien.** Les moindres carrés ne sont pas un choix arbitraire. Trois lectures du même objet :
 > - **Minimisation** (vue classique) : minimiser la somme des carrés des résidus
@@ -962,7 +962,7 @@ Le $R^2$ est descriptif — il dit *combien* le modèle explique, pas si cette e
 
 > 💡 **Deuxième question naturelle.** Le modèle marche globalement (B). Très bien. Mais **quels prédicteurs comptent vraiment** ? Est-ce que `horsepower` a un effet significatif sur `mpg` ? Et l'`origin` apporte-t-elle quelque chose **au-delà** de ce que `horsepower` capture déjà ? Deux tests pour deux granularités : Student pour un coefficient à la fois (C.1), Fisher pour plusieurs coefficients d'un coup (C.2). Et un récapitulatif pratique en C.3 : comment lire ces tests dans le summary OLS.
 
-#### C.1 — Test de Student sur $\hat{\beta}_j$
+#### C.1 — Test de Student sur $\hat{(\beta_j)}$
 
 **La question.** Est-ce que le prédicteur $X_j$ a vraiment un effet sur $Y$, ou est-ce que $\hat{\beta}_j \neq 0$ par chance ? On teste $H_0 : \beta_j = 0$ contre $H_1 : \beta_j \neq 0$, **un coefficient à la fois**.
 
@@ -975,16 +975,67 @@ Le $R^2$ est descriptif — il dit *combien* le modèle explique, pas si cette e
 > 
 > $t_j = \frac{\hat{\beta}_j}{\text{se}(\hat{\beta}_j)}$
 > 
+> **Lecture.** $t_j$ se lit « à combien d'écarts-types de 0 se trouve mon estimation » (ratio **signal / bruit** : effet estimé ÷ son incertitude).
+> - $t_j = 5$ → $\hat{\beta}_j$ est à 5 erreurs-types de 0 ; il ne retomberait quasi jamais à 0 en refaisant l'expérience → **effet réel**.
+> - $t_j = 0.3$ → $\hat{\beta}_j$ est à 0.3 erreur-type de 0 ; le bruit seul explique la valeur observée → **effet indistinguable de zéro**.
+> 
 > Sous $H_0$, $t_j$ suit une loi de Student à $n - p - 1$ degrés de liberté. Pour $n$ grand, on retient la règle :
 > 
 > $|t_j| > 1.96 \implies \text{on rejette } H_0 \text{ au seuil } 5\%$
 
+![Loi de la statistique de test sous H0 et p-value](images/2-Statistiques/A_Frequentist/regression-lineaire/pvalue.png)
+
+**Figure — La p-value comme aire sous la loi de $t$ sous $H_0$.** La cloche est la distribution de $t_j$ si $\beta_j = 0$. Le $t_{\text{obs}}$ observé tombe dans la queue ; l'aire orange au-delà de $\pm|t_{\text{obs}}|$ (les deux queues) est la **p-value**. Les pointillés $\pm 1.96$ délimitent la zone de rejet à 5%. Rejeter $H_0$ ($|t| > 1.96$) équivaut exactement à « 0 hors de l'IC à 95% ».
+
 > 💡 **La p-value.** C'est la probabilité d'observer un $|t_j|$ aussi grand si $H_0$ était vraie. Plus elle est petite, plus on est confiant que $\beta_j \neq 0$. Seuil classique : $p < 0.05$. C'est la colonne `P>|t|` du summary OLS (cf. C.3).
+
+> [!note]- Rappel — p-value, et son lien avec la t-stat
+> **Définition.** La p-value est la probabilité, **sous $H_0$** (ici $\beta_j = 0$), d'observer une statistique au moins aussi extrême que celle mesurée :
+> 
+> $p = P\big(|T| \ge |t_{\text{obs}}| \;\big|\; H_0\big), \quad T \sim t_{n-p-1}$
+> 
+> Petite p → ce qu'on observe serait très improbable si $\beta_j = 0$ → on rejette $H_0$.
+> 
+> **Lien avec la t-stat.** La p-value n'est que la t-stat **passée dans la CDF de Student** — une fonction décroissante de $|t|$. Asymptotiquement (grand $n$), $p \approx 2(1 - \Phi(|t|))$ :
+> 
+> | $|t|$ | p-value (bilatérale) |
+> |:---:|:---:|
+> | 1.96 | 0.05 |
+> | 2.58 | 0.01 |
+> | 3.0 | 0.0027 |
+> 
+> Les deux portent la même information ; en finance on cite souvent directement la **t-stat** (sans dimension, règle du pouce $|t| > 2$) plutôt que la p-value.
+> 
+> **Le débat des seuils (asset pricing).** Harvey, Liu & Zhu (2016) montrent qu'avec des centaines de facteurs testés (multiple testing), $|t| > 2$ est trop laxiste : ils recommandent $|t| > 3$ pour qu'un facteur soit crédible. D'où l'habitude de comparer des t-stats entre facteurs.
+> 
+> > ⚠️ **Ce que la p-value n'est PAS.** Ce n'est **pas** $P(H_0 \text{ vraie} \mid \text{données})$, ni « la probabilité que le résultat soit dû au hasard ». C'est une probabilité calculée *en supposant $H_0$ vraie*. Confondre les deux est l'erreur la plus classique en entretien.
 
 > [!warning] Intervalle de confiance sur $\beta_j$ à 95%
 > $\hat{\beta}_j \pm 1.96 \cdot \text{se}(\hat{\beta}_j)$
 > 
 > C'est l'ensemble des valeurs de $\beta_j$ qu'on ne rejetterait pas au seuil 5%. Plus $\text{se}(\hat{\beta}_j)$ est petite, plus l'intervalle est étroit — plus on est précis. C'est la colonne `[0.025, 0.975]` du summary.
+
+![Distribution d'échantillonnage et IC répétés](images/2-Statistiques/A_Frequentist/regression-lineaire/ic_beta.png)
+
+**Figure — Ce que « 95% » signifie.** *Gauche* : un dataset → la pente OLS $\hat{\beta}_1$ et son IC $[1.43, 2.17]$. *Droite* : 100 datasets simulés (même $\beta_1^\ast$, bruit re-tiré) → 100 IC, dont ~95 sur 100 contiennent $\beta_1^\ast$ (bleu), le reste le rate (rouge). La barre verte est **ton** IC réel — le seul que tu as en pratique. Illustre directement la loi $\hat{\beta}_1 \sim \mathcal{N}(\beta_1, \sigma^2/S_{XX})$ de III.A. Cependant tu n'as aucun moyen pour savoir si le IC réel contient vraiment $\beta_1^*$. 
+
+> [!tip] Ce que « 95% » veut vraiment dire
+> Le « 95% » porte sur la **procédure**, pas sur ton intervalle. Une fois les données collectées, ton IC est **figé** : il contient $\beta_1^\ast$ ou non, point — plus aucune probabilité sur *ce* cas précis. Ce que tu fais avec un IC, en pratique :
+> - **$0 \in$ IC ?** → si oui, l'effet n'est pas distinguable de zéro (feature potentiellement inutile). C'est le test de Student ci-dessus, lu géométriquement.
+> - **Largeur ?** → précision de l'estimation. $[1, 3]$ est utilisable, $[1, 10]$ ne dit presque rien.
+> - **Niveau 95%** = convention : monter à 99% **élargit** l'IC (moins informatif). Ce n'est pas gratuit.
+> 
+> Pour une vraie probabilité sur *ton* intervalle, $P(\beta_1 \in [a,b] \mid \text{données})$, il faut passer bayésien (intervalle de crédibilité, au prix d'un prior).
+
+> [!note]- Pipeline de simulation — comment les 100 IC sont générés
+> Pour chaque dataset $k = 1, \dots, 100$ :
+> 1. $x_i$ **fixes**, vrais $\beta_0, \beta_1$ **fixes** (connus — c'est une simulation) ;
+> 2. tire un nouveau bruit $\varepsilon_i^{(k)} \sim \mathcal{N}(0, \sigma^2)$ ;
+> 3. calcule $y_i^{(k)} = \beta_0 + \beta_1 x_i + \varepsilon_i^{(k)}$ ;
+> 4. OLS sur $(x_i, y_i^{(k)})$ → $\hat{\beta}_1^{(k)}$ et $\text{se}^{(k)}$ ;
+> 5. $\text{IC}^{(k)} = \hat{\beta}_1^{(k)} \pm t \cdot \text{se}^{(k)}$.
+> 
+> Seul le bruit (donc $y$) change entre les 100 datasets ; $x$ et le vrai $\beta_1$ ne bougent jamais. Sur de vraies données on ne peut pas faire ça (on ignore le vrai $\beta_1$, et re-tirer le bruit = collecter de nouvelles observations) — d'où le **bootstrap** comme substitut.
 
 > [!note]- Cas particulier — régression simple
 > En régression simple ($p = 1$), $\text{se}(\hat{\beta}_1) = \hat{\sigma}/\sqrt{S_{XX}}$ et la statistique se simplifie en :

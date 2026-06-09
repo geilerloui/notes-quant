@@ -106,7 +106,7 @@ Ce $\theta$ est appelé le **vrai paramètre**, et il est inconnu. Le but de l'e
 > 
 > L'estimation peut être une réalisation de l'expérience : $\hat{\mu}_{\text{obs}} = 3.14$.
 
-![[images/3-Apprentissage automatique/05_Generative Models/vae/im1 (2).png|519]]
+![[images/2-Statistiques/A_Frequentist/01_Inference statistique/01_Cadre/im1 (3).png|611]]
 
 ### B. Consistance et normalité asymptotique
 
@@ -170,6 +170,8 @@ Ce $\theta$ est appelé le **vrai paramètre**, et il est inconnu. Le but de l'e
 > On peut montrer que :
 > 
 > $$\boxed{\text{Risque quadratique} = \text{Variance} + \text{Biais}^2}$$
+> 
+> **Vocabulaire.** Le risque quadratique est exactement l'**erreur quadratique moyenne** (MSE, *Mean Squared Error*) : c'est le même objet $\mathbb{E}[(\hat{\theta}_n - \theta)^2]$. « Risque quadratique » est le terme de la théorie de la décision — où le *risque* $\mathbb{E}_\theta[L(\hat{\theta}_n, \theta)]$ se définit pour une perte $L$ quelconque, le MSE étant le cas particulier de la perte quadratique $L(\hat{\theta}, \theta) = (\hat{\theta} - \theta)^2$ — tandis que « MSE » est le terme usuel en ML. Ici tout est en perte quadratique, donc *risque* = *risque quadratique* = *MSE*.
 
 > [!example] Exemple — risque quadratique
 > - $T_1 = X_1$, $b(T_1) = 0$ donc :
@@ -181,3 +183,47 @@ Ce $\theta$ est appelé le **vrai paramètre**, et il est inconnu. Le but de l'e
 > $$R(T_2) = \text{Var}(\bar{X}_n) = \frac{\sigma^2}{n}$$
 > 
 > Comme $R(T_1) = \sigma^2$ et $R(T_2) = \sigma^2/n \xrightarrow[n \to \infty]{} 0$, **$T_2$ est meilleur que $T_1$ au sens du risque quadratique**.
+
+### E. Le compromis biais-variance
+
+La décomposition $R(\hat{\theta}_n) = \text{Var}(\hat{\theta}_n) + \text{biais}(\hat{\theta}_n)^2$ n'est pas qu'une identité algébrique : c'est l'énoncé d'un **arbitrage**. Ces deux quantités mesurent deux choses géométriquement distinctes, et l'erreur classique est de les confondre.
+
+![[biais_variance.png|650]]
+> *Figure — Décomposition du risque quadratique. **À gauche**, l'anatomie : l'estimateur $\hat{\theta}_n$ est la cloche entière (sa distribution d'échantillonnage) ; le **biais** est l'écart entre $\theta^\ast$ et le centre $\mathbb{E}[\hat{\theta}_n]$, la **variance** est la largeur de la cloche autour de ce centre (et non autour de $\theta^\ast$). **À droite**, le compromis : l'estimateur biaisé mais resserré B ($R = 0{.}61$) bat l'estimateur sans biais mais étalé A ($R = 1{.}56$) — un peu de biais échangé contre beaucoup de variance en moins.*
+
+> [!tip] Lecture géométrique de la figure
+> Sur l'axe des abscisses : les **valeurs possibles de l'estimateur**. L'estimateur $\hat{\theta}_n$ n'est **pas** un point — c'est la *cloche* entière, sa **distribution d'échantillonnage** (sampling distribution).
+> - $\theta^\ast$ : la vraie valeur, un point fixe.
+> - $\mathbb{E}[\hat{\theta}_n]$ : le **centre** de la cloche.
+> - **biais** $= \mathbb{E}[\hat{\theta}_n] - \theta^\ast$ : l'écart entre le centre de la cloche et la vérité (erreur *systématique*).
+> - **variance** : la **largeur** de la cloche, c'est-à-dire la dispersion autour de $\mathbb{E}[\hat{\theta}_n]$ — et **non** autour de $\theta^\ast$.
+> 
+> C'est précisément parce que la variance se mesure autour de $\mathbb{E}[\hat{\theta}_n]$ (et non de $\theta^\ast$) que la décomposition se sépare proprement en deux termes. Si on mesurait la dispersion directement autour de $\theta^\ast$, on obtiendrait le risque quadratique entier d'un coup, sans le décomposer.
+
+La conséquence est contre-intuitive : **le meilleur estimateur n'est pas forcément sans biais**. Accepter un peu de biais pour réduire la variance peut diminuer le risque total. C'est toute la logique du *shrinkage* (régularisation ridge, estimateur de James-Stein, etc.).
+
+> [!note] Le piège de l'oracle
+> $c^\ast$ dépend de $\mu$ et $\sigma^2$ **inconnus** : ce n'est donc pas un véritable estimateur (au sens où son expression dépend des quantités à estimer), mais un *oracle*. L'intérêt théorique reste entier : il prouve l'existence d'un estimateur biaisé qui fait mieux. Le passage du résultat oracle à un estimateur *utilisable* — qui estime le shrinkage à partir des données et domine quand même $\bar{X}$ — est exactement l'objet de l'**estimateur de James-Stein** (dimension $\ge 3$).
+
+> [!note] Lien ML — la même décomposition, mais en prédiction
+> La décomposition réapparaît au cœur du machine learning, mais avec **trois** termes au lieu de deux (cf. [[01_Fondation#D. Décomposition biais-variance et double descent]]). Ce n'est pas une contradiction : la différence ne tient pas à « stats vs ML » mais à la **cible d'évaluation**.
+> 
+> - **Ici (estimation)** — la cible est un paramètre déterministe $\theta$, donc
+> 
+> $$R(\hat{\theta}_n) = \text{Var}(\hat{\theta}_n) + \text{biais}^2 \qquad (\text{2 termes}).$$
+> 
+> - **En ML (prédiction)** — la cible est une observation future $y_0 = f(x_0) + \varepsilon_0$, *bruitée*, ce qui ajoute un troisième terme :
+> 
+> $$\text{EPE}(x_0) = \underbrace{\big(f(x_0) - \mathbb{E}[\hat{f}(x_0)]\big)^2 + \text{Var}(\hat{f}(x_0))}_{\text{= la décompo ci-dessus, pour } \hat{f}(x_0) \text{ estimant } f(x_0)} + \underbrace{\text{Var}(\varepsilon)}_{\sigma^2 \text{ irréductible}}.$$
+> 
+> En une phrase : $\;\text{EPE}(x_0) = \underbrace{\mathbb{E}[(\hat{f}(x_0) - f(x_0))^2]}_{\text{décompo d'estimation}} + \sigma^2$. **La prédiction, c'est l'estimation plus le bruit de l'observation test.**
+> 
+> | Estimation (cette note) | Prédiction (ML) |
+> | :--- | :--- |
+> | paramètre vrai $\theta$ (fixe) | valeur vraie $f(x_0)$ (fixe) |
+> | estimateur $\hat{\theta}_n$ | prédiction $\hat{f}(x_0)$ |
+> | source d'aléa : l'échantillon $X_1, \dots, X_n$ | source d'aléa : le training set $\mathcal{T}$ |
+> | cible d'évaluation : $\theta$ | cible d'évaluation : $y_0 = f(x_0) + \varepsilon_0$ |
+> | $R = \text{Var} + \text{biais}^2$ | $\text{EPE} = \text{Var} + \text{biais}^2 + \sigma^2$ |
+> 
+> Le vrai clivage est donc **estimation vs prédiction** : viser une cible déterministe ne donne pas de terme irréductible, viser un tirage futur bruité en donne un. C'est exactement pourquoi la courbe en U du test MSE ne descend jamais sous $\sigma^2$ : quand la complexité monte, biais² ↓ et variance ↑ (les deux termes d'estimation), pendant que $\sigma^2$ reste un plancher constant.

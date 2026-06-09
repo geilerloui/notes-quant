@@ -113,7 +113,7 @@ Euler-Maruyama introduit un **biais** quand $h$ est trop grand : la distribution
 
 Pour éliminer le biais de discrétisation, on combine Euler-Maruyama avec un **pas Metropolis-Hastings** : à chaque proposition $X_{k+1}$, on accepte ou rejette selon la probabilité $\min(1, \pi(X_{k+1}) / \pi(X_k))$ ajustée par le ratio des densités de propositions. C'est le **MALA (Metropolis-Adjusted Langevin Algorithm)**, qui combine la précision MCMC avec l'efficacité du gradient.
 
-C'est l'algorithme par défaut quand on veut un sampler exact (cf [[Inférence Bayésienne]] pour le contexte MCMC).
+C'est l'algorithme par défaut quand on veut un sampler exact (cf [[01_Inférence Bayésienne]] pour le contexte MCMC).
 
 ---
 
@@ -149,7 +149,7 @@ Cette idée fonde tout un pan du deep learning génératif :
 
 **Stochastic Gradient Langevin Dynamics (SGLD, Welling-Teh 2011).** En deep learning, on remplace $\nabla U$ exact par un estimateur stochastique calculé sur un mini-batch (comme dans SGD). On obtient un sampler approximatif de la posterior bayesienne sur les poids du réseau. Ça donne une **alternative bayésienne à SGD** pour entraîner des réseaux de neurones.
 
-**Hamiltonian Monte Carlo (HMC).** Variante d'underdamped Langevin où on supprime le bruit pendant le mouvement (dynamique hamiltonienne déterministe) et on n'ajoute du bruit que par le pas Metropolis. Algorithme par défaut en inférence bayésienne moderne (Stan, NumPyro). Cf [[MCMC]] pour le contexte.
+**Hamiltonian Monte Carlo (HMC).** Variante d'underdamped Langevin où on supprime le bruit pendant le mouvement (dynamique hamiltonienne déterministe) et on n'ajoute du bruit que par le pas Metropolis. Algorithme par défaut en inférence bayésienne moderne (Stan, NumPyro). Cf [[02_MCMC]] pour le contexte.
 
 **Score-based diffusion models.** Voir [[04_Reverse-time SDE et Fokker-Planck]] pour le lien rigoureux : on apprend le score pendant un processus *forward* qui rajoute du bruit, puis on sample en suivant le **reverse-time SDE** qui utilise ce score appris.
 

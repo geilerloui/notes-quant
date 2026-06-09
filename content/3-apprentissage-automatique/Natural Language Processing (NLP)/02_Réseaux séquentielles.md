@@ -203,7 +203,7 @@ Si $\|W_{aa}\| < 1$ et $\tanh'(z) \leq 1$, ce produit tends vers 0 quand $t-k$ a
 
 ### Classifications selon input/output
 
-![[images/2-Statistiques/A_Frequentist/Inférence statistique/im10 (1).png|517]]
+![[images/2-Statistiques/A_Frequentist/01_Inference statistique/03_Tests d'hypothèses/im10 (1).png|517]]
 
 - **One-to-One** : RNN classique (comme FFNN)
 - **One-to-Many** : Génération de texte (ex: légendage d'image)
@@ -279,7 +279,7 @@ $$a_t = o_t \odot \tanh(C_t)$$
 
 ### Architecture GRU
 
-![[images/2-Statistiques/A_Frequentist/Inférence statistique/im11.png|275]]
+![[images/2-Statistiques/A_Frequentist/01_Inference statistique/03_Tests d'hypothèses/im11.png|275]]
 
 cc
 ![[images/3-Apprentissage automatique/09_PGM/Représentation/im14.png]]
@@ -365,7 +365,7 @@ JAI PERDU LAIMAGE
 
 **Seq2seq** : La traduction automatique fonctionne différemment :
 
-![[images/2-Statistiques/A_Frequentist/Inférence statistique/im8.png]]
+![[images/2-Statistiques/A_Frequentist/01_Inference statistique/03_Tests d'hypothèses/im8.png]]
 
 > [!info]- 🎯 L'insight révolutionnaire
 > **Réseau vert** : **Encoder** qui transforme la phrase d'entrée en représentation latente
@@ -400,7 +400,7 @@ $$\underset{y^1, \ldots, y^{T_y}}{\arg \max} \, P(y^1, \ldots, y^{T_y} | x)$$
 
 jai perdu l'image
 
-![[images/2-Statistiques/A_Frequentist/Inférence statistique/im5 (1).png|490]]
+![[images/2-Statistiques/A_Frequentist/01_Inference statistique/02_Intervalles de confiance/im5 (1).png|490]]
 
 ### Alternatives Softmax
 

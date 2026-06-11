@@ -270,8 +270,10 @@ $$H_0: \theta = \theta_0 \qquad H_1: \theta > \theta_0$$
 
 On rejette $H_0$ uniquement quand $T_{\text{obs}}$ est **trop grand**. La p-value est l'aire de la queue **droite** au-delà de $T_{\text{obs}}$ :
 
-$$\text{p-value} = \mathbb{P}_{H_0}[T \ge T_{\text{obs}}]$$
+$$\text{p-value} = \mathbb{P}[T \ge T_{\text{obs}} \mid H_0]$$
 ![[images/2-Statistiques/A_Frequentist/01_Inference statistique/03_Tests d'hypothèses/im8.png]]
+
+
 
 
 ### B. Test unilatéral à gauche

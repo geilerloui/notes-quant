@@ -1,0 +1,1 @@
+KNN , bayes on l'a pas fait peut être svm vite fait 

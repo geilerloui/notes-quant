@@ -193,7 +193,7 @@ On a vu en I.B.3 que le minimiseur théorique est le **classifieur de Bayes**. E
 | Approche | Stratégie | Exemples |
 |---|---|---|
 | **Génératifs** | Estimer $\hat P(X \mid Y=k)$ et $\hat P(Y=k)$, recombiner par Bayes : $\hat P(Y=k \mid X) \propto \hat P(X \mid Y=k) \hat P(Y=k)$ | Naive Bayes, LDA, QDA |
-| **Discriminatifs** | Estimer $\hat P(Y=k \mid X)$ directement, sans passer par $\hat P(X \mid Y=k)$ | Régression logistique, MLP avec sigmoïde/softmax (cf [[00_Perceptron]]) |
+| **Discriminatifs** | Estimer $\hat P(Y=k \mid X)$ directement, sans passer par $\hat P(X \mid Y=k)$ | Régression logistique, MLP avec sigmoïde/softmax (cf [[00_Perceptron Multi-Couches]]) |
 | **Discriminant function** | Apprendre directement $\hat f : \mathcal{X} \to \{1, \ldots, K\}$, sans probabilités | Arbres (cf [[(i) Modèles d'Arbres]]), perceptron strict, SVM |
 
 > 💡 **Pourquoi cette distinction est importante.** Selon ce qu'on choisit de modéliser, on obtient des familles très différentes de méthodes. Les **génératifs** sont plus riches (on peut générer des données synthétiques) mais souvent moins précis pour la prédiction. Les **discriminatifs** sont focalisés sur la tâche de prédiction et généralement plus performants. Les **discriminant functions** sont les plus directs mais perdent l'information probabiliste.
@@ -293,7 +293,119 @@ On a vu en I.B.3 que le minimiseur théorique est le **classifieur de Bayes**. E
 
 ### E. Curse of dimensionality
 
-*À développer.*
+> Cette section part d'un fait géométrique pur — l'espace se vide exponentiellement vite quand $d$ monte — et montre pourquoi ça casse le kNN en régression, puis comment on s'en sort.
+
+**Le setup.** On place $N$ points uniformément dans le cube unité $[0,1]^d$. L'uniformité est volontaire : c'est le **pire cas**, celui sans aucune structure à exploiter. Toute la malédiction qu'on va décrire s'applique dans ce monde sans hypothèse. En pratique les données ne sont jamais vraiment uniformes — c'est précisément ce qui sauve le ML réel, et on y revient en I.F avec la Manifold Hypothesis.
+
+**Manifestation 1 — le voisinage n'est plus local.** On veut faire du 1-NN en régression : pour prédire en $x_0$, on cherche le point d'entraînement le plus proche et on retourne sa valeur $Y$. Pour que cette moyenne locale ait un sens, il faut que les voisins soient *proches*. Posons la question : pour capturer une fraction $r$ des $N$ points autour de $x_0$, quelle est la taille du sous-cube nécessaire ?
+
+Comme les points sont uniformes, capturer une fraction $r$ du volume suffit. Un sous-cube d'arête $e$ a un volume $e^d$. On veut $e^d = r$, soit :
+
+$$\boxed{e_d(r) = r^{1/d}}$$
+
+> [!warning] La malédiction en chiffres
+> | dimension $d$ | arête pour $r=1\%$ | arête pour $r=10\%$ |
+> |---|---|---|
+> | 1 | 0.01 | 0.10 |
+> | 3 | 0.22 | 0.46 |
+> | 10 | **0.63** | **0.80** |
+> | 100 | 0.95 | 0.98 |
+> 
+> En 10 dimensions, pour capturer 1% des points, le sous-cube couvre déjà 63% de l'étendue de chaque axe. Le voisinage n'est plus local.
+
+Le double piège : réduire $r$ pour rester local → peu de points → variance explose. Augmenter $r$ pour avoir assez de points → voisinage non-local → biais. **En haute dimension, il n'existe plus de réglage qui donne à la fois localité et assez d'échantillons.**
+
+![[cube_ball_basics.png|627]]
+**Figure.** *Placeholder — sous-cube qui capture $r=10\%$ des points en $d=2$ (arête 0.32) vs $d=3$ (arête 0.46), avec la courbe $e_d(r)$ en fonction de $d$.*
+
+**Manifestation 2 — les points fuient vers les bords.** Dans ce même cube, on inscrit la boule de rayon 0.5 centrée en $(0.5, \ldots, 0.5)$. Cette boule touche le cube au milieu de chaque face — distance constante 0.5 du centre. Mais la distance du centre à un coin vaut :
+
+$\text{distance centre} \to \text{coin} = \sqrt{d \cdot 0.5^2} = \frac{\sqrt{d}}{2}$
+
+En $d=2$ : 0.71. En $d=3$ : 0.87. En $d=10$ : 1.58. Le cube se transforme en oursin — ses pointes ($2^d$ coins) s'éloignent pendant que la boule reste figée. Tout le volume migre vers les coins.
+
+Conséquence concrète : un point tiré uniformément dans $[0,1]^d$ a une distance au centre qui vaut en espérance $\sqrt{d/12}$. En $d=3$ c'est pile 0.5 (le bord de la boule). Dès $d > 3$, **le point typique est hors de la boule** — et par concentration (somme de $d$ variables indépendantes), quasi tous les points sont à la même distance $\approx \sqrt{d/12}$ du centre. La fraction de points dans la boule inscrite tombe à 0 dès $d \approx 10$.
+
+![[Pasted image 20260617211930.png|428]]
+**Figure.** *Placeholder — fraction des points dans la boule inscrite en fonction de $d$ (courbe empirique), montrant la chute vers 0 dès $d \sim 10$.*
+
+le truc des oursins la
+![[Pasted image 20260617212210.png]]
+
+**Conséquence sur la prédiction — l'exemple de la cloche.** Pour voir ce que ça coûte en erreur, on pose un cas concret (ESL §2.5) : $N=1000$ points tirés uniformément dans $[-1,1]^d$, vraie relation $f(X) = e^{-8\|X\|^2}$ (cloche gaussienne valant 1 au centre, décroissant vite vers 0), sans bruit. On veut prédire en $x_0 = 0$ par 1-NN.
+
+La prédiction est $\hat y_0 = f(x_{\text{NN}}) = e^{-8\|x_{\text{NN}}\|^2}$. Si le NN est à distance $r$ de l'origine, la prédiction vaut $e^{-8r^2}$. On vient de montrer que $r$ croît avec $d$ — donc la prédiction descend vers 0, alors que la vraie valeur est $f(0) = 1$.
+
+=> la c'étiat très mal expliqué: faut quand même préciser que notre échantillon de test est à la localisation $x_0=0$ et qu'on va chercher un point dans T (training set) le plus proche. Plus la dimension est grande et plus ce point sera dans les épines comme sur l'image en haut et donc la distance va exploser ce qui va faire qu'on va prédire 0 au lieu de 1 c'est donc totalement biaisé.
+
+On décompose l'erreur en biais et variance :
+
+$\text{MSE}(x_0) = \underbrace{\left(f(0) - \mathbb{E}[\hat y_0]\right)^2}_{\text{biais}^2} + \underbrace{\text{Var}(\hat y_0)}_{\approx 0}$
+
+> [!warning] Ce qu'on observe
+> - **Biais** : domine et explose. Le NN s'éloigne de l'origine → $f(x_{\text{NN}}) \to 0$ → sous-estimation systématique. En $d=10$, plus de 99% des tirages ont leur NN à distance $> 0.5$, où $f \approx 0.13$. Le biais plafonne à 1 ($= f(0) - 0$), la MSE aussi.
+> - **Variance** : quasi nulle partout. Les données sont uniformes donc peu importe le tirage de $\mathcal{T}$, le NN tombe toujours à peu près à la même distance. La prédiction est stable — mais stablement fausse.
+
+C'est le visage de la malédiction en régression : **le 1-NN meurt par biais, pas par variance.**
+
+
+
+![[Pasted image 20260617211745.png|291]]![[Pasted image 20260617211819.png|268]]
+**Figure.** *Placeholder — courbes MSE, biais² et variance en fonction de $d$ pour cet exemple. MSE et biais² montent et plafonnent à 1, variance reste quasi nulle.*
+
+**Échappatoire — le modèle linéaire.** Le kNN fait de la moyenne locale, et c'est exactement là que la malédiction frappe. Le modèle linéaire $Y = X^T\beta + \varepsilon$ (OLS) échappe à ce piège : il utilise **tous** les points du training set pour estimer $\beta$, sans notion de voisinage. En moyennant sur $x_0$ avec $N$ grand :
+
+$\mathbb{E}_{x_0}[\text{EPE}(x_0)] = \sigma^2 + \sigma^2 \frac{p}{N}$
+
+L'EPE croît **linéairement** en $p$, pas exponentiellement. La malédiction est tuée — au prix d'une hypothèse forte : si la vraie $f$ n'est pas linéaire, le biais structurel peut être énorme. C'est le tradeoff fondamental : **localité sans hypothèse (kNN) vs structure imposée (linéaire)**.
+
+**Borne formelle — Lipschitz et le corollaire de Mallat.** On peut se demander si la malédiction est évitable avec un meilleur estimateur. La réponse est non, sous hypothèse Lipschitz. Si $f$ est uniformément Lipschitz de constante $C$ sur $\Omega$ compact, alors pour **tout** estimateur $\tilde f$ :
+
+$\sup_{f \in \mathcal{F}} \|f - \tilde f\|_\infty \geq C \frac{\sqrt{d}}{2} \sqrt{\frac{2}{\pi e}} \left(1 + O\left(\frac{\log d}{d}\right)\right) \cdot n^{-1/d}$
+
+Pour atteindre une erreur $C\epsilon$, il faut donc :
+
+$n \geq \frac{\epsilon^{-d}\, d^{d/2}}{(2\pi e)^{d/2}}$
+
+C'est une **borne minimax** : pas "un mauvais modèle se plante", mais "le meilleur modèle possible se plante au moins autant". L'explosion exponentielle $\epsilon^{-d}$ est inévitable sous cette seule hypothèse de régularité. La sortie n'est donc pas "plus de données" — c'est **changer la classe de fonctions**, en imposant une structure plus forte que Lipschitz. C'est exactement ce que font les réseaux de neurones via la compositionnalité et les invariances, ce qui leur permet de casser cette borne.
+
+> [!note]- Pourquoi Lipschitz ne suffit pas
+> Lipschitz dit seulement "$f$ ne varie pas trop vite". C'est une hypothèse faible qui ne dit rien sur la **structure** de $f$. Les hypothèses plus fortes qui cassent la borne sont par exemple : additivité ($f(x) = \sum_i f_i(x_i)$, qui ramène à $d$ problèmes 1D), compositionnalité (la vraie $f$ se décompose en couches, chaque couche simple), ou faible dimension intrinsèque (les données vivent sur une sous-variété de dimension $k \ll d$ — ce qu'on formalise en I.F).
+
+**Remarque :** tu m'avais parlé que les réseaux de neurones font exploser cette bornes en partie grâce à trois propriétés, l'invariance, la composabilité et le ? 
+
+**Overfitting et malédiction de la dimension:** on en avait parlé de ça je vois que ta rien dessus ici 
+
+**remarque 2:** je me demande si ça serait pas bien d'avoir une petite table "récap" sur ce qu'on a vu pour régresion linéaire , knn , neural nets, svm et ce que tu veux sur overfitting malédiction de la dimension.
+
+---
+
+### F. Manifold Hypothesis
+
+> La section E a décrit le pire cas : données uniformes dans $\mathbb{R}^d$, malédiction pleine. Cette section explique pourquoi le ML fonctionne malgré tout en pratique — et quelle hypothèse fondamentale le justifie.
+
+**Le constat.** Les données réelles ne remplissent pas $\mathbb{R}^d$ de façon uniforme. Des images de chats sont techniquement des vecteurs de $\mathbb{R}^{10^6}$ (pixels), mais elles ne peuvent pas avoir n'importe quelle valeur : elles forment une structure très fine dans cet espace énorme.
+
+> [!warning] Manifold Hypothesis
+> Les données réelles vivent sur une **sous-variété** de dimension intrinsèque $k \ll d$, plongée dans l'espace ambiant $\mathbb{R}^d$. La malédiction de la dimension joue en $k$, pas en $d$.
+
+**L'intuition de Bishop.** Pourquoi $k$ est-il petit ? Parce que les données sont générées par un petit nombre de **causes physiques**, même si leur représentation est en haute dimension. Pour des images d'un objet, les degrés de liberté réels sont par exemple : l'orientation de l'objet, sa position dans la scène, la distance à la caméra. Trois paramètres physiques — pas un million. Toutes les images de cet objet forment donc une surface de dimension $k=3$ dans $\mathbb{R}^{10^6}$, pas un nuage qui remplit l'espace.
+
+![[manifold_hypothesis.png|355]]
+**Figure.** *Placeholder — sous-variété (surface courbe) dans un espace ambiant $\mathbb{R}^3$, avec deux classes (chats / chiens) comme régions sur cette variété et une frontière de décision dessus. Les trois axes représentent les paramètres physiques de Bishop : orientation, position, distance caméra.*
+
+**Ce que ça change pour les modèles.** Le ML ne réduit pas la dimension ambiante $d$ — un réseau de neurones prend bien $d$ features en entrée. Ce qu'il apprend, c'est à **exploiter** la structure de dimension $k$ pour faire sa prédiction. La malédiction joue en $k$ parce que c'est la vraie complexité du problème.
+
+Deux grandes familles selon comment elles traitent la variété :
+
+- **PCA** : cherche une sous-variété **linéaire** (un sous-espace plat). Elle approxime la variété par le meilleur hyperplan de dimension $k$. C'est la version linéaire de la Manifold Hypothesis.
+- **Réseaux de neurones** : apprennent une sous-variété **non-linéaire** pendant l'entraînement. Chaque couche déforme l'espace des représentations pour "déplier" la variété et rendre la tâche linéairement soluble en sortie.
+
+> [!note]- Dimension intrinsèque et Lipschitz
+> Le corollaire de Mallat (I.E) donne une borne en $\epsilon^{-d}$ sous hypothèse Lipschitz seule. La Manifold Hypothesis est précisément l'hypothèse structurelle plus forte qui **casse cette borne** : si les données vivent sur une variété de dimension $k$, la borne devient $\epsilon^{-k}$. Tout le gain vient de $d \to k$. C'est pourquoi la compositionnalité et les invariances des réseaux de neurones ne sont pas juste des astuces d'ingénieur — elles sont la façon dont le modèle exploite implicitement que $k \ll d$.
+
+> [!note]- La variété n'est pas prouvée, c'est un pari
+> La Manifold Hypothesis est une hypothèse empirique, pas un théorème. On ne sait pas calculer $k$ exactement pour un dataset réel, et la variété n'est pas visualisable directement dès que $d > 3$. Ce qu'on sait : empiriquement, les modèles qui l'exploitent (neural nets, kernel methods, PCA) fonctionnent bien malgré $d$ grand. Si les données étaient vraiment uniformes ($k = d$), aucun modèle ne s'en sortirait — pas même les réseaux de neurones profonds.
 
 ---
 

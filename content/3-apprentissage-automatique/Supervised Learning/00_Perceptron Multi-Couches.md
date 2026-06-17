@@ -10,9 +10,9 @@ weight: 3
 
 Un réseau de neurones artificiels est composé de neurones organisés en couches. Le cas le plus simple est le perceptron multi-couches (MLP) avec une couche cachée :
 
-![[Pasted image 20260418192240.png|397]]
+![[nn_architecture.png|397]]
 
-![[Pasted image 20260418192459.png|317]]
+![[input_dataset.png|317]]
 
 ## I - Forward Pass
 
@@ -148,7 +148,96 @@ En comparaison dans le réseau de neurone : j'initialise mes matrices $W^{(i)}$ 
 
 C'est étonnamment plutôt rapide alors qu'il y a beaucoup d'étapes de calcul !
 
-## III - Algorithme d'Entraînement
+
+## II.5 — Géométrie de la loss : visualiser le paysage d'optimisation
+
+> Le gradient descent descend une surface dans l'espace des paramètres $\theta \in \mathbb{R}^P$ — mais $P$ est typiquement de l'ordre de $10^6$ à $10^{12}$, complètement invisible. La **loss landscape** est une façon de projeter cette surface en 2D ou 3D pour en comprendre la géométrie.
+
+**La méthode (Li et al. 2018).** On fixe les poids entraînés $\theta^*$, on tire deux directions aléatoires $\delta_1, \delta_2 \in \mathbb{R}^P$, et on trace :
+
+$L(\alpha, \beta) = J(\theta^* + \alpha\,\delta_1 + \beta\,\delta_2)$
+
+en faisant varier $\alpha, \beta$ sur une grille. L'astuce clé de Li et al. est la **filter normalization** : chaque direction $\delta$ est normalisée filtre par filtre (couche par couche) pour que l'échelle soit comparable entre couches de tailles différentes. Sans ça, les directions sont dominées par les couches les plus larges et la visualisation est trompeuse.
+
+![[loss_landscape.png]]
+**Figure.** *Loss landscape d'un réseau 2→16→16→2→1 entraîné sur les spirales. Gauche : surface 3D autour de $\theta^*$ (point rouge). Milieu : vue de dessus avec contours. Droite : coupe 1D le long d'une direction aléatoire. Le minimum est dans une vallée large et plate — caractéristique des **flat minima**.*
+
+**Ce que la géométrie révèle.**
+
+- **Flat minima vs sharp minima.** Un minimum plat (largement entouré de basse loss) généralise mieux qu'un minimum pointu — si les poids bougent légèrement (bruit de test, perturbation), la loss reste basse. C'est l'argument de Hochreiter & Schmidhuber (1997), formalisé par Keskar et al. (2017) qui montrent empiriquement que les **gros mini-batches** convergent vers des sharp minima (mauvaise généralisation) et les **petits mini-batches** vers des flat minima (bonne généralisation).
+
+- **Pas de vrais minima locaux en haute dim.** Contrairement à l'intuition 2D, Goodfellow et al. (2015) et Dauphin et al. (2014) montrent que les points critiques d'un réseau profond sont **presque tous des points-selle** (valeurs propres mixtes de la Hessienne), pas des minima locaux. Les rares vrais minima locaux ont tous des valeurs de loss similaires au minimum global. C'est pourquoi le gradient descent fonctionne malgré la non-convexité.
+
+- **La coupe 1D.** La courbe droite de la figure montre que le long d'une direction aléatoire, le paysage est asymétrique : descente douce d'un côté, remontée plus abrupte de l'autre. C'est typique — les directions de forte courbure (Hessienne élevée) correspondent aux directions dans lesquelles l'optimisation avance lentement et le minimum est le plus sensible aux perturbations.
+
+> [!note]- Lien avec Adam et le choix d'optimiseur
+> Adam adapte son pas **par paramètre** en divisant par la racine carrée du moment du second ordre — ce qui revient à préconditionner le gradient par une estimation diagonale de la Hessienne. Dans les directions de forte courbure (grand $\nabla^2 J$), Adam fait des petits pas ; dans les directions plates, des grands pas. C'est exactement la bonne réponse à la géométrie anisotrope qu'on voit dans la loss landscape. SGD vanilla, lui, fait le même pas dans toutes les directions — il souffre davantage dans les vallées allongées ("ravines") que visualise le panneau de gauche.
+
+> [!note]- Référence
+> Li, H., Xu, Z., Taylor, G., Studer, C., & Goldstein, T. (2018). Visualizing the loss landscape of neural nets. *NeurIPS 2018.* La figure classique de leur papier compare les landscapes de réseaux avec et sans skip connections (ResNet) — avec les skip connections le paysage est beaucoup plus lisse, ce qui explique en partie pourquoi les ResNets s'entraînent mieux.
+
+
+
+
+
+## II.6 — Théorème d'approximation universelle
+
+> Un réseau de neurones peut-il approcher **n'importe quelle fonction** ? La réponse est oui — c'est le **théorème d'approximation universelle**, et c'est l'un des résultats théoriques fondamentaux qui justifie pourquoi les réseaux de neurones sont un outil si général.
+
+**L'énoncé informel.** Un MLP avec une seule couche cachée de largeur suffisante peut approcher n'importe quelle fonction continue sur un compact, avec une précision arbitraire.
+
+> [!warning] Théorème d'approximation universelle (Cybenko 1989, Hornik 1991)
+> Soit $g : \mathbb{R} \to \mathbb{R}$ une fonction d'activation non polynomiale (ex : sigmoïde, ReLU, tanh). Alors pour toute fonction continue $f : [0,1]^d \to \mathbb{R}$ et tout $\varepsilon > 0$, il existe $N \in \mathbb{N}$ et des paramètres $w_i, b_i, c_i$ tels que :
+> $\sup_{x \in [0,1]^d} \left| f(x) - \sum_{i=1}^N c_i\, g(w_i^T x + b_i) \right| < \varepsilon$
+> Un MLP à une couche cachée de $N$ neurones peut approcher $f$ à $\varepsilon$ près.
+
+**L'intuition géométrique.** Chaque neurone $g(w^T x + b)$ découpe l'espace input avec un hyperplan (défini par $w^T x + b = 0$) et applique une non-linéarité de part et d'autre. En combinant linéairement assez de ces "tranchées", on peut approximer n'importe quelle forme — comme une somme de marches d'escalier peut approcher n'importe quelle courbe.
+
+Avec une sigmoïde : chaque neurone fait une transition douce entre 0 et 1 le long d'un hyperplan. La somme pondérée de ces transitions peut sculpter n'importe quelle surface.
+
+![[universal_approximation.png]]
+**Figure.** *Ligne du haut : approximation d'une fonction 1D complexe avec $N = 3, 10, 50$ neurones — l'erreur max passe de 0.81 à 0.001 quand $N$ augmente. Ligne du bas (gauche) : chaque neurone découpe $\mathbb{R}^2$ avec un hyperplan et une zone activée. Ligne du bas (milieu/droite) : la combinaison de 3 puis 30 neurones crée des frontières de décision de plus en plus complexes.*
+
+**Ce que le théorème ne dit PAS.**
+
+- Il garantit l'**existence** des paramètres, pas qu'on sait les trouver. Le gradient descent n'est pas garanti de converger vers la bonne solution.
+- Il ne dit rien sur la **taille** $N$ nécessaire — elle peut être astronomique. En pratique, on préfère des réseaux **profonds** (plusieurs couches) plutôt que larges, car la profondeur permet une représentation exponentielle plus compacte.
+- Il ne dit rien sur la **généralisation** — un réseau qui approxime parfaitement $f$ sur $[0,1]^d$ peut extrapoler n'importe comment hors de ce domaine.
+
+**Pourquoi la profondeur plutôt que la largeur.** Barron (1993) et des résultats plus récents montrent qu'un réseau profond peut représenter certaines fonctions avec exponentiellement moins de neurones qu'un réseau plat. L'intuition : chaque couche compose les représentations de la couche précédente — comme les fonctions composées $f_3(f_2(f_1(x)))$ peuvent représenter des structures hiérarchiques complexes avec peu de paramètres par niveau.
+
+C'est le pendant théorique de ce qu'on voit empiriquement avec la Manifold Hypothesis (cf. [[01_Fondation#F. Manifold Hypothesis]]) : les données du monde réel ont une structure hiérarchique et compositionnelle, et les réseaux profonds sont précisément taillés pour l'exploiter.
+
+> [!note]- Le lien avec Mallat et les transformées de Fourier
+> Mallat (cours Collège de France) donne une vision plus profonde : les couches d'un réseau effectuent des opérations analogues à des **transformées en ondelettes** — chaque couche extrait des structures à une certaine échelle, et la composition des couches remonte les échelles (pixels → bords → formes → objets). Ce n'est plus juste "on peut approcher n'importe quoi" mais "on approche efficacement les fonctions qui ont une structure multi-échelle" — ce qui est précisément la structure des signaux naturels (images, sons, texte). C'est la version constructive et quantitative du théorème d'approximation universelle.
+
+---
+
+## III - Ce qu'apprend un réseau - représentation et déformation de l'espace
+
+> Les sections I à III décrivent **comment** un réseau calcule et s'entraîne. Cette section répond à une question différente : **qu'est-ce qu'il apprend concrètement** ? L'idée clé est que chaque couche déforme l'espace des données pour rendre le problème progressivement plus simple.
+
+**Le problème de départ.** Deux spirales entrelacées dans $\mathbb{R}^2$ — un problème de classification binaire non-linéairement séparable. Aucune droite ne peut séparer les deux classes dans l'espace input. C'est exactement le type de structure que le modèle linéaire ne peut pas capturer (cf. [[01_Fondation#E. Curse of dimensionality]]).
+
+**Ce que fait le réseau.** On entraîne un réseau 2→16→16→**2**→1 (tanh, Adam). L'avant-dernière couche $h_3$ projette dans $\mathbb{R}^2$ — ce qui permet de visualiser directement la représentation apprise sans PCA. La dernière couche est un simple classifieur **linéaire** dans cet espace $\mathbb{R}^2$.
+
+![[nn_learning.png]]
+**Figure.** *Ligne du haut : frontière de décision dans l'espace input $\mathbb{R}^2$ à différentes étapes de l'entraînement. Ligne du bas : représentation cachée $h_3 \in \mathbb{R}^2$ des mêmes données. À epoch 6000, les deux classes sont linéairement séparables dans $h_3$ (frontière pointillée = droite).*
+
+**Lecture de la figure.**
+
+- **Epoch 0** : poids aléatoires → frontière arbitraire dans l'input, nuage mélangé dans $h_3$.
+- **Epoch 200** : le réseau commence à détecter une structure globale, mais rate encore les spirales.
+- **Epoch 1500** : la frontière s'enroule autour des spirales, $h_3$ commence à séparer les classes.
+- **Epoch 6000** : les spirales sont bien séparées. Dans $h_3$, les deux classes occupent deux régions distinctes séparables par une **droite** — le réseau a "déplié" la variété.
+
+> [!warning] Le message fondamental
+> Le réseau n'apprend pas à mémoriser les points. Il apprend une **transformation de l'espace** $\mathbb{R}^2 \to \mathbb{R}^2$ (via les couches cachées) telle que le problème devient linéairement soluble dans l'espace de représentation finale. La dernière couche n'est qu'un classifieur linéaire — toute la "magie" est dans les couches cachées.
+
+> [!note]- Lien avec la Manifold Hypothesis
+> Les deux spirales forment une **variété 1D** (une courbe) dans $\mathbb{R}^2$. Dans l'espace input, cette variété est entrelacée — les deux classes sont inséparables. Le réseau apprend à **déplier** cette variété dans $h_3$ pour que les deux branches se retrouvent de part et d'autre d'un hyperplan. C'est la version concrète de ce qu'on décrit abstraitement dans [[01_Fondation#F. Manifold Hypothesis]] : le réseau exploite la structure de faible dimension intrinsèque des données pour résoudre le problème.
+
+## IV - Algorithme d'Entraînement
 
 L'algorithme d'entraînement alterne entre les phases forward (Section I) et backward (Section II) :
 
@@ -168,7 +257,7 @@ for epoch in range(num_epochs):
         W = W - alpha * gradients
 ```
 
-## IV - Visualisations 3D
+## V - Visualisations 3D
 
 
 en gros une fois que le modèle a été appris on a les matrice W^(i) qui ont été updaté et donc on a une fonction qui permet d'écrire une fonction pour faire de l'interpolation quoi en gros 
@@ -176,9 +265,13 @@ en gros une fois que le modèle a été appris on a les matrice W^(i) qui ont é
 
 $J(\theta)=\frac{1}{2n}\sum_{i=1}^{n}(y^{(i)} - g_2(g_1(XW^{(1)})W^{(2)} ))^2$
 
-![[Pasted image 20260419141718.png|332]]
+![[surface_3D_NN.png|332]]
 
-## V - Choix d'Architectures
+Ou encore mieux comme image c'est celui du welch labs
+
+![[Pasted image 20260617213937.png]]
+
+## VI - Choix d'Architectures
 
 ### A. Initialisation des poids
 
@@ -228,7 +321,33 @@ Xavier est conçu pour des activations **symétriques autour de zéro** (tanh, s
 
 $$\boxed{\;\sigma^2 = \frac{2}{n_{\text{in}}}\;}$$
 
-En pratique, c'est l'initialisation **par défaut** dans PyTorch et TensorFlow pour les couches suivies d'une ReLU (ou Leaky ReLU).
+En pratique, c'est l'initialisation **par défaut** dans PyTorch et TensorFlow pour les couches suivies 
+d'une ReLU (ou Leaky ReLU).
+
+#### Regard RMT sur l'initialisation
+
+Xavier et He sont des règles empiriques bien justifiées, mais la **Random Matrix Theory** (RMT) donne un cadre théorique plus profond pour comprendre pourquoi elles fonctionnent — et où elles atteignent leurs limites.
+
+**Le fait de base.** Une matrice de poids $W^{(l)} \in \mathbb{R}^{n_{\text{out}} \times n_{\text{in}}}$ avec des entrées i.i.d. $\mathcal{N}(0, \sigma^2)$ est une **matrice rectangulaire aléatoire**. RMT nous dit que ses **valeurs singulières** (les racines carrées des valeurs propres de $W^T W$) ne sont pas arbitraires : quand $n_{\text{in}}, n_{\text{out}} \to \infty$ avec ratio $q = n_{\text{out}}/n_{\text{in}}$ fixe, leur distribution converge vers la **loi de Marchenko-Pastur** :
+
+$\rho_{\text{MP}}(\lambda) = \frac{1}{2\pi \sigma^2} \frac{\sqrt{(\lambda_+ - \lambda)(\lambda - \lambda_-)}}{q \lambda}, \qquad \lambda \in [\lambda_-, \lambda_+]$
+
+avec $\lambda_{\pm} = \sigma^2(1 \pm \sqrt{q})^2$.
+
+![[marchenko_pastur_init.png]]
+**Figure.** *Placeholder — histogramme des valeurs singulières de $W$ pour différents ratios $q = n_{\text{out}}/n_{\text{in}}$, superposé à la densité Marchenko-Pastur théorique.*
+
+**Ce que ça dit sur Xavier.** L'étalement des valeurs singulières est $[\lambda_-, \lambda_+] = [\sigma^2(1-\sqrt{q})^2,\, \sigma^2(1+\sqrt{q})^2]$. La **valeur singulière typique** est $\sigma^2 \cdot q^{1/2}$ au sens de la médiane de la loi MP. Pour que cette valeur typique soit d'ordre 1 (ni explosion ni effondrement lors du produit $Wx$), il faut $\sigma^2 \sim 1/n_{\text{in}}$ — ce qui est exactement la prescription Xavier. RMT justifie donc Xavier non pas depuis un argument de variance scalaire, mais depuis la **géométrie spectrale** de la matrice entière.
+
+**Ce que Xavier ne peut pas voir.** La règle Xavier suppose des entrées i.i.d. gaussiennes et un réseau en régime linéaire. En pratique, après quelques étapes d'entraînement, $W$ n'est plus aléatoire : une partie de ses valeurs singulières encode un **signal appris**, le reste est du **bruit résiduel**. RMT permet de séparer les deux : les valeurs singulières qui dépassent le bord de la loi MP ($\lambda_+$) correspondent au signal, celles qui restent à l'intérieur sont du bruit pur.
+
+C'est le même diagnostic que pour les matrices de covariance en finance (cf. [[02_Marchenko_Pastur]]) — appliqué aux poids d'un réseau.
+
+> [!note]- Lien avec le vanishing gradient
+> Le **vanishing gradient** a aussi une lecture RMT. Lors du backward pass, le gradient se propage via des produits de matrices $\frac{\partial L}{\partial z^{(l)}} = \frac{\partial L}{\partial z^{(l+1)}} \cdot W^{(l+1)} \cdot \text{diag}(g'(z^{(l)}))$. Si les valeurs singulières de $W^{(l)}$ sont toutes $< 1$, le produit de $L$ telles matrices fait tendre le gradient vers 0 exponentiellement vite en $L$. La condition Xavier / He revient à maintenir les valeurs singulières **d'ordre 1** — ce que RMT garantit précisément quand $\sigma^2 = 1/n_{\text{in}}$.
+
+> [!note]- Pour aller plus loin
+> La connexion RMT — réseaux de neurones est un domaine de recherche actif. Quelques références clés : Martin & Mahoney (2021) "Implicit Self-Regularization in Deep Neural Networks" montrent que les poids entraînés suivent des lois de puissance dans leur spectre (Heavy-Tailed Self-Regularization). Pennington & Wakhoo (2017) utilisent la **free probability** pour analyser la propagation du signal dans des réseaux profonds aléatoires — le même outil que [[05_Free_Probability]] appliqué ici.
 
 #### Récapitulatif
 

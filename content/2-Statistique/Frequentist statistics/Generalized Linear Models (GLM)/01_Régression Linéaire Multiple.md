@@ -885,6 +885,17 @@ On se place ici sous l'hypothèse de normalité **H6** (cf. II.A.H6) : les rési
 
 #### B.1 — Le $R^2$
 
+> 💡 **L'intuition la plus directe.** Avant la décomposition formelle ci-dessous, voici la façon la plus simple de comprendre le $R^2$ : c'est une comparaison entre deux modèles.
+>
+> - **Modèle naïf** : je prédis toujours $\bar y$ (la moyenne), peu importe $x$. L'erreur résiduelle de ce modèle a une variance $\text{Var}(\text{mean})$ — c'est exactement $\text{SST}/n$.
+> - **Modèle régression** : je prédis $\hat y = \hat\alpha + \hat\beta x$. L'erreur résiduelle a une variance $\text{Var}(\text{line})$ — c'est $\text{SSR}/n$.
+>
+> Comme la droite ne peut **jamais** faire pire que la moyenne (au sens des moindres carrés — la moyenne est le cas particulier $\beta=0$), on a toujours $\text{Var}(\text{line}) \le \text{Var}(\text{mean})$. Le $R^2$ mesure **de combien la droite réduit cette variance, en proportion** :
+>
+> $R^2 = \frac{\text{Var}(\text{mean}) - \text{Var}(\text{line})}{\text{Var}(\text{mean})}$
+>
+> Lecture : si la droite réduit la variance à 0 (prédiction parfaite), $R^2 = 1$. Si la droite n'apporte **rien** par rapport à la moyenne ($\hat\beta \approx 0$, $\text{Var}(\text{line}) \approx \text{Var}(\text{mean})$), $R^2 \approx 0$ — la régression ne sert à rien, autant prédire la moyenne. C'est **rigoureusement identique** à la définition SSE/SST ci-dessous : $\text{Var}(\text{mean}) = \text{SST}/n$ et $\text{Var}(\text{line}) = \text{SSR}/n$, et le $n$ s'annule dans le ratio.
+
 **(i) Définition classique — la décomposition des sommes de carrés**
 
 > [!warning] Décomposition fondamentale

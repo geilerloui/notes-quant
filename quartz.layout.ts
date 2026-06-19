@@ -3,10 +3,11 @@ import * as Component from "./quartz/components"
 
 const explorerConfig = {
   sortFn: (a: any, b: any) => {
-    const orderA = (a.data?.order ?? 999) as number
-    const orderB = (b.data?.order ?? 999) as number
-    if (orderA !== orderB) return orderA - orderB
-    return a.displayName.localeCompare(b.displayName, undefined, {
+    // Tri par nom de fichier (qui porte la numérotation 01_, 02_, ...).
+    // numeric:true garantit 02 avant 10 (au lieu d'un tri lexicographique 1,10,2).
+    const nameA = a.file?.name ?? a.slug ?? a.displayName
+    const nameB = b.file?.name ?? b.slug ?? b.displayName
+    return nameA.localeCompare(nameB, undefined, {
       numeric: true,
       sensitivity: "base",
     })

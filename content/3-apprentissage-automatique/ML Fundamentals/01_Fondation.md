@@ -231,6 +231,12 @@ On a vu en I.B.3 que le minimiseur théorique est le **classifieur de Bayes**. E
 > - **Biais** : erreur systématique. *En moyenne sur tous les datasets possibles, est-ce que $\hat f$ vise juste ?* Un modèle linéaire sur une vraie relation quadratique aura un biais structurel non nul, peu importe la quantité de données.
 > - **Variance** : sensibilité aux données. *Si je ré-entraîne sur un autre dataset tiré de la même distribution, est-ce que $\hat f(x_0)$ change beaucoup ?*
 
+
+![[Pasted image 20260425192714.png|405]]
+
+
+
+
 > [!note]- Dérivation
 > On note $\mu = \mathbb{E}[\hat f(x_0)]$ et on écrit :
 > 
@@ -243,6 +249,13 @@ On a vu en I.B.3 que le minimiseur théorique est le **classifieur de Bayes**. E
 > [!warning] Overfitting & Underfitting
 > - Modèle trop simple → **fort biais** → **underfitting** : $\text{MSE}^{\text{train}}$ et $\text{MSE}^{\text{test}}$ tous deux élevés.
 > - Modèle trop complexe → **forte variance** → **overfitting** : $\text{MSE}^{\text{train}}$ très faible mais $\text{MSE}^{\text{test}} \gg \text{MSE}^{\text{train}}$ (le modèle mémorise les fluctuations du train).
+
+> [!warning] Généralisation
+> La **généralisation** d'un modèle, c'est sa capacité à bien performer sur des données **jamais vues**, tirées de la même distribution que le train. Formellement, l'**erreur de généralisation** (*generalization error*) est le test error quand le test set tend vers l'infini — c'est exactement l'**EPE** définie en I.B.
+>
+> $\text{generalization error} \;=\; \lim_{n_{\text{test}} \to \infty} \text{test error} \;=\; \text{EPE}$
+>
+> Un modèle qui **overfit** a une excellente performance sur le train mais une mauvaise généralisation — il a mémorisé le bruit du train plutôt que d'apprendre la vraie structure de $f$. À l'inverse, un modèle qui **underfit** généralise mal aussi, mais pour une raison différente : il n'a jamais capturé $f$, même sur le train. Toute la section II (cross-validation, learning curves) sert à **estimer** cette erreur de généralisation sans disposer d'un jeu de test infini.
 
 ![[Pasted image 20260425191515.png]]
 **Figure 4.** Cas $f$ non linéaire. (a) La vraie fonction (noir) est une sinusoïde tronquée. (b) On fait varier les degrés de liberté du modèle (splines) en abscisse, du moins flexible (gauche) au plus flexible (droite). Le **train MSE** (gris) ne fait que chuter. Le **test MSE** (rouge) est en forme de U.
@@ -372,11 +385,19 @@ C'est une **borne minimax** : pas "un mauvais modèle se plante", mais "le meill
 > [!note]- Pourquoi Lipschitz ne suffit pas
 > Lipschitz dit seulement "$f$ ne varie pas trop vite". C'est une hypothèse faible qui ne dit rien sur la **structure** de $f$. Les hypothèses plus fortes qui cassent la borne sont par exemple : additivité ($f(x) = \sum_i f_i(x_i)$, qui ramène à $d$ problèmes 1D), compositionnalité (la vraie $f$ se décompose en couches, chaque couche simple), ou faible dimension intrinsèque (les données vivent sur une sous-variété de dimension $k \ll d$ — ce qu'on formalise en I.F).
 
-**Remarque :** tu m'avais parlé que les réseaux de neurones font exploser cette bornes en partie grâce à trois propriétés, l'invariance, la composabilité et le ? 
+> [!note]- Récap — malédiction de la dimension par modèle
+> | Modèle | Comment il échappe (ou pas) à la malédiction |
+> |---|---|
+> | **Régression linéaire** | Échappe par hypothèse structurelle forte. EPE croissant en $p/N$, pas exponentiel. Biais nul si $f$ est vraiment linéaire, sinon biais structurel élevé. |
+> | **kNN** | Ne s'échappe pas. Localité sans hypothèse → le voisin s'éloigne exponentiellement vite, biais explose (cf. exemple ci-dessus). |
+> | **Réseaux de neurones** | Échappent **si** l'architecture encode les bonnes symétries (CNN → translation, RNN → translation temporelle). Sinon (MLP générique) restent dans le pire cas, comme le kNN. Cf. [[00_Perceptron Multi-Couches#VI — Pourquoi ça marche : Mallat]]. |
+> | **SVM (kernel)** | Le kernel trick projette en très haute dimension, mais le **kernel** encode une notion de similarité (souvent locale, comme RBF) — même problème que kNN si le kernel n'exploite pas de structure. Les kernels structurés (ex : kernel de chaînes pour texte) s'en sortent mieux. |
+> | **Arbres / Random Forest** | Partitionnement récursif de l'espace — souffre aussi de la sparsité en haute dimension (chaque split a de moins en moins de points), mais le bagging réduit la variance. |
+>
+> Le facteur commun : un modèle échappe à la malédiction **uniquement s'il impose une structure** (linéarité, symétrie, additivité) qui réduit la dimension effective du problème. Sans ça, tout modèle retombe dans le pire cas.
 
-**Overfitting et malédiction de la dimension:** on en avait parlé de ça je vois que ta rien dessus ici 
-
-**remarque 2:** je me demande si ça serait pas bien d'avoir une petite table "récap" sur ce qu'on a vu pour régresion linéaire , knn , neural nets, svm et ce que tu veux sur overfitting malédiction de la dimension.
+> [!note]- Lien avec l'overfitting (cf. I.D)
+> La malédiction de la dimension et l'overfitting sont **deux symptomes du même problème sous-jacent** : pas assez de données par rapport à la complexité effective du problème. La décomposition biais-variance de I.D s'applique directement ici — le 1-NN en haute dimension est un cas extrême de la courbe en U de la Figure 4 : biais énorme, variance quasi nulle. C'est un point important car l'intuition naïve associe souvent kNN/modèles flexibles à "forte variance" — mais en haute dimension, c'est le **biais** qui domine pour le 1-NN (cf. décomposition ci-dessus). La malediction de la dimension est donc un cas où l'overfitting au sens classique (variance) n'est **pas** le problème principal — c'est l'incapacité structurelle à capturer $f$ qui domine.
 
 ---
 

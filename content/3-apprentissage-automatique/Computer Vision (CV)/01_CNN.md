@@ -235,3 +235,51 @@ Le réseau **redécouvre** automatiquement le zoo classique du traitement du sig
 - Sur des signaux réels (bruités), on **combine toujours lissage + dérivation**, soit en deux passes, soit dans un filtre intelligent (Sobel, LoG).
 - Un CNN, c'est un empilement de telles convolutions où **les coefficients des filtres sont appris par descente de gradient** au lieu d'être fixés à la main.
 - Les premières couches d'un CNN entraîné sur des images réelles redécouvrent spontanément les filtres classiques du traitement du signal (Sobel, Gabor, LoG-like).
+
+---
+
+## IV — Pourquoi les CNN fonctionnent : symétries et hiérarchie (Mallat)
+
+> Cette section développe le point 3 du programme de Mallat esquissé dans [[00_Perceptron Multi-Couches#II.7 — Pourquoi les réseaux marchent : géométrie et symétries (Mallat)]]. L'argument central : les CNN échappent à la malédiction de la dimension parce qu'ils **encodent explicitement les symétries** des données visuelles dans leur architecture.
+
+**Symétries et réduction de dimension.** Une symétrie de $f$ c'est une transformation $g$ telle que $f(g \cdot x) = f(x)$ même si $g \cdot x$ est loin de $x$ — une régularité **globale**, contrairement à Lipschitz qui est locale. Si $f$ possède un groupe de symétrie $G$, l'espace d'étude se réduit de $\Omega$ à $\Omega/G$. Plus $G$ est grand, plus la réduction est massive — et donc plus on s'affranchit de la borne $n \geq \epsilon^{-d}$.
+
+**Symétries des images.** Une image $x$ est un champ de pixels $x(u)$ où $u$ indexe la position 2D. Deux symétries naturelles :
+
+- **Translation globale** : $x(u) \to x(u-g)$ — décaler l'image ne change pas la nature de l'objet. C'est exactement ce qu'encodent les convolutions via le partage de poids : un même filtre appliqué à toutes les positions.
+- **Déformation locale** : $x(u) \to x(u - g(u))$ — déformer l'image (rotation locale, étirement) ne change pas non plus la nature de l'objet. $g$ est maintenant une *fonction*, pas un scalaire — le groupe $G$ devient de très grande dimension, d'où une réduction massive de la dimension effective.
+
+![[déformation.png|300]]
+**Figure.** *Déformations du chiffre 3 — chaque version est une transformation $x(u) \to x(u - g(u))$ avec un $g$ différent. La fonction $f$ (« c'est un 3 ») reste invariante.*
+
+![[déformation_2.png|500]]
+**Figure.** *Types de déformations : translation, rotation, distorsion locale (difféomorphisme). L'invariance par translation est encodée par les convolutions ; les déformations locales sont gérées par la data augmentation et le pooling.*
+
+> [!note]- Invariance vs équivariance
+> Les convolutions sont **équivariantes** par translation : si l'image est décalée, la feature map l'est aussi de la même façon. L'**invariance** (la prédiction finale ne dépend pas de la position) n'arrive qu'après le pooling global. La distinction est importante pour comprendre ce que chaque couche apprend.
+
+**Ce que le réseau apprend.** Un CNN opère via une représentation $\Phi_w$ apprise, puis un classifieur linéaire :
+
+$x \to \Phi_w(x) \to f_w(x) = \sigma(\langle \omega, \Phi_w(x) \rangle)$
+
+Si le problème possède la symétrie $g$ et que le réseau l'a apprise, alors $\Phi_w(g \cdot x) = \Phi_w(x)$ et donc $f_w(g \cdot x) = f_w(x)$. Expérimentalement : deux CNN entraînés avec des initialisations différentes ont des poids individuels très différents, mais des représentations $\Phi_w$ fonctionnellement équivalentes. **Ce ne sont pas les poids qui comptent, ce sont les invariants qu'ils encodent.**
+
+**Hiérarchie multi-échelles — de $d$ à $O(\log d)$.** Les pixels d'une image interagissent principalement avec leurs voisins proches, mais les interactions à grande distance comptent aussi (en somme, elles sont du même ordre que les interactions locales à cause du grand nombre). La solution : **moyenner progressivement** à mesure qu'on s'éloigne. On passe d'un problème de dimension $d$ (tous les pixels) à $O(\log d)$ par hiérarchisation — ce qui **casse la malédiction de la dimension**.
+
+C'est exactement ce que fait l'architecture CNN couche par couche :
+
+| Couche | Ce qu'elle voit | Dimension de représentation |
+|---|---|---|
+| Couche 1 | Pixels voisins (3×3) | Bords, orientations |
+| Couche 2 | Régions moyennes | Textures, motifs |
+| Couche 3+ | Grandes plages | Parties d'objets |
+| Couche finale | Image entière | Objet |
+
+Chaque couche agrège une zone spatiale de plus en plus large, tout en réduisant la dimension de la représentation. L'outil mathématique qui formalise cette hiérarchie c'est la **théorie des ondelettes** (Mallat, 1980-90) — précurseur direct des CNN modernes.
+
+> [!note]- Bilan : pourquoi les CNN échappent à la borne $\epsilon^{-d}$
+> La borne de Mallat suppose Lipschitz seule. Les CNN échappent à cette borne parce qu'ils exploitent trois propriétés structurelles que Lipschitz n'encode pas :
+> 1. **Symétries globales** (translation via partage de poids) — réduisent la dimension via $\Omega/G$
+> 2. **Compositionnalité** (pixels → bords → formes → objets) — chaque niveau simple, complexité par composition
+> 3. **Hiérarchie multi-échelles** (pooling progressif) — réduit $d$ à $O(\log d)$
+> Un MLP générique sur des images n'encode aucune de ces trois propriétés — même sur des données qui les ont, il reste dans le pire cas de la malédiction.

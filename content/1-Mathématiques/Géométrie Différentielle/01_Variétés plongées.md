@@ -1,7 +1,10 @@
 ---
-title: Variétés plongées
+title: 01_Variétés plongées
 date: 2026-05-11
-tags: [mathématiques, géométrie-différentielle, variétés]
+tags:
+  - mathématiques
+  - géométrie-différentielle
+  - variétés
 ---
 
 ## L'idée fondatrice

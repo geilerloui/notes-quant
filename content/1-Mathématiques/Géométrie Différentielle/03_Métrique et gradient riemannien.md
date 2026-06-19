@@ -1,7 +1,11 @@
 ---
-title: Métrique et gradient riemannien
+title: 03_Métrique et gradient riemannien
 date: 2026-05-11
-tags: [mathématiques, géométrie-différentielle, optimisation, gradient]
+tags:
+  - mathématiques
+  - géométrie-différentielle
+  - optimisation
+  - gradient
 ---
 
 ## L'idée fondatrice

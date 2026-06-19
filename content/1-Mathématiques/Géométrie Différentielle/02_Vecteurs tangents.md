@@ -1,7 +1,10 @@
 ---
-title: Vecteurs tangents
+title: 02_Vecteurs tangents
 date: 2026-05-11
-tags: [mathématiques, géométrie-différentielle, espace-tangent]
+tags:
+  - mathématiques
+  - géométrie-différentielle
+  - espace-tangent
 ---
 
 ## L'idée fondatrice

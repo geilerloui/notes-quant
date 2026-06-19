@@ -1,7 +1,11 @@
 ---
-title: Rétraction et descente sur variété
+title: 04_Rétraction et descente sur variété
 date: 2026-05-11
-tags: [mathématiques, géométrie-différentielle, optimisation, rétraction]
+tags:
+  - mathématiques
+  - géométrie-différentielle
+  - optimisation
+  - rétraction
 ---
 
 ## L'idée fondatrice

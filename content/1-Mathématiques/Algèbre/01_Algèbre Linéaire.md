@@ -1,4 +1,6 @@
-
+---
+title: Algèbre Linéaire
+---
 ## 0. Rappels — spectre et invariance orthogonale
 
 Avant d'attaquer, deux objets d'algèbre linéaire qu'on va utiliser sans arrêt.

@@ -1,5 +1,5 @@
 ---
-title: 01_Variétés plongées
+title: Variétés plongées
 date: 2026-05-11
 tags:
   - mathématiques

@@ -1,5 +1,5 @@
 ---
-title: 03_Métrique et gradient riemannien
+title: Métrique et gradient riemannien
 date: 2026-05-11
 tags:
   - mathématiques

@@ -1,5 +1,5 @@
 ---
-title: 05_Géodésiques et distance géodésique
+title: Géodésiques et distance géodésique
 date: 2026-05-11
 tags:
   - mathématiques

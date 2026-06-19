@@ -1,5 +1,5 @@
 ---
-title: 02_Vecteurs tangents
+title: Vecteurs tangents
 date: 2026-05-11
 tags:
   - mathématiques

@@ -196,6 +196,31 @@ La colonne $\text{PC}_k = X v_k$ donne, pour chaque individu, sa **coordonnée l
 ![[fig02_rotation.png|550]]
 *Figure 2. À gauche : le nuage dans le repère original $(e_1, e_2)$, avec les vecteurs propres $v_1, v_2$ en rouge (obliques). À droite : le même nuage après changement de base $Y = XV$ — les axes propres deviennent les axes de coordonnées. Les données sont décorrélées et les axes sont classés par variance décroissante.*
 
+### (iii bis) Une composante principale est une combinaison linéaire des features
+
+Il faut s'arrêter une seconde sur ce que représente concrètement $\text{PC}_k = Xv_k$. En écrivant le produit matrice-vecteur composante par composante, pour l'individu $i$ :
+
+$
+\text{PC}_k[i] \;=\; (Xv_k)[i] \;=\; \sum_{j=1}^d v_{k,j} \cdot x_{i,j} \;=\; v_{k,1} x_{i,1} + v_{k,2} x_{i,2} + \cdots + v_{k,d} x_{i,d}.
+$
+
+> [!important] Chaque composante principale est une somme pondérée des features originales
+> $\text{PC}_k$ n'est **pas** une nouvelle mesure indépendante — c'est une **combinaison linéaire** des $d$ variables de départ, avec les coefficients $v_{k,1}, \ldots, v_{k,d}$ donnés par le $k$-ième vecteur propre. Ces coefficients s'appellent les **loadings**. La PCA ne fabrique aucune information nouvelle : elle **recombine** linéairement les colonnes existantes de $X$ pour trouver les directions qui concentrent le plus de variance.
+
+**Lecture concrète sur l'exemple météo.** On a trouvé en (v) ci-dessous $v_1 \approx (-0.06,\ 0.69,\ 0.72)$ sur (pluie, $t_{\max}$, $t_{\min}$). Donc, explicitement :
+
+$
+\text{PC}_1 \;\approx\; -0.06 \cdot \text{pluie}_{cr} \;+\; 0.69 \cdot t_{\max,cr} \;+\; 0.72 \cdot t_{\min,cr}
+$
+
+(indices $cr$ = variables centrées-réduites). PC1 n'est rien d'autre qu'une **moyenne pondérée** des deux températures, quasiment indifférente à la pluie — c'est exactement ce qui permet de l'**étiqueter** "axe température" a posteriori. C'est toujours ainsi qu'on interprète une composante principale en pratique : on regarde quelles variables ont les **plus gros loadings** (en valeur absolue) et on leur donne un nom métier.
+
+> [!note]- Pourquoi c'est obligatoirement linéaire
+> La contrainte vient directement du problème d'optimisation posé en (ii) : on cherche $v$ qui maximise $v^\top \Sigma v = \text{Var}(Xv)$ parmi les vecteurs **unitaires de $\mathbb{R}^d$**. La quantité $Xv$ est par construction une combinaison linéaire des colonnes de $X$ — il n'y a pas d'autre forme possible à l'intérieur de ce cadre. C'est précisément cette restriction à des combinaisons **linéaires** qui limite la PCA face à des structures non-linéaires (cf. §6.iv) — et qui motive des extensions comme le Kernel PCA, qui relâche cette contrainte en travaillant dans un espace transformé non-linéairement.
+
+> [!tip] Le pendant pour les loadings (vue duale)
+> Symétriquement, en §3 on verra que les **variables** elles-mêmes se lisent comme des combinaisons linéaires des **individus** ($\widetilde Y_k = X^\top u_k$). C'est la même idée appliquée du côté dual : la SVD ($\S$4) montre que scores et loadings sont juste les deux faces du même objet $X = USV^\top$.
+
 ### (iv) Variance le long de chaque axe propre
 
 Dans le nouveau repère, la matrice de covariance est **diagonale** :

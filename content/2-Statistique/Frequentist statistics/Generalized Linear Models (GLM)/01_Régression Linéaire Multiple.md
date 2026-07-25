@@ -604,7 +604,7 @@ La régression simple est le cas particulier $p = 1$. Tout ce qui suit s'appliqu
 > 
 > **Le point pédagogique fort.** H1 et H3 sont **deux pathologies indépendantes**. Corriger l'une ne corrige pas l'autre. Sur Auto, après avoir ajouté le terme quadratique, il faut encore traiter l'hétéroscédasticité (par exemple via WLS ou écart-types robustes) si on veut faire de l'inférence valide.
 
-#### H4 — Indépendance
+0#### H4 — Indépendance
 
 > [!warning] Définition (Indépendance)
 > Les résidus sont indépendants entre eux :

@@ -114,5 +114,5 @@ La borne de Mallat (cf. [[01_Fondation#E. Curse of dimensionality]]) dit : sous 
 > [!note]- Lien avec les autres notes
 > - [[01_Fondation#E. Curse of dimensionality]] — la borne $\epsilon^{-d}$ que les symétries permettent de casser
 > - [[01_Fondation#F. Manifold Hypothesis]] — les données vivent sur une variété = elles ont une structure de groupe implicite
-> - [[01_CNN#IV — Pourquoi les CNN fonctionnent : symétries et hiérarchie (Mallat)]] — développement complet pour les CNN
+> - [[02_CNN#IV — Pourquoi les CNN fonctionnent : symétries et hiérarchie (Mallat)]] — développement complet pour les CNN
 > - [[00_Perceptron Multi-Couches#II.7 — Pourquoi les réseaux marchent : géométrie et symétries (Mallat)]] — programme de recherche de Mallat

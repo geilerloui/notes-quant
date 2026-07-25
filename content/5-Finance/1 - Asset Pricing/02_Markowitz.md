@@ -379,7 +379,7 @@ où $\alpha$ est l'espérance du rendement actif (l'*alpha* du gérant) et TE l'
 
 $$\text{CVaR}_\alpha(x) \leq c.$$
 
-Le CVaR (Conditional Value-at-Risk, alias Expected Shortfall) est l'espérance des pertes au-delà du quantile $\alpha$. Voir [[Mesures de risque (VaR, CVaR, ES)]] pour la définition complète, le lien avec la VaR, et les trois formulations possibles (min CVaR, max espérance pénalisée par CVaR, contrainte CVaR ≤ seuil). Contrairement à la VaR, le CVaR est **convexe**, donc compatible avec un programme d'optimisation standard.
+Le CVaR (Conditional Value-at-Risk, alias Expected Shortfall) est l'espérance des pertes au-delà du quantile $\alpha$. Voir [[01_Mesures de risque (VaR, CVaR, ES)]] pour la définition complète, le lien avec la VaR, et les trois formulations possibles (min CVaR, max espérance pénalisée par CVaR, contrainte CVaR ≤ seuil). Contrairement à la VaR, le CVaR est **convexe**, donc compatible avec un programme d'optimisation standard.
 
 ### A.5 Contrainte de concentration
 

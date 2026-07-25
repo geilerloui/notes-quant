@@ -654,4 +654,4 @@ $$
 
 Puis on a une définition des quatre groupes : Never takers, Compliers, Always takers et Defiers
 
-![[im12 1.png|468]]
+![[images/2-Statistiques/C_Causality/im12 1.png|468]]

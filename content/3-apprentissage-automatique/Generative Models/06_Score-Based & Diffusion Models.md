@@ -238,7 +238,7 @@ $$
 
 où $\mathbf{z}_{t} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$. Il a été montré par [Welling et al. (2011)](https://www.stats.ox.ac.uk/~teh/research/compstats/WelTeh2011a.pdf) que sous $\epsilon \rightarrow 0$ et $t \rightarrow \infty$, $\mathbf{x}_{t}$ converge vers un échantillon exact de $p(\mathbf{x})$. C'est l'idée-clé derrière l'approche de modélisation générative basée sur les scores.
 
-![[im1-3 (1).png|330]]
+![[images/3-Apprentissage automatique/06_Natural language processing/tokenization/im1-3 (1).png|330]]
 
 > [!warning] Le verrou : la trace coûte $D$ backward
 > Sur le jouet 2D ci-dessus, $D=2$ donc 2 backward auxiliaires par évaluation de la loss : OK. Sur ImageNet, $D \approx 2 \cdot 10^5$ : **infaisable**. D'où deux familles de solutions pour remplacer $\operatorname{tr}(\nabla_x s_\theta(x))$ :
@@ -402,7 +402,7 @@ Les deux termes sont calculés avec la fonction `autograd.functional.jvp()`, qui
 
 **(c) Terme de gauche.** Le gradient de $v^\top s_\theta(x)$ est le terme `jvp`. On refait un produit scalaire à droite avec $v$ pour obtenir le terme de gauche.
 
-![[im8 (2).png]]
+![[images/3-Apprentissage automatique/06_Natural language processing/machine translation/im8 (2).png]]
 
 **(3) Visualisation.** Pour visualiser le champ de gradient, on part du dataset $[X]$ ; le point d'arrivée de chaque vecteur est $s_{\theta}(x)$.
 

@@ -364,7 +364,7 @@ La première dit que la valeur optimale d'un état = la valeur de la meilleure a
 > 
 > **Conjecture.** $\pi^*$ est très probablement la politique optimale. On le démontrera formellement avec Policy Iteration et Value Iteration dans la prochaine section.
 
-## II. Programmation dynamique
+## II. Programmation dynamique (model-based)
 
 **Le contexte.** On dispose d'un MDP entièrement connu : on a la matrice de transition $\mathbf{P}$ et la fonction de récompense $R$. La question : **comment calculer $v_\pi$ (évaluation) et $\pi_*$ (optimisation) en pratique ?**
 
@@ -693,7 +693,7 @@ $$\pi_*(s) = \arg\max_a \Big[ R(s, a) + \gamma \sum_{s'} P(s' \mid s, a) \, V_*(
 
 > 💡 **Bilan DP.** On a vu trois algorithmes (Policy Evaluation, Policy Iteration, Value Iteration) qui sont en réalité **trois lectures de la même équation de Bellman**. Évaluer = itérer Bellman avec une politique fixée. Optimiser = itérer Bellman avec un $\max$. Tous convergent en $\gamma^k$ grâce à la propriété de contraction de l'opérateur de Bellman (résultat admis ici). Reste un seul problème : tout ça suppose qu'on **connaît le modèle** $\mathbf{P}$ et $R$. C'est ce qu'on lâche maintenant en passant à Monte Carlo et TD Learning.
 
-## III. Monte Carlo
+## III. Monte Carlo (model-free)
 
 **Le contexte.** Toute la section II reposait sur une hypothèse forte : on connaît la matrice de transition $\mathbf{P}$ et la fonction de récompense $R$. C'est rarement le cas en pratique. Quand un agent joue à un jeu vidéo, conduit une voiture ou trade un portefeuille, il **n'a pas** de modèle explicite de l'environnement — il observe seulement des séquences d'états, d'actions et de récompenses.
 

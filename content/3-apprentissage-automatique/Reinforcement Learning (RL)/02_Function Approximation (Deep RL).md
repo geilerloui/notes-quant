@@ -23,19 +23,36 @@ Jusqu'ici on représentait $V(s)$ ou $Q(s, a)$ par une table de lookup. Cette ap
 > [!warning] Idée centrale
 > Approximer les value functions :
 >
-> $$v_\pi(s) \approx \hat v(s, \mathbf w) \quad \text{ou} \quad q_\pi(s, a) \approx \hat q(s, a, \mathbf w),$$
+> $$v_\pi(s) \approx \hat v(s; \mathbf w) \quad \text{ou} \quad q_\pi(s, a) \approx \hat q(s, a; \mathbf w),$$
 >
 > où $\mathbf w$ est le **vecteur de paramètres** (poids) de l'approximateur.
+>
+> **Le but : remplacer une table par une fonction.** Au lieu de stocker une valeur par état (ou par couple état-action) dans un tableau, on la calcule à partir d'un petit nombre de paramètres $\mathbf w$, partagés entre tous les états. On peut ainsi représenter — et mettre à jour — la valeur d'un état jamais visité, à partir de ce qu'on a appris sur des états similaires.
+
+Le problème est apparu concrètement avec **Barto, Sutton et Anderson (1983)**, sur la tâche du **pole balancing** (cart-pole) : un pendule à équilibrer sur un chariot. Sur un petit grid world, le tabulaire fonctionne très bien — chaque état (une case) a sa propre ligne dans la table $V(s)$ ou $Q(s, a)$.
+
+Le problème : le cart-pole (comme `CartPole` sous Gymnasium aujourd'hui) est décrit par un état à **4 nombres réels continus** — 
+```(position du chariot, vitesse, angle du pendule, vitesse angulaire).``` Il y a donc une **infinité d'états possibles** : impossible de leur allouer une ligne de table chacun. C'est exactement cette impasse qui a motivé le passage à des approximateurs paramétriques comme le VFA linéaire.
+
+![[Pasted image 20260723170632.png]]
+*Figure. L'environnement CartPole : l'état est un vecteur continu (position, vitesse, angle, vitesse angulaire), ce qui exclut toute représentation tabulaire.*
 
 **Choix d'approximateurs courants** : combinaisons linéaires de features, réseaux de neurones, decision trees, k-NN, bases Fourier/wavelet.
 
-![[images/3-Apprentissage automatique/07_Reinforcement learning/Deep RL/Value based/im1.png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/Deep RL/Value based/im1.png|329]]
 
 > 💡 **On va se concentrer sur deux familles différentiables** : représentations linéaires de features et réseaux de neurones. La différentiabilité est requise pour faire de la descente de gradient.
 
 #### A.1 Pourquoi la généralisation matter
 
-Le RL repose sur quatre composantes : optimization, delayed consequences, exploration, et **généralisation** — c'est cette dernière qu'on adresse ici. On veut généraliser à des états-actions jamais vus (par exemple un nouveau pixel dans Atari).
+Le RL repose sur quatre composantes :
+
+| Composante | Détail |
+| :--- | :--- |
+| **Optimization** | Étant donné un problème de décision séquentielle, trouver la politique $\pi$ qui maximise le retour espéré $\mathbb{E}[G_t]$. C'est tout le passage qu'on a fait sur MDP → Bellman → DP → MC → TD/SARSA/Q-learning ([[01_RL Tabulaire]]). |
+| **Delayed consequences** | La difficulté que l'optimisation doit gérer — une action à $t$ affecte des récompenses bien après $t$ (d'où le discount $\gamma$, le retour $G_t$, l'équation de Bellman qui propage les valeurs futures). |
+| **Exploration** | Une difficulté propre au fait qu'on n'a pas de modèle et qu'on doit générer ses propres données pour optimiser (d'où ε-greedy, GLIE). |
+| **Généralisation** | Une difficulté propre au fait que l'espace d'états est trop grand pour optimiser état par état (d'où le VFA de cette note) — c'est cette dernière qu'on adresse ici. On veut généraliser à des états-actions jamais vus (par exemple un nouveau pixel dans Atari). |
 
 > [!warning] Trois bénéfices clés
 > - **Mémoire** : moins de stockage pour $(P, R) / V / Q / \pi$.
@@ -55,7 +72,7 @@ $$\Delta \mathbf w = -\frac{1}{2} \alpha \nabla_\mathbf{w} J(\mathbf w).$$
 
 **SGD** échantillonne le gradient :
 
-$$\Delta \mathbf w = \alpha (V^\pi(s) - \hat V(s, \mathbf w)) \nabla_\mathbf w \hat V(s).$$
+$$\Delta \mathbf w = \alpha (V^\pi(s) - \hat V(s; \mathbf w)) \nabla_\mathbf w \hat V(s).$$
 
 > 💡 **Drawback fondamental.** On n'a pas accès à un oracle qui donne $V^\pi(s)$ pour tout $s$ — c'est précisément ce qu'on veut estimer. La solution : remplacer $V^\pi(s)$ par un **target estimé** (MC ou TD).
 
@@ -64,6 +81,12 @@ $$\Delta \mathbf w = \alpha (V^\pi(s) - \hat V(s, \mathbf w)) \nabla_\mathbf w \
 Avant deep learning, l'ingénierie des features était l'essentiel du job. Maintenant, les NN font ça automatiquement.
 
 $$\mathbf x(s) = \begin{pmatrix} x_1(s) \\ x_2(s) \\ \vdots \\ x_n(s) \end{pmatrix} = \begin{pmatrix} \text{dist at 1} \\ \text{dist at 2} \\ \vdots \\ \text{dist at 180} \end{pmatrix}.$$
+
+> [!example]- Deux exemples de feature vector
+> **Cas particulier important : $\mathbf x(s) = s$.** Quand l'état est déjà un vecteur de nombres directement exploitable, aucune transformation n'est nécessaire — la fonction "feature" est l'identité, on donne l'état brut tel quel à l'approximateur.
+>
+> - **Capteurs de distance** (ci-dessus) : $n = 180$, un capteur de distance par degré. Ici $\mathbf x(s) \neq s$ — c'est un cas où les features doivent être construites à la main à partir d'un état plus abstrait (position/orientation du robot).
+> - **CartPole** (section G) : $\mathbf x(s) = s$ exactement — le vecteur à **4 dimensions** de l'état brut (position du chariot, vitesse, angle du pendule, vitesse angulaire) sert directement de feature vector, sans aucune ingénierie de features.
 
 Pour une approximation linéaire :
 
@@ -90,7 +113,7 @@ $$\Delta \mathbf w = \alpha (G_t - \hat V(s_t; \mathbf w)) \nabla_\mathbf w \hat
 >    - Pour $t = 1, \ldots, L_k$ :
 >      - Si first visit à $s$ dans l'épisode $k$ :
 >        - $G_t(s) = \sum_{j=t}^{L_k} \gamma^{j-t} r_{k,j}$.
->        - $\mathbf w \leftarrow \mathbf w + \alpha (G_t(s) - \hat V(s, \mathbf w)) \mathbf x(s)$.
+>        - $\mathbf w \leftarrow \mathbf w + \alpha (G_t(s) - \hat V(s; \mathbf w)) \mathbf x(s)$.
 > 3. $k \leftarrow k + 1$.
 
 **Variante batch.**
@@ -103,12 +126,25 @@ $$\Delta \mathbf w = \alpha (G_t - \hat V(s_t; \mathbf w)) \nabla_\mathbf w \hat
 >
 > $$\mathbf w = (X^T X)^{-1} X^T \mathbf G.$$
 
+> [!example]- CartPole — MC VFA comme une régression linéaire
+> **L'idée : construire une table comme un dataset supervisé.** On reprend les trois transitions de l'exemple de C.1/C.2 et leurs retours déjà calculés ($G_0 = 2.71$, $G_1 = 1.9$, $G_2 = 1$). On range chaque $(s_t, G_t)$ comme une ligne : les colonnes de features à gauche, la cible $G_t$ à droite — exactement comme un jeu de données de régression linéaire classique.
+>
+> | $i$ | pos | vel | angle | angvel | bias | **target $G$** |
+> |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+> | 1 | 0.00 | 0.02 | 0.01 | −0.01 | 1 | **2.71** |
+> | 2 | 0.00 | 0.04 | 0.00 | −0.02 | 1 | **1.90** |
+> | 3 | 0.01 | 0.03 | 0.02 | 0.05 | 1 | **1.00** |
+>
+> Les 5 premières colonnes forment la matrice de design $X \in \mathbb{R}^{3 \times 5}$ (une ligne par état visité, une colonne par feature), la dernière colonne forme le vecteur cible $\mathbf G = (2.71,\, 1.90,\, 1.00)^T$. Résoudre $\mathbf w = (X^T X)^{-1} X^T \mathbf G$, c'est **exactement** une régression linéaire ordinaire (MCO) de $G$ sur les features — celle-là même que tu as vue en 2-statistiques/regression-lineaire.md, sauf que la variable expliquée n'est pas mesurée une fois pour toutes mais **change à chaque fois qu'on rejoue des épisodes** (les $G_t$ dépendent de la politique $\pi$ suivie).
+>
+> 💡 **Nuance importante.** Ici $N = 3$ observations pour $n = 5$ features (avec le biais) : le système est **sous-déterminé**, $X^T X$ n'est pas inversible avec seulement 3 lignes. En pratique il faut $N \gg n$ — beaucoup plus d'épisodes (donc de lignes) que de features — pour que la régression soit bien posée, exactement comme en régression linéaire classique où il faut plus d'observations que de variables explicatives. C'est aussi pour ça qu'en pratique on préfère la version incrémentale (le pseudo-code ci-dessus) : elle met à jour $\mathbf w$ au fur et à mesure, sans jamais avoir besoin d'inverser une matrice sur tout le dataset accumulé.
+
 #### B.3 TD(0) VFA
 
 > [!warning] Idée
 > On remplace l'oracle par le target $TD(0)$ :
 >
-> $$\boxed{J(\mathbf w) = \mathbb{E}_\pi\big[(r_j + \gamma \hat V^\pi(s_{j+1}, \mathbf w) - \hat V(s_j; \mathbf w))^2\big]}$$
+> $$\boxed{J(\mathbf w) = \mathbb{E}_\pi\big[(r_j + \gamma \hat V^\pi(s_{j+1}; \mathbf w) - \hat V(s_j; \mathbf w))^2\big]}$$
 
 Update :
 
@@ -124,19 +160,19 @@ $$\Delta \mathbf w = \alpha (r + \gamma \mathbf x(s')^T \mathbf w - \mathbf x(s)
 
 On définit la **mean squared value error** (MSVE) :
 
-$$\text{MSVE}(\mathbf w) = \sum_{s \in S} d(s) (v^\pi(s) - \hat v^\pi(s, \mathbf w))^2,$$
+$$\text{MSVE}(\mathbf w) = \sum_{s \in S} d(s) (v^\pi(s) - \hat v^\pi(s; \mathbf w))^2,$$
 
 où $d(s)$ est la distribution stationnaire des états sous $\pi$.
 
 > [!warning] Théorème 8.1 (MC convergence)
 > MC policy evaluation avec VFA linéaire converge vers les poids $\mathbf w_{MC}$ avec la **MSVE minimum** :
 >
-> $$\text{MSVE}(\mathbf w_{MC}) = \min_\mathbf w \sum_{s \in S} d(s) (v^\pi(s) - \hat v^\pi(s, \mathbf w))^2.$$
+> $$\text{MSVE}(\mathbf w_{MC}) = \min_\mathbf w \sum_{s \in S} d(s) (v^\pi(s) - \hat v^\pi(s; \mathbf w))^2.$$
 
 > [!warning] Théorème 8.2 (TD(0) convergence)
 > TD(0) avec VFA converge vers les poids $\mathbf w_{TD}$ qui sont **dans un facteur constant** du minimum :
 >
-> $$\text{MSVE}(\mathbf w_{TD}) = \frac{1}{1 - \gamma} \min_\mathbf w \sum_{s \in S} d(s) (v^\pi(s) - \hat v^\pi(s, \mathbf w))^2.$$
+> $$\text{MSVE}(\mathbf w_{TD}) = \frac{1}{1 - \gamma} \min_\mathbf w \sum_{s \in S} d(s) (v^\pi(s) - \hat v^\pi(s; \mathbf w))^2.$$
 
 > [!warning] Convergence des méthodes de contrôle
 > | Algorithme | Tabulaire | Linear VFA | Nonlinear VFA |
@@ -147,12 +183,23 @@ où $d(s)$ est la distribution stationnaire des états sous $\pi$.
 >
 > *(Oui)* = oscille autour de la valeur optimale.
 
+**Pourquoi ce tableau a cette forme précise — le Deadly Triad.** La divergence apparaît quand **trois ingrédients** sont réunis en même temps :
+
+1. **Function approximation** (au lieu du tabulaire) — la mise à jour d'un état affecte aussi les états voisins, via les poids partagés $\mathbf w$.
+2. **Bootstrapping** (TD/Q-learning, qui utilisent leur propre estimation $\hat V$/$\hat Q$ comme cible) — contrairement à MC, qui utilise le retour réel $G_t$.
+3. **Off-policy** (la politique évaluée diffère de la politique suivie) — c'est le cas de Q-learning ($\max_{a'}$, politique gloutonne) mais pas de SARSA (on-policy).
+
+![[Pasted image 20260724104251.png|313]]
+*Figure. Le Deadly Triad — un triangle dont les trois sommets sont function approximation, bootstrapping et off-policy learning ; la divergence apparaît quand les trois sont réunis simultanément.*
+
+> 💡 **Ce que ça explique dans le tableau ci-dessus.** MC Control n'a pas de bootstrap : il échappe à un des trois ingrédients, d'où le "(Oui)" qui oscille plutôt que diverge franchement. SARSA est on-policy : il échappe à un ingrédient différent, même résultat. Q-learning coche les **trois cases à la fois** (function approximation + bootstrap + off-policy) : c'est le seul cas où le "Non" est total, y compris en VFA linéaire. C'est aussi ce même triad qui motive **Experience Replay** et **Fixed Q-Targets** dans DQN (section E.5) — les deux remèdes qui permettent à Q-learning de fonctionner malgré tout avec un réseau de neurones.
+
 ### C. VFA pour le contrôle (action-value)
 
-Similaire à VFA pour value function : on approxime $\hat q(s, a, \mathbf w) \approx q_\pi(s, a)$. On alterne **policy evaluation** (avec $\hat q$) et **policy improvement** ($\epsilon$-greedy).
+Similaire à VFA pour value function : on approxime $\hat q(s, a; \mathbf w) \approx q_\pi(s, a)$. On alterne **policy evaluation** (avec $\hat q$) et **policy improvement** ($\epsilon$-greedy).
 
 > [!warning] Loss
-> $$J(\mathbf w) = \mathbb{E}_\pi[(q_\pi(s, a) - \hat q^\pi(s, a, \mathbf w))^2].$$
+> $$J(\mathbf w) = \mathbb{E}_\pi[(q_\pi(s, a) - \hat q^\pi(s, a; \mathbf w))^2].$$
 
 Comme on n'a pas $q_\pi$, on substitue un target :
 
@@ -168,6 +215,93 @@ Comme on n'a pas $q_\pi$, on substitue un target :
 > - **Q-learning** : TD target $r + \gamma \max_{a'} \hat Q(s', a'; \mathbf w)$
 >
 > $$\Delta \mathbf w = \alpha (r + \gamma \max_{a'} \hat Q(s', a'; \mathbf w) - \hat Q(s, a; \mathbf w)) \nabla_\mathbf w \hat Q(s, a; \mathbf w).$$
+
+#### C.1 Construire $\mathbf x(s, a)$ — block feature stacking
+
+**Le problème.** Toutes les formules ci-dessus supposent qu'on sache calculer $\hat Q(s, a; \mathbf w) = \mathbf x(s, a)^T \mathbf w$. Mais jusqu'ici, on n'a construit des feature vectors que pour un **état** ($\mathbf x(s)$, sections B.1 et D) — jamais pour un **couple état-action**. Il faut injecter l'action dans le vecteur.
+
+> [!warning] Idée — un bloc par action
+> Avec $|A|$ actions discrètes et un feature vector d'état $\mathbf x(s) \in \mathbb{R}^n$, on construit $\mathbf x(s, a) \in \mathbb{R}^{n \times |A|}$ en **empilant** $|A|$ blocs de taille $n$ : seul le bloc correspondant à l'action $a$ contient $\mathbf x(s)$, tous les autres blocs sont à zéro.
+>
+> $$\mathbf w^T \mathbf x(s, a) \;=\; \mathbf w_a^T \mathbf x(s),$$
+>
+> où $\mathbf w_a$ est le sous-vecteur de $\mathbf w$ correspondant au bloc actif. C'est équivalent à apprendre **un vecteur de poids séparé par action**, mais exprimé comme un seul produit scalaire — donc compatible avec toutes les formules d'update déjà écrites (MC, SARSA, Q-learning).
+
+> [!example] CartPole — $\mathbf x(s, a)$ concrètement
+> CartPole a $|A| = 2$ actions (gauche, droite) et $\mathbf x(s) = (\text{pos}, \text{vel}, \text{angle}, \text{angvel}, 1) \in \mathbb{R}^5$ (4 coordonnées de l'état + biais, cf. B.1). Le vecteur $\mathbf x(s, a)$ empile deux blocs de taille 5, soit $10$ dimensions au total :
+>
+> $$\mathbf x(s, \text{gauche}) = (\underbrace{\text{pos}, \text{vel}, \text{angle}, \text{angvel}, 1}_{\text{bloc gauche}},\; \underbrace{0, 0, 0, 0, 0}_{\text{bloc droite}})$$
+>
+> $$\mathbf x(s, \text{droite}) = (\underbrace{0, 0, 0, 0, 0}_{\text{bloc gauche}},\; \underbrace{\text{pos}, \text{vel}, \text{angle}, \text{angvel}, 1}_{\text{bloc droite}})$$
+>
+> $\mathbf w$ a lui aussi 10 dimensions : les 5 premières forment $\mathbf w_{\text{gauche}}$, les 5 dernières $\mathbf w_{\text{droite}}$. Comme le bloc inactif de $\mathbf x(s,a)$ est nul, une mise à jour sur $(s, \text{gauche})$ ne touche que $\mathbf w_{\text{gauche}}$ — les poids de l'action droite restent intacts.
+
+**Algorithme complet (MC, CartPole).** Concrètement, avec la cible Monte Carlo, l'entraînement se déroule ainsi sur un épisode :
+
+> [!warning] Entraînement — MC Control avec block feature
+> 1. Générer un épisode complet en suivant la politique $\varepsilon$-greedy courante par rapport à $\hat Q(\cdot, \cdot; \mathbf w)$ :
+>    $$(s_0, a_0, r_0, s_1, a_1, r_1, \ldots, s_{T-1}, a_{T-1}, r_{T-1}, s_T \;(\text{chute})).$$
+> 2. **Attendre la fin de l'épisode** (la chute du pendule), puis remonter la trajectoire **à l'envers**, de $t = T-1$ jusqu'à $t = 0$ :
+>    - Calculer le retour au pas $t$ par récursion arrière : $G_{T-1} = r_{T-1}$, puis $G_t = r_t + \gamma \, G_{t+1}$.
+>    - Construire $\mathbf x(s_t, a_t)$ par block stacking (bloc gauche ou droite selon $a_t$, comme ci-dessus).
+>    - Mettre à jour : $\mathbf w \leftarrow \mathbf w + \alpha \big(G_t - \hat Q(s_t, a_t; \mathbf w)\big) \, \mathbf x(s_t, a_t)$.
+>    - Reculer d'un pas ($t \leftarrow t - 1$) et recommencer.
+> 3. Passer à l'épisode suivant, avec un $\varepsilon$ qui a décru (schedule GLIE).
+>
+> **Concrètement** : on part de la dernière transition avant la chute, on regarde quelle action $a_{T-1}$ a été prise à cet instant, on construit le bloc $\mathbf x(s_{T-1}, a_{T-1})$ (le bloc gauche ou droite rempli avec l'état, l'autre à zéro), on met à jour $\mathbf w$ avec $G_{T-1} = r_{T-1}$, puis on recule d'une case dans la séquence, on refait exactement la même chose avec $G_{T-2} = r_{T-2} + \gamma G_{T-1}$, et ainsi de suite jusqu'à revenir à $s_0$.
+
+> 💡 **Pourquoi remonter à l'envers.** $G_t$ se calcule récursivement à partir de $G_{t+1}$ ($G_t = r_t + \gamma G_{t+1}$) — c'est beaucoup plus simple à programmer en partant de la fin (où $G_{T-1} = r_{T-1}$ est immédiat) plutôt qu'en resommant toutes les récompenses futures à chaque pas. L'ordre dans lequel on applique les mises à jour de $\mathbf w$ n'a pas d'importance pour la convergence — seul compte le fait que chaque $(s_t, a_t, G_t)$ soit traité une fois.
+
+#### C.2 Phase d'inférence
+
+**Le contexte.** C.1 décrit la **phase d'entraînement** : $\mathbf w$ bouge à chaque mise à jour, et l'agent explore ($\varepsilon > 0$) pour découvrir de meilleures actions. Une fois l'entraînement terminé (ou jugé suffisant), on passe à la **phase d'inférence** (aussi dite d'évaluation ou de déploiement) : $\mathbf w$ est figé, et on utilise l'agent pour décider en conditions réelles.
+
+> [!warning] Inférence — utiliser $\mathbf w$ sans l'entraîner
+> 1. **Geler $\mathbf w$** : plus aucune mise à jour, plus de $G_t$ ni de gradient à calculer.
+> 2. À chaque nouvel état $s_t$ rencontré :
+>    - Construire $\mathbf x(s_t, \text{gauche})$ et $\mathbf x(s_t, \text{droite})$ par block stacking (C.1).
+>    - Calculer $\hat Q(s_t, \text{gauche}; \mathbf w) = \mathbf w^T \mathbf x(s_t, \text{gauche})$ et $\hat Q(s_t, \text{droite}; \mathbf w) = \mathbf w^T \mathbf x(s_t, \text{droite})$ — deux produits scalaires, quasi instantanés.
+>    - Choisir $a_t^* = \arg\max_a \hat Q(s_t, a; \mathbf w)$ (glouton pur, ou $\varepsilon$ résiduel très faible, ex. $0.05$).
+>    - Exécuter $a_t^*$ dans l'environnement.
+> 3. Répéter à chaque pas, jusqu'à la fin de l'épisode (ou indéfiniment en usage réel).
+
+> 💡 **Ce qui change par rapport à l'entraînement.** Pas d'attente de fin d'épisode, pas de calcul de $G_t$, pas de mise à jour de $\mathbf w$ : l'inférence est purement un enchaînement de "observer $\to$ calculer deux produits scalaires $\to$ agir". C'est exactement ce qu'on ferait avec un DQN entraîné (section E) — sauf qu'ici $\hat Q$ est un produit scalaire linéaire plutôt qu'un forward pass dans un réseau de neurones.
+
+> [!example]- CartPole — un épisode complet à la main
+> **Setup.** $\gamma = 0.9$, $\alpha = 0.1$, $\mathbf w$ initialisé à $\mathbf 0$ (10 dimensions : 5 pour le bloc gauche, 5 pour le bloc droite). Épisode de 3 pas, terminé par une chute juste après le pas $t=2$. Les $s_t$ ci-dessous sont juste des repères de temps dans **cette** trajectoire précise — pas des labels réutilisables comme "Bull"/"Bear" en 01.
+>
+> | $t$ | $s_t$ = (pos, vel, angle, angvel) | $a_t$ | $r_t$ |
+> |:---:|---|:---:|:---:|
+> | 0 | $(0.00,\, 0.02,\, 0.01,\, -0.01)$ | Gauche | $+1$ |
+> | 1 | $(0.00,\, 0.04,\, 0.00,\, -0.02)$ | Droite | $+1$ |
+> | 2 | $(0.01,\, 0.03,\, 0.02,\, 0.05)$ | Droite | $+1$ (puis chute) |
+>
+> **Étape 1 — calculer les retours en remontant depuis la fin** (C.1) :
+>
+> $$G_2 = 1, \qquad G_1 = 1 + 0.9 \times 1 = 1.9, \qquad G_0 = 1 + 0.9 \times 1.9 = 2.71.$$
+>
+> **Étape 2 — mettre à jour $\mathbf w$ en remontant $t = 2 \to t = 0$**, en partant de $\mathbf w = \mathbf 0$.
+>
+> *Pas $t=2$ (Droite).* $\mathbf x(s_2, \text{droite}) = (0,0,0,0,0,\; 0.01, 0.03, 0.02, 0.05, 1)$. Comme $\mathbf w = \mathbf 0$, $\hat Q(s_2, \text{droite}; \mathbf w) = 0$.
+>
+> $$\mathbf w \leftarrow \mathbf 0 + 0.1 \times (1 - 0) \times \mathbf x(s_2, \text{droite}) = (0,0,0,0,0,\; 0.001,\, 0.003,\, 0.002,\, 0.005,\, 0.100).$$
+>
+> *Pas $t=1$ (Droite).* $\mathbf x(s_1, \text{droite}) = (0,0,0,0,0,\; 0.00, 0.04, 0.00, -0.02, 1)$. Avec le $\mathbf w$ obtenu au pas précédent, $\hat Q(s_1, \text{droite}; \mathbf w) \approx 0.100$.
+>
+> $$\mathbf w \leftarrow \mathbf w + 0.1 \times (1.9 - 0.100) \times \mathbf x(s_1, \text{droite}) \approx (0,0,0,0,0,\; 0.001,\, 0.010,\, 0.002,\, 0.001,\, 0.280).$$
+>
+> *Pas $t=0$ (Gauche).* $\mathbf x(s_0, \text{gauche}) = (0.00, 0.02, 0.01, -0.01, 1,\; 0,0,0,0,0)$. Le bloc gauche de $\mathbf w$ est encore à $\mathbf 0$ (jamais touché), donc $\hat Q(s_0, \text{gauche}; \mathbf w) = 0$.
+>
+> $$\mathbf w \leftarrow \mathbf w + 0.1 \times (2.71 - 0) \times \mathbf x(s_0, \text{gauche}) \approx (0,\, 0.005,\, 0.003,\, -0.003,\, 0.271,\; 0.001,\, 0.010,\, 0.002,\, 0.001,\, 0.280).$$
+>
+> **Résultat final.**
+>
+> $$\mathbf w_{\text{gauche}} \approx (0,\, 0.005,\, 0.003,\, -0.003,\, 0.271), \qquad \mathbf w_{\text{droite}} \approx (0.001,\, 0.010,\, 0.002,\, 0.001,\, 0.280).$$
+>
+> Trois observations :
+> - **Les deux blocs évoluent indépendamment.** Le bloc gauche n'a été mis à jour qu'une fois (au pas $t=0$, seule fois où Gauche a été choisie) ; le bloc droite deux fois ($t=1$ et $t=2$). C'est exactement la propriété annoncée en C.1 : une mise à jour sur une action ne touche jamais les poids de l'autre action.
+> - **Le biais domine** dans les deux blocs : logique, puisque les autres coordonnées de l'état sont proches de zéro dans cet exemple — c'est le biais qui capte l'essentiel de "combien vaut le fait d'être en vie encore quelques pas".
+> - **Avec plus d'épisodes**, ce même mécanisme (remonter, calculer $G_t$, mettre à jour le bloc actif) se répète et affine $\mathbf w$, jusqu'à ce que $\hat Q$ distingue correctement les états stables des états sur le point de tomber.
 
 ### D. Exemple — Grid World
 
@@ -188,7 +322,7 @@ Comme on n'a pas $q_\pi$, on substitue un target :
 >
 > **TD(0) VFA target** :
 >
-> $$U^\sim(s, \mathbf w) = \mathbf x(s_{t+1})^T \mathbf w.$$
+> $$U^\sim(s; \mathbf w) = \mathbf x(s_{t+1})^T \mathbf w.$$
 >
 > **Update rule** :
 >
@@ -239,7 +373,7 @@ $$U^\sim(s_0) = \mathbf w^T (0, 0, 1) = -0.72.$$
 
 Comme dans le **XOR-world**, certaines value functions ne se modélisent pas linéairement. On peut ajouter des termes d'interaction :
 
-$$\hat U(s, \mathbf w) = x_1 w_1 + x_2 w_2 + x_1 x_2 w_3 + w_4.$$
+$$\hat U(s; \mathbf w) = x_1 w_1 + x_2 w_2 + x_1 x_2 w_3 + w_4.$$
 
 ![[neural-2.png]]
 
@@ -276,11 +410,11 @@ Mais ça reste manuel. Mieux : un **NN profond** qui apprend les features automa
 #### E.4 Loss et target
 
 > [!warning] Loss DQN
-> $$J(\mathbf w) = \mathbb{E}_{(s_t, a_t, r_t, s_{t+1})}\big[(y_t^{DQN} - \hat q(s_t, a_t, \mathbf w))^2\big],$$
+> $$J(\mathbf w) = \mathbb{E}_{(s_t, a_t, r_t, s_{t+1})}\big[(y_t^{DQN} - \hat q(s_t, a_t; \mathbf w))^2\big],$$
 >
 > avec target one-step :
 >
-> $$y_t^{DQN} = r_t + \gamma \max_{a'} \hat q(s_{t+1}, a', \mathbf w^-),$$
+> $$y_t^{DQN} = r_t + \gamma \max_{a'} \hat q(s_{t+1}, a'; \mathbf w^-),$$
 >
 > où $\mathbf w^-$ sont les paramètres du **target network** (fixés temporairement), et le target $y_t$ est traité comme **fixe** lors du SGD sur $\mathbf w$.
 
@@ -307,7 +441,7 @@ Mais ça reste manuel. Mieux : un **NN profond** qui apprend les features automa
 > 💡 **Limite et extension.** Le buffer de base traite toutes les transitions équitablement. **Prioritized Replay** (Schaul et al.) rejoue plus souvent les transitions importantes (TD error élevée) — agent apprend plus efficacement.
 
 > [!warning] (2) Fixed Q-Targets
-> Pour stabiliser, on utilise un **target network séparé** $\hat q(s, a, \mathbf w^-)$ pour générer les $y_j$. Tous les $C$ updates (typiquement $C = 10000$), on copie $\mathbf w^- \leftarrow \mathbf w$. Entre temps, le target reste **fixe**.
+> Pour stabiliser, on utilise un **target network séparé** $\hat q(s, a; \mathbf w^-)$ pour générer les $y_j$. Tous les $C$ updates (typiquement $C = 10000$), on copie $\mathbf w^- \leftarrow \mathbf w$. Entre temps, le target reste **fixe**.
 
 #### E.6 Pseudo-code DQN
 
@@ -318,12 +452,12 @@ Mais ça reste manuel. Mieux : un **NN profond** qui apprend les features automa
 > 4. Pour chaque épisode $m = 1, \ldots, M$ :
 >    - Observer la frame initiale $x_1$, préprocesser pour obtenir $s_1$.
 >    - Pour chaque time step $t = 1, \ldots, T$ :
->      - Sélectionner $a_t = \begin{cases} \text{action aléatoire} & \text{avec proba } \epsilon \\ \arg\max_a \hat q(s_t, a, \mathbf w) & \text{sinon} \end{cases}$
+>      - Sélectionner $a_t = \begin{cases} \text{action aléatoire} & \text{avec proba } \epsilon \\ \arg\max_a \hat q(s_t, a; \mathbf w) & \text{sinon} \end{cases}$
 >      - Exécuter $a_t$, observer $r_t$ et $x_{t+1}$.
 >      - Préprocesser pour obtenir $s_{t+1}$, stocker $(s_t, a_t, r_t, s_{t+1})$ dans $D$.
 >      - Échantillonner uniformément un mini-batch de $N$ transitions de $D$.
->      - $y_j = r_j$ si épisode termine à $j+1$, sinon $y_j = r_j + \gamma \max_{a'} \hat q(s_{j+1}, a', \mathbf w^-)$.
->      - SGD sur $J(\mathbf w) = \frac{1}{N} \sum_j (y_j - \hat q(s_j, a_j, \mathbf w))^2$.
+>      - $y_j = r_j$ si épisode termine à $j+1$, sinon $y_j = r_j + \gamma \max_{a'} \hat q(s_{j+1}, a'; \mathbf w^-)$.
+>      - SGD sur $J(\mathbf w) = \frac{1}{N} \sum_j (y_j - \hat q(s_j, a_j; \mathbf w))^2$.
 >      - Tous les $C$ steps : $\mathbf w^- \leftarrow \mathbf w$.
 
 #### E.7 Détails d'entraînement (papier original)
@@ -370,7 +504,7 @@ Mais ça reste manuel. Mieux : un **NN profond** qui apprend les features automa
 > 💡 **Motivation.** L'opérateur $\max$ dans DQN utilise le **même réseau** pour sélectionner ET évaluer une action — biais d'**overestimation**. Solution : découpler.
 
 > [!warning] Target Double DQN
-> $$y_t^{\text{DoubleDQN}} = r_t + \gamma \, \hat q\big(s_{t+1}, \, \arg\max_{a'} \hat q(s_{t+1}, a', \mathbf w), \, \mathbf w^-\big).$$
+> $$y_t^{\text{DoubleDQN}} = r_t + \gamma \, \hat q\big(s_{t+1}, \, \arg\max_{a'} \hat q(s_{t+1}, a'; \mathbf w); \, \mathbf w^-\big).$$
 >
 > L'**arg max** est calculé avec le réseau online ($\mathbf w$), la valeur est évaluée avec le target ($\mathbf w^-$).
 
@@ -395,8 +529,8 @@ Le reste de DQN (replay, target network update périodique) reste identique.
 #### G.1 Architecture
 
 L'architecture **dueling** sépare le réseau en **deux flux** après les couches conv :
-- Un flux pour estimer $\hat v(s, \mathbf w, \mathbf w_v)$ (state value).
-- Un flux pour estimer $A(s, a, \mathbf w, \mathbf w_A)$ (advantage par action).
+- Un flux pour estimer $\hat v(s; \mathbf w, \mathbf w_v)$ (state value).
+- Un flux pour estimer $A(s, a; \mathbf w, \mathbf w_A)$ (advantage par action).
 - Module d'agrégation pour produire $\hat q(s, a)$.
 
 ![[ddqn-1.png]]
@@ -536,6 +670,13 @@ où $D(s_i)$ est la **state visitation frequency**.
 >
 > **Sum frequencies** : $D_{s_i} = \sum_t D_{s_i, t}$.
 
+### I. To do
+
+> [!note] Points à approfondir plus tard
+> - **Graphes de convergence de $\mathbf w$.** Générer un vrai graphique (code, pas un placeholder) qui trace l'évolution de $\mathbf w$ (ou d'une composante, ou de la performance/durée d'épisode) au fil des épisodes d'entraînement, pour visualiser concrètement la convergence.
+> - **Comparer MC, SARSA et Q-learning (SARSAMAX) sur CartPole.** Un même graphe (ou une petite série de graphes) qui compare les trois méthodes côte à côte sur le même environnement — par exemple durée d'épisode moyenne en fonction du nombre d'épisodes d'entraînement, pour voir laquelle converge le plus vite et le plus stablement.
+> - **Prudence de SARSA vs. agressivité de Q-learning.** Illustrer concrètement sur CartPole (pas seulement l'exemple cliff walking de 01) que Q-learning, en évaluant la politique gloutonne plutôt que la politique réellement suivie, peut apprendre une politique plus "risquée" qui se comporte mal pendant l'exploration — alors que SARSA, en tenant compte du coût de l'exploration ($\varepsilon$-greedy), apprend une politique plus prudente. Point déjà discuté en 01 (SARSA vs Q-learning, section IV.B) mais jamais illustré numériquement sur CartPole.
+
 ---
 
 ## II. Policy-Based (Policy Gradient)
@@ -567,7 +708,7 @@ Toute policy non-uniforme est exploitable. La policy optimale Nash est uniformé
 $$P(\text{rock}) = P(\text{paper}) = P(\text{scissors}) = \tfrac{1}{3}.$$
 
 #### B.2 Aliased gridworld
-
+		
 > [!example] Environnement partiellement observable
 > ![[images/3-Apprentissage automatique/07_Reinforcement learning/Deep RL/Policy based/im1.png]]
 >

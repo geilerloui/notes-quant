@@ -5,7 +5,7 @@ title: Word Embeddings - NLP
 
 > Cette note couvre les **représentations vectorielles de mots** (word embeddings) — comment passer d'un texte brut à des vecteurs que des modèles peuvent traiter. On suit la progression historique : one-hot (naïf) → représentations distributionnelles (co-occurrence + reweighting + LSA) → représentations *prediction-based* (Word2Vec et ses variantes), avec un mot sur GloVe et l'évaluation.
 
-> 💡 **Position dans la zoologie NLP.** Les word embeddings statiques (Word2Vec, GloVe) ont été remplacés en pratique par les **représentations contextuelles** (BERT, GPT) traitées dans [[03_Représentations contextuelles]]. Mais comprendre Word2Vec reste indispensable : c'est la grammaire commune, et beaucoup d'idées (skip-gram, negative sampling, NCE) sont reprises sous d'autres noms en deep learning moderne.
+> 💡 **Position dans la zoologie NLP.** Les word embeddings statiques (Word2Vec, GloVe) ont été remplacés en pratique par les **représentations contextuelles** (BERT, GPT) traitées dans [[06_Représentations contextuelles]]. Mais comprendre Word2Vec reste indispensable : c'est la grammaire commune, et beaucoup d'idées (skip-gram, negative sampling, NCE) sont reprises sous d'autres noms en deep learning moderne.
 
 Bibliographie principale :
 - [Demystifying neural networks in skip-gram (blog très clair)](https://aegis4048.github.io/demystifying_neural_network_in_skip_gram_language_modeling)
@@ -17,7 +17,7 @@ Bibliographie principale :
 
 **Approche.** La méthode la plus naïve. Étant donné un corpus, on considère l'ensemble $V$ de tous les mots uniques (le **vocabulaire**). On représente chaque mot par un vecteur one-hot de taille $|V|$.
 
-![[freq2.png]]
+![[freq2.png|542]]
 **Figure 1.** Représentation one-hot : un 1 à la position du mot, des 0 partout ailleurs.
 
 > [!warning] Problèmes du one-hot
@@ -25,7 +25,7 @@ Bibliographie principale :
 > - Aucune notion de **similarité** entre mots.
 > - Idéalement, on voudrait que les représentations de *cat* et *dog* (animaux domestiques) soient plus proches que *cat* et *truck*. Avec des one-hot, la distance euclidienne entre **n'importe quels** deux mots du vocabulaire vaut $\sqrt{2}$.
 
-![[freq1.png]]
+![[freq1.png|496]]
 **Figure 2.** La distance euclidienne entre deux mots distincts vaut $\sqrt{2}$, et la distance cosinus vaut 0.
 
 ---
@@ -51,12 +51,12 @@ On la construit en deux étapes.
 
 **(2) Choisir les paramètres.** Une matrice de co-occurrence se définit par deux choix : la **taille de fenêtre** et le **scaling** (poids uniforme ou décroissant avec la distance au mot central).
 
-![[distrib1.png]]
+![[distrib1.png|410]]
 **Figure 3.** Illustration sur la première phrase de *Finnegans Wake* (qui est aussi sa dernière). On choisit une fenêtre, et on peut soit pondérer uniformément les mots de la fenêtre, soit donner moins de poids aux mots éloignés du centre.
 
 **Notre choix.** Fenêtre de taille $k = 2$ et matrice $\text{word} \times \text{context}$ basée sur le corpus précédent.
 
-![[distrib2.png]]
+![[distrib2.png|405]]
 **Figure 4.** Matrice de co-occurrence résultante.
 
 ### B. Comparaison vectorielle
@@ -71,7 +71,7 @@ $$\text{euclidean}(u, v) = \sqrt{\sum_{i=1}^n |u_i - v_i|^2}.$$
 
 > 💡 **Limite.** Euclidienne favorise la **magnitude** plutôt que la similarité de proportion. Linguistiquement, $A$ et $B$ ressemblent à *superb* et *good* (sens proche), tandis que $B$ et $C$ ressemblent à *good* et *bad* (mêmes nombres mais sens opposés). Euclidienne ne capte pas ça.
 
-![[distrib11.png]]
+![[distrib11.png|583]]
 **Figure 5.** Distance euclidienne — $A$ et $B$ apparaissent éloignés à cause de la magnitude.
 
 **Length normalization.** On normalise par la **norme L2** :
@@ -80,18 +80,18 @@ $$\|u\|_2 = \sqrt{\sum_{i=1}^n u_i^2}, \qquad \tilde u = \left[\frac{u_1}{\|u\|_
 
 Après length normalization, tous les points sont sur la sphère unité — $A$ et $B$ deviennent proches.
 
-![[distrib12.png]]
+![[distrib12.png|539]]
 **Figure 6.** Length normalization — magnitude éliminée, seule la direction compte.
 
 **Distance cosinus.** La distance utilisée par défaut quand rien n'est précisé. Elle fait simultanément une distance euclidienne dans l'espace length-normalisé :
 
 $$\cos(u, v) = 1 - \frac{\sum_{i=1}^n u_i v_i}{\|u\|_2 \cdot \|v\|_2}.$$
 
-![[distrib9.png]]
+![[distrib9.png|576]]
 
 > 💡 **Équivalence cosinus / L2-norm puis cosinus.** Si on commence par normaliser L2 puis qu'on calcule la distance cosinus, on obtient le même résultat — le dénominateur de la formule cosinus inclut déjà la normalisation.
 
-![[distrib10.png]]
+![[distrib10.png|574]]
 
 ### C. Schémas de repondération (reweighting)
 
@@ -129,7 +129,7 @@ $$\text{PMI}_0(w, c) = \begin{cases} \text{PMI}(w, c) & \text{si } p(x, y) > 0 \
 
 $$\text{PPMI}(w, c) = \begin{cases} \text{PMI}(w, c) & \text{si } \text{PMI}(w, c) > 0 \\ 0 & \text{sinon} \end{cases}$$
 
-![[distrib6.png]]
+![[distrib6.png|481]]
 **Figure 7.** Matrice de PPMI calculée sur le dataset initial.
 
 #### C.3 TF-IDF
@@ -137,13 +137,13 @@ $$\text{PPMI}(w, c) = \begin{cases} \text{PMI}(w, c) & \text{si } \text{PMI}(w, 
 > [!warning] L'idée
 > TF-IDF amplifie les valeurs des termes qui apparaissent dans **très peu de documents**. Un terme avec un TF-IDF élevé est très associé spécifiquement à un document — pas à beaucoup d'autres.
 
-![[distrib4.png]]
+![[distrib4.png|519]]
 
 $$\text{TF-IDF} = \text{TF} \times \text{IDF}.$$
 
 **IDF en pratique.** L'IDF est à son **pic** quand un mot apparaît dans **un seul** document — ce qui le rend spécifique à ce document.
 
-![[distrib5.png]]
+![[distrib5.png|438]]
 
 ### D. Latent Semantic Analysis (LSA)
 
@@ -220,7 +220,7 @@ Conventionnellement :
 >
 > *Comprendre* et *assimiler* partagent des contextes communs → leurs vecteurs seront similaires.
 
-#### A.1 Les espaces
+**A.1 Les espaces**
 
 > [!warning] Espace des sens
 > Espace **dense** de dimension $d \ll |V|$ pour représenter les sens des mots. Exemple :

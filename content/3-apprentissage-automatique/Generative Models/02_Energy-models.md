@@ -84,13 +84,13 @@ ne fait pas intervenir $Z(\theta)$. On peut donc savoir laquelle des deux config
 - **Débruitage** : choisir le $\tilde{x}$ qui maximise $p_\theta(\tilde{x})$ pour des candidats donnés.
 - **Classification / labellisation de séquence** : pour la reconnaissance d'objets, on apprend une fonction d'énergie qui capture la relation entre images $X$ et labels $Y$, et on prédit $\hat{y} = \arg\max_y p_\theta(x, y)$ — pas besoin de $Z$.
 
-![[im2 (4).png]]
+![[images/3-Apprentissage automatique/06_Natural language processing/machine translation/im2 (4).png]]
 
 ### B. Modèle d'Ising
 
 Image vraie $y \in \{0, 1\}^{3 \times 3}$ et image corrompue $x \in \{0, 1\}^{3 \times 3}$ (on observe $x$, on cherche à retrouver $y$).
 
-![[im3 (5).png]]
+![[images/3-Apprentissage automatique/04_Computer vision/00_CNN architecture/im3 (5).png]]
 
 On modélise la jointe par :
 

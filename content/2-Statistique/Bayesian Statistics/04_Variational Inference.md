@@ -67,7 +67,7 @@ où $\text{KL}$ et $\mathcal{L}$ peuvent varier en fonction du choix de $q(z)$, 
 >
 > Comme $\log p(x)$ est constant et $\text{KL} + \text{ELBO} = \log p(x)$, **maximiser l'ELBO revient exactement à minimiser la KL**.
 
-![[im1 (4).png]]
+![[images/3-Apprentissage automatique/06_Natural language processing/machine translation/im1 (4).png]]
 **Figure 1.** En augmentant la borne inférieure $\mathcal{L}$ (ELBO), on réduit la KL divergence. On n'a même pas besoin de connaître $p(z \mid x)$ — l'approximation s'améliore quoi qu'il arrive.
 
 | KL | $\mathcal{L}$ | = | $\log p(x)$ |

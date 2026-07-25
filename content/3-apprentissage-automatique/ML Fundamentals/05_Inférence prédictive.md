@@ -120,7 +120,7 @@ Beaucoup de modèles de classification produisent des "probabilités" qui ne son
 > [!example] Pièges de l'AUC
 > Reliability curve d'un SVM ill-calibré : $\text{AUC} = 0.89$, $BS = 0.49$. **L'AUC élevée nous trompe** — elle nous dit que le ranking est bon, mais le Brier score révèle que les probas elles-mêmes sont fausses.
 >
-> ![[im4-9.png]]
+> ![[images/3-Apprentissage automatique/04_Computer vision/01_CNN/im4-9.png]]
 
 ### F. Méthodes de recalibration (binaire)
 
@@ -310,7 +310,7 @@ $$f(x_0) = f(x_{k-1}) + (x_0 - x_{k-1}) \cdot \frac{f(x_k) - f(x_{k-1})}{x_k - x
 >
 > **(3) Prediction set.** Sur la query, on trie le softmax. On rajoute les classes dans l'ordre décroissant **jusqu'à ce que la somme dépasse** $\hat q$.
 >
-> ![[im3-4.png]]
+> ![[images/3-Apprentissage automatique/04_Computer vision/01_CNN/im3-4.png]]
 
 ### G. Conformalized Quantile Regression (CQR)
 
@@ -369,7 +369,7 @@ Trois axes d'évaluation :
 >
 > $$\text{Coverage} \sim \text{Beta}(l, n - l + 1), \quad l = \lceil (n + 1)(1 - \alpha) \rceil.$$
 >
-> ![[im4-5.png]]
+> ![[images/3-Apprentissage automatique/04_Computer vision/01_CNN/im4-5.png]]
 
 > [!note]- Protocole d'évaluation
 > 1. Random split données → train/calib/val.
@@ -379,17 +379,17 @@ Trois axes d'évaluation :
 >
 > Comparer avec la distribution Beta théorique.
 >
-> ![[im4-6.png]]
+> ![[images/3-Apprentissage automatique/04_Computer vision/01_CNN/im4-6.png]]
 
 > [!warning] (2) Set size
 > Plus c'est petit, mieux c'est. Idéalement la distribution des sizes est **bimodale** : la plupart sont faciles (size 1) et quelques-unes sont dures (size grande).
 >
-> ![[im4-7.png]]
+> ![[images/3-Apprentissage automatique/04_Computer vision/01_CNN/im4-7.png]]
 
 > [!warning] (3) Adaptiveness / proxy de conditional coverage
 > Le conditional coverage exact n'est pas calculable. **Proxy** : **label-stratified coverage**. Si on classifie chats, chiens, éléphants, on veut 90% sur chaque classe séparément. Tu stratifies par classe et tu mesures le coverage. Si les barres sont **égales**, tu es proche du conditional.
 >
-> ![[im4-8.png]]
+> ![[images/3-Apprentissage automatique/04_Computer vision/01_CNN/im4-8.png]]
 
 ### J. Outputs additionnels
 

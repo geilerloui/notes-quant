@@ -104,7 +104,16 @@ $$
 X = \begin{pmatrix} 1&2&3&4\\5&6&7&8\\9&10&11&12\\13&14&15&16 \end{pmatrix}
 $$
 
-Chaque patch $3\times3$ aplati devient une ligne de $X_{unfold}$ :
+Chaque patch $3\times3$ aplati devient une ligne de $X_{unfold}$ — aucune valeur n'est inventée ou modifiée, on recopie juste les pixels de $X$ dans un ordre différent (ligne par ligne au lieu de carré) :
+
+> [!note]- Détail patch par patch (les 4 lignes de $X_{unfold}$)
+> - **Patch 1**, fenêtre en haut-gauche $\begin{pmatrix}1&2&3\\5&6&7\\9&10&11\end{pmatrix}$ → ligne $[1,2,3,5,6,7,9,10,11]$
+> - **Patch 2**, fenêtre décalée d'une colonne $\begin{pmatrix}2&3&4\\6&7&8\\10&11&12\end{pmatrix}$ → ligne $[2,3,4,6,7,8,10,11,12]$
+> - **Patch 3**, fenêtre décalée d'une ligne $\begin{pmatrix}5&6&7\\9&10&11\\13&14&15\end{pmatrix}$ → ligne $[5,6,7,9,10,11,13,14,15]$
+> - **Patch 4**, fenêtre décalée d'une ligne et d'une colonne $\begin{pmatrix}6&7&8\\10&11&12\\14&15&16\end{pmatrix}$ → ligne $[6,7,8,10,11,12,14,15,16]$
+
+![[images/3-Apprentissage automatique/04_Computer vision/01_CNN/im2col_patch.png|550]]
+*Le patch 1 (bordure rouge, à gauche) devient la ligne 1 de $X_{unfold}$ (bordure rouge, à droite) — même 9 valeurs, juste réarrangées.*
 
 $$
 X_{unfold} = \begin{pmatrix}
@@ -115,6 +124,8 @@ X_{unfold} = \begin{pmatrix}
 \end{pmatrix}
 $$
 
+Remarque : les valeurs $2,3,6,7,10,11$ apparaissent à la fois dans le Patch 1 et le Patch 2 (chevauchement des fenêtres) — chaque pixel proche du centre contribue à plusieurs patchs, donc à plusieurs lignes de $X_{unfold}$.
+
 $$
 Y = X_{unfold} \cdot w = \begin{pmatrix}-6\\-6\\-6\\-6\end{pmatrix} \;\Rightarrow\; \begin{pmatrix}-6&-6\\-6&-6\end{pmatrix}
 $$
@@ -123,7 +134,40 @@ $$
 
 **Ce que ça révèle.** La seule vraie différence avec le MLP n'est pas la formule ($y=Wx+b$ reste valable) — c'est **comment on construit $X$**. Au lieu d'aplatir toute l'image en un seul vecteur (fully-connected), on construit une ligne par position de sortie en piochant un petit patch, avec chevauchement entre les lignes (regarde les colonnes communes entre la 1ère et la 2ème ligne de $X_{unfold}$ ci-dessus). Ce chevauchement, combiné au fait que le **même** $w$ multiplie toutes les lignes, c'est exactement le partage de poids et la sparsité de la section I — encodés directement dans la construction de $X_{unfold}$, pas dans une formule différente.
 
-*(Rétropropagation pour les CNN : section vide dans la source d'origine — à compléter.)*
+### Rétropropagation : le gradient d'une convolution est une convolution transposée
+
+Le mécanisme (chain rule, gradient qui remonte couche par couche) est le même que pour n'importe quel réseau — rien à redériver ici. Seule question intéressante : concrètement, à quoi ressemble le gradient une fois qu'il traverse une couche de convolution ?
+
+$$
+\frac{\partial \mathcal L}{\partial X_{unfold}} = \frac{\partial \mathcal L}{\partial Y_{unfold}} \cdot W^T
+$$
+
+Ce gradient ressort "déplié" (une ligne par patch). Pour revenir à la forme image, on replie chaque ligne à la position de son patch d'origine — et comme les patchs se chevauchent, un pixel touché par plusieurs patchs reçoit la **somme** de leurs contributions.
+
+**Exemple minimal.** Reprenons $w = \begin{pmatrix}1&0&-1\\1&0&-1\\1&0&-1\end{pmatrix}$ et un gradient entrant $\frac{\partial \mathcal L}{\partial Y} = \begin{pmatrix}1&1\\1&1\end{pmatrix}$ (les 4 positions de sortie). Chaque position renvoie une copie de $w$, repliée à sa place dans la grille $4\times4$, puis on additionne les chevauchements :
+
+- Pixel $(0,0)$ — coin, touché par un seul patch (Patch 1) : $\frac{\partial \mathcal L}{\partial X}[0,0] = w[0,0] = 1$
+- Pixel $(1,1)$ — centre, touché par les 4 patchs, chacun avec une position locale différente dans $w$ : $0 + 1 + 0 + 1 = 2$
+
+> [!note]- Détail : pourquoi le pixel $(1,1)$ reçoit $0+1+0+1=2$ (chain rule à plusieurs variables)
+> Un seul filtre $w$ est réutilisé à 4 positions différentes — ce n'est pas "plusieurs filtres", c'est le même $w$ qui recouvre le pixel $X[1,1]=6$ à un endroit différent à chaque fois. Comme ce pixel influence 4 sorties ($Y[0,0], Y[0,1], Y[1,0], Y[1,1]$), la règle de la chaîne dit que son effet total sur la loss est la **somme** de son effet à travers chacune :
+>
+> $$
+> \frac{\partial \mathcal L}{\partial X[1,1]} = \sum_{(a,b)} \frac{\partial \mathcal L}{\partial Y[a,b]} \times \frac{\partial Y[a,b]}{\partial X[1,1]}
+> $$
+>
+> où $\frac{\partial Y[a,b]}{\partial X[1,1]}$ est simplement le poids de $w$ qui multipliait $X[1,1]$ dans ce patch précis :
+>
+> - **Patch 1** (fenêtre haut-gauche) : $X[1,1]$ tombe au centre du patch → poids $w[1,1] = 0$
+> - **Patch 2** (fenêtre décalée à droite) : $X[1,1]$ tombe à gauche-centre → poids $w[1,0] = 1$
+> - **Patch 3** (fenêtre décalée en bas) : $X[1,1]$ tombe en haut-centre → poids $w[0,1] = 0$
+> - **Patch 4** (fenêtre décalée en bas-droite) : $X[1,1]$ tombe en haut-gauche → poids $w[0,0] = 1$
+>
+> Avec $\frac{\partial \mathcal L}{\partial Y}=1$ partout : $\frac{\partial \mathcal L}{\partial X[1,1]} = 1\times0 + 1\times1 + 1\times0 + 1\times1 = 2$. Même résultat que par le "repliement + somme" ci-dessus — la convolution transposée n'est qu'une façon efficace de calculer cette somme pour tous les pixels d'un coup, plutôt que pixel par pixel à la main.
+
+![[images/3-Apprentissage automatique/04_Computer vision/01_CNN/backprop_miroir.png|500]]
+
+C'est exactement la définition d'une **convolution transposée** avec le même filtre $W$ (section IV) : étaler chaque valeur de sortie sur une zone de l'entrée via $W$, en sommant les zones qui se chevauchent. Donc à chaque couche de convolution, il y a une convolution transposée cachée dans le backward pass — même dans un simple classifieur, sans segmentation ni autoencodeur.
 
 ## III - Hyperparamètres des filtres
 

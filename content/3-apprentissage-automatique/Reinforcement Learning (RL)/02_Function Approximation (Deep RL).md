@@ -359,6 +359,9 @@ $$U^\sim(s_0) = \mathbf w^T (0, 0, 1) = -0.72.$$
 
 ### E. Deep Q-Learning (DQN)
 
+> [!info] Le fil rouge de toute la section E : Atari
+> Jusqu'ici (B, C, D), l'état était un petit vecteur de quelques nombres (position, vitesse...), et les features étaient construites à la main. **DQN change d'échelle** : Mnih et al. (2015, *Nature*) l'appliquent aux **jeux Atari**, où l'état est une **image brute** (pixels) — impossible d'y construire des features à la main comme en B/C/D. C'est précisément ce qui motive le passage à un réseau de neurones profond : il apprend lui-même les features utiles directement depuis les pixels. Tout ce qui suit (E.1 à E.6) — architecture, preprocessing, entraînement, résultats — porte sur ce même papier et ce même jeu de benchmarks Atari, du début à la fin.
+
 #### E.1 Contexte historique
 
 > 💡 **Historique en bref.**
@@ -369,7 +372,7 @@ $$U^\sim(s_0) = \mathbf w^T (0, 0, 1) = -0.72.$$
 
 ![[neural-1.png]]
 
-#### E.2 Pourquoi NN — limites du linéaire
+**Pourquoi NN — limites du linéaire**
 
 Comme dans le **XOR-world**, certaines value functions ne se modélisent pas linéairement. On peut ajouter des termes d'interaction :
 
@@ -386,28 +389,32 @@ Mais ça reste manuel. Mieux : un **NN profond** qui apprend les features automa
 > - **(ii) Kernel-based** — plus riche, sans features explicites. Convergence sous certaines conditions, mais pas scalable.
 > - **(iii) Deep NN** — universal approximator, distributed representations, exponentiellement moins de paramètres qu'un shallow net pour la même fonction. SGD pour apprendre.
 
-#### E.3 Architecture DQN
+#### E.3 Prétraitement des frames et architecture du réseau
 
-> 💡 **Référence.** Mnih et al. 2015 (Nature). Réseau qui prend en entrée des images Atari préprocessées et sort un vecteur de Q-values, une par action.
+> 💡 **Référence.** Mnih et al. 2015 (*Nature*). Réseau qui prend en entrée des images Atari préprocessées et sort un vecteur de Q-values, une par action.
 
-**Préprocessing des frames Atari.**
+![[dqn-5.png|483]]
+**Figure.** La boucle agent-environnement classique, ici sur un jeu Atari (Space Invaders) : l'agent observe $s_t$ (l'écran), choisit une action $a_t$ (le joystick), reçoit une récompense $r_t$ (le score).
 
-> [!note]- Pipeline de préprocessing
-> 1. **Single frame encoding** — max pooling pixel-wise sur 2 frames consécutives (gère les artefacts du jeu).
-> 2. **Dimensionality reduction** — extraire le canal Y (luminance), redimensionner à $84 \times 84 \times 1$.
-> 3. **Stack 4 frames récentes** → input $84 \times 84 \times 4$ (pour avoir une approximation Markovienne).
+**Préprocessing — l'essentiel.** L'état donné au réseau, ce sont les **4 dernières frames de l'écran, empilées** comme 4 canaux d'une même entrée (fenêtre glissante : à chaque nouveau pas, on ajoute la frame la plus récente et on enlève la plus ancienne). Pourquoi 4 et pas 1 : une seule image ne dit pas dans quelle direction va la balle (Pong) ou un ennemi — deux situations visuellement identiques peuvent avoir des dynamiques opposées selon d'où vient l'objet. En empilant 4 frames successives, le réseau peut déduire vitesse et direction à partir des différences entre elles. Chaque frame est aussi convertie en **niveaux de gris** (on ne garde pas la couleur) et réduite en taille avant d'être empilée (détail d'implémentation, sans grand intérêt conceptuel).
 
-**Architecture du réseau.**
+Au final, l'entrée du réseau est un tensor $s \in \mathbb{R}^{4 \times 84 \times 84}$ — exactement le même rôle que le $\mathbf x(s)$ des sections B/C, sauf que ce ne sont plus des features construites à la main mais des pixels bruts empilés.
 
-> [!note]- Détails couches
-> - Input : $84 \times 84 \times 4$.
-> - Conv1 : 32 filtres $8 \times 8$, stride 4 + ReLU.
-> - Conv2 : 64 filtres $4 \times 4$, stride 2 + ReLU.
-> - Conv3 : 64 filtres $3 \times 3$, stride 1 + ReLU.
-> - FC : 512 unités + ReLU.
-> - Output : linéaire, une unité par action.
+**Architecture — de $s$ à $\hat Q(s,\cdot)$.**
 
-#### E.4 Loss et target
+![[dqn-4.png]]
+**Figure.** Schéma de l'architecture (version simplifiée du papier original) : stack de 4 frames → 2 couches convolutives → 1 couche fully-connected → sortie linéaire. La version Nature 2015, utilisée dans la suite de cette note, a une couche convolutive de plus et davantage de filtres (32, puis 64, puis 64 ; 512 unités en FC) — le principe est identique, seule la taille change.
+
+C'est exactement la même construction que celle vue plus haut dans notre discussion : trois couches convolutives, puis on **aplatit** (*flatten*) en un vecteur, puis une couche fully-connected classique, puis une sortie linéaire :
+
+$$h_1 = \text{ReLU}(W_1 * [s]_{4 \times 84 \times 84} + b_1), \quad h_2 = \text{ReLU}(W_2 * h_1 + b_2), \quad h_3 = \text{ReLU}(W_3 * h_2 + b_3),$$
+
+$$\hat Q(s, \cdot\, ; \mathbf w) = W_5 \cdot \text{ReLU}\big(W_4 \cdot \text{flatten}(h_3) + b_4\big) + b_5,$$
+
+où $*$ est la convolution (poids partagés, connectivité locale — cf. [[03_CNN]]), et $\mathbf w = \{W_1, \ldots, W_5, b_1, \ldots, b_5\}$ regroupe **tous** les filtres et poids du réseau (potentiellement des millions de paramètres, contre 5 à 10 en VFA linéaire). La sortie $\hat Q(s,\cdot;\mathbf w)$ est un **vecteur** de taille $|\mathcal A|$ — une Q-valeur par action, calculées toutes en un seul forward pass, sans jamais construire de feature vector par action à la main (contrairement au block stacking de C.1).
+
+
+#### E.4 Loss, target et les deux innovations clés
 
 > [!warning] Loss DQN
 > $$J(\mathbf w) = \mathbb{E}_{(s_t, a_t, r_t, s_{t+1})}\big[(y_t^{DQN} - \hat q(s_t, a_t; \mathbf w))^2\big],$$
@@ -417,8 +424,6 @@ Mais ça reste manuel. Mieux : un **NN profond** qui apprend les features automa
 > $$y_t^{DQN} = r_t + \gamma \max_{a'} \hat q(s_{t+1}, a'; \mathbf w^-),$$
 >
 > où $\mathbf w^-$ sont les paramètres du **target network** (fixés temporairement), et le target $y_t$ est traité comme **fixe** lors du SGD sur $\mathbf w$.
-
-#### E.5 Les deux innovations clés
 
 > 💡 **Pourquoi Q-learning avec VFA peut diverger.**
 > - **Corrélation entre samples** : transitions consécutives très corrélées → pas i.i.d.
@@ -443,9 +448,9 @@ Mais ça reste manuel. Mieux : un **NN profond** qui apprend les features automa
 > [!warning] (2) Fixed Q-Targets
 > Pour stabiliser, on utilise un **target network séparé** $\hat q(s, a; \mathbf w^-)$ pour générer les $y_j$. Tous les $C$ updates (typiquement $C = 10000$), on copie $\mathbf w^- \leftarrow \mathbf w$. Entre temps, le target reste **fixe**.
 
-#### E.6 Pseudo-code DQN
+#### E.5 Pseudo-code DQN
 
-> [!note]- Algorithme complet
+> [!note] Algorithme complet
 > 1. Initialiser le replay memory $D$ avec capacité fixe.
 > 2. Initialiser $\hat q$ avec poids aléatoires $\mathbf w$.
 > 3. Initialiser le target network $\hat q$ avec $\mathbf w^- = \mathbf w$.
@@ -460,25 +465,11 @@ Mais ça reste manuel. Mieux : un **NN profond** qui apprend les features automa
 >      - SGD sur $J(\mathbf w) = \frac{1}{N} \sum_j (y_j - \hat q(s_j, a_j; \mathbf w))^2$.
 >      - Tous les $C$ steps : $\mathbf w^- \leftarrow \mathbf w$.
 
-#### E.7 Détails d'entraînement (papier original)
+> 💡 **Quelques détails pratiques du papier original**, en complément du pseudo-code ci-dessus : reward clipping à $[-1, +1]$ (même learning rate sur tous les jeux, malgré des scores d'échelles très différentes) ; RMSProp, mini-batch de 32 ; $\epsilon$ décroît linéairement de $1.0$ à $0.1$ sur le premier million de steps puis reste fixé à $0.1$ ; à l'évaluation (une fois entraîné), $\epsilon = 0.05$.
 
-> 💡 **Hyperparamètres clés.**
-> - **Reward clipping** à $[-1, +1]$ (permet d'utiliser le même learning rate sur tous les jeux).
-> - **Frame skipping** (action repeat) — l'agent agit toutes les 4 frames, l'action est répétée. Réduit la fréquence de décision sans perdre en perf.
-> - **RMSProp** + mini-batch 32.
-> - $\epsilon$-greedy : $\epsilon$ décroît linéairement de 1.0 à 0.1 sur le premier million de steps, puis fixé à 0.1.
-> - À l'évaluation : $\epsilon = 0.05$.
+#### E.6 Visualisations et résultats
 
-#### E.8 Application Atari
-
-![[dqn-5.png]]
-**Figure.** L'état est l'image complète (avec stack de frames pour la dynamique).
-
-![[dqn-4.png]]
-**Figure.** Pong demande plus que l'image courante (vélocité, position de la balle) — d'où le stack de 4 frames.
-
-![[dqn-1.png]]
-**Figure.** Architecture DQN appliquée aux jeux Atari : 84×84×4 → 3 conv layers → 2 FC → output par action.
+*(Toujours le même papier/jeu de benchmarks Atari annoncé en ouverture de la section E — ces figures illustrent ce qu'on vient de construire, pas une nouvelle application.)*
 
 ![[dqn-2.png]]
 **Figure.** Résultat — niveau humain sur la majorité des jeux Atari (Mnih et al. 2015).
@@ -555,130 +546,6 @@ $$\boxed{\hat q = \hat v + \big(A(s, a) - \tfrac{1}{|A|} \sum_{a'} A(s, a')\big)
 
 > 💡 **Quand le dueling brille.** Particulièrement utile quand le **nombre d'actions est grand**. State-of-the-art Atari en 2016.
 
-### H. Imitation Learning
-
-> 💡 **Motivation.** Apprendre depuis des **rewards sparse** est lent et risqué (autonomous driving, médical). Une alternative : apprendre par **imitation** d'un expert.
-
-#### H.1 Setup
-
-> [!warning] Learning from Demonstration
-> On dispose de :
-> - State space, action space.
-> - Transition model $P(s' \mid s, a)$.
-> - **Pas de reward function** $R$.
-> - Set de trajectoires expertes $(s_0, a_0, s_1, a_1, \ldots)$ avec actions de la policy experte $\pi^*$.
-
-#### H.2 Behavioral Cloning
-
-> 💡 **Idée la plus simple.** Apprendre $\pi$ par **supervised learning** sur les paires $\{(s_i, a_i)\}$. Exemple historique : ALVINN (Pomerleau 1989, sensors → steering angle).
-
-> [!warning] Limite — compounding errors
-> Les data ne sont **pas i.i.d.** dans l'espace d'états : elles sont concentrées autour des trajectoires expertes. Si l'agent fait une erreur et atterrit dans un état non visité par l'expert, il n'a aucune donnée pour apprendre une recovery policy.
->
-> **L'erreur scale en $T^2$** sur la longueur de l'épisode (vs linéaire en RL standard).
-
-#### H.3 DAGGER (Dataset Aggregation)
-
-> 💡 **Idée.** Itérativement, on génère des données dans les états que la policy actuelle visite, et on demande à l'expert de **labelliser ces nouveaux états**. Ça mitige les compounding errors.
-
-> [!note]- Pseudo-code DAGGER
-> 1. $\mathcal D \leftarrow \emptyset$, $\hat \pi_1$ arbitraire.
-> 2. Pour $i = 1$ à $N$ :
->    - $\pi_i = \beta_i \pi^* + (1 - \beta_i) \hat \pi_i$ (mélange).
->    - Sample $T$-step trajectories avec $\pi_i$.
->    - Récupérer $\mathcal D_i = \{(s, \pi^*(s))\}$ — actions de l'expert sur les états visités par $\pi_i$.
->    - Aggregate : $\mathcal D \leftarrow \mathcal D \cup \mathcal D_i$.
->    - Train classifier $\hat \pi_{i+1}$ sur $\mathcal D$.
-> 3. Retourner le meilleur $\hat \pi_i$ sur validation.
-
-> 💡 **Limite.** L'expert doit être disponible pour labelliser **en temps réel** — pas toujours faisable.
-
-#### H.4 Inverse Reinforcement Learning (IRL)
-
-> 💡 **L'idée centrale.** Récupérer **la reward function** depuis les démonstrations expertes. Sans hypothèse d'optimalité, le problème est mal posé (n'importe quelle reward peut générer ces trajectoires).
-
-**Linear Feature Reward IRL.** Reward représentée comme combinaison linéaire de features :
-
-$$R(s) = w^T x(s).$$
-
-La value function devient :
-
-$$V^\pi(s) = w^T \mu(\pi),$$
-
-où $\mu(\pi) \in \mathbb{R}^n$ est la **fréquence pondérée actualisée** des features sous $\pi$.
-
-> [!warning] Critère de Ng-Russell
-> Si l'expert est optimal,
->
-> $$\mathbb{E}_{\pi^*}\!\left[\sum_t \gamma^t R^*(s_t) \mid s_0\right] \geq \mathbb{E}_\pi\!\left[\sum_t \gamma^t R^*(s_t) \mid s_0\right] \quad \forall \pi.$$
->
-> Donc on cherche $w^*$ tel que :
->
-> $$w^{*T} \mu(\pi^* \mid s_0) \geq w^{*T} \mu(\pi \mid s_0) \quad \forall \pi, \forall s.$$
->
-> "Trouver une paramétrisation où la policy experte surpasse les autres."
-
-#### H.5 Apprenticeship Learning via IRL
-
-> 💡 **L'idée.** Si on peut **matcher les feature expectations** de l'expert ($\|\mu(\pi) - \mu(\pi^*)\|_1 \leq \epsilon$), alors par Cauchy-Schwarz :
->
-> $$|w^T \mu(\pi) - w^T \mu(\pi^*)| \leq \epsilon \quad \forall w \text{ avec } \|w\|_\infty \leq 1.$$
-
-> [!note]- Pseudo-code Apprenticeship Learning
-> 1. Initialiser $\pi_0$.
-> 2. Pour $i = 1, 2, \ldots$ :
->    - Trouver $w$ tel que l'expert outperform les controllers précédents max :
->
->      $$\arg\max_w \max_\gamma \gamma$$
->
->      $$\text{s.t. } w^T \mu(\pi^*) \geq w^T \mu(\pi) + \gamma, \forall \pi \in \{\pi_0, \ldots, \pi_{i-1}\}.$$
->
->    - Trouver $\pi_i$ optimal pour $w$.
->    - Si $\gamma \leq \epsilon/2$ : retourner $\pi_i$.
-
-> 💡 **Limites pratiques.**
-> - Si l'expert est sous-optimal, la policy résultante est un **mélange arbitraire**.
-> - Demande de calculer une optimal policy à chaque itération — coûteux.
-> - **Infinité de reward functions** ont la même optimal policy.
-
-#### H.6 Maximum Entropy IRL
-
-> 💡 **Adresse l'ambiguïté** des IRL classiques. Ziebart et al. introduit le principe d'entropie maximale : parmi toutes les policies qui matchent les feature expectations, choisir celle de plus grande entropie.
-
-Distribution sur les trajectoires :
-
-$$P(\tau_j \mid w) = \frac{1}{Z(w)} \exp(w^T \mu_{\tau_j}).$$
-
-Likelihood des données observées :
-
-$$L(w) = \sum_{\text{examples}} \log P(\tau \mid w).$$
-
-Gradient :
-
-$$\nabla L(w) = \tilde \mu - \sum_\tau P(\tau \mid w) \mu_\tau = \tilde \mu - \sum_{s_i} D(s_i) x(s_i),$$
-
-où $D(s_i)$ est la **state visitation frequency**.
-
-> 💡 **Très influent.** Sélection principielle parmi les multiples reward functions possibles. Mais demande la connaissance du transition model.
-
-> [!note]- Pseudo-code MaxEnt IRL (résumé)
-> **Backward pass** : calcul itératif des $Z_{a_{i,j}}$ et $Z_{s_i}$ (partition functions).
->
-> **Local action probability** : $P(a_{i,j} \mid s_i) = Z_{a_{i,j}} / Z_{s_i}$.
->
-> **Forward pass** : calcul des state visitation frequencies $D_{s_i, t}$ récursivement.
->
-> **Sum frequencies** : $D_{s_i} = \sum_t D_{s_i, t}$.
-
-### I. To do
-
-> [!note] Points à approfondir plus tard
-> - **Graphes de convergence de $\mathbf w$.** Générer un vrai graphique (code, pas un placeholder) qui trace l'évolution de $\mathbf w$ (ou d'une composante, ou de la performance/durée d'épisode) au fil des épisodes d'entraînement, pour visualiser concrètement la convergence.
-> - **Comparer MC, SARSA et Q-learning (SARSAMAX) sur CartPole.** Un même graphe (ou une petite série de graphes) qui compare les trois méthodes côte à côte sur le même environnement — par exemple durée d'épisode moyenne en fonction du nombre d'épisodes d'entraînement, pour voir laquelle converge le plus vite et le plus stablement.
-> - **Prudence de SARSA vs. agressivité de Q-learning.** Illustrer concrètement sur CartPole (pas seulement l'exemple cliff walking de 01) que Q-learning, en évaluant la politique gloutonne plutôt que la politique réellement suivie, peut apprendre une politique plus "risquée" qui se comporte mal pendant l'exploration — alors que SARSA, en tenant compte du coût de l'exploration ($\varepsilon$-greedy), apprend une politique plus prudente. Point déjà discuté en 01 (SARSA vs Q-learning, section IV.B) mais jamais illustré numériquement sur CartPole.
-
----
-
 ## II. Policy-Based (Policy Gradient)
 
 ### A. Introduction au policy search
@@ -699,41 +566,61 @@ où $D(s_i)$ est la **state visitation frequency**.
 > - Convergence vers des **optima locaux** (gradient descent).
 > - **Data-inefficient** et **high variance**.
 
-### B. Pourquoi parfois une stochastic policy
+### B. Pourquoi une stochastic policy est parfois meilleure
 
-#### B.1 Rock-paper-scissors
+> 💡 **Le fil rouge de B.** Jusqu'ici (01, et I. ci-dessus), $\pi(s) = \arg\max_a Q(s,a)$ : une politique **déterministe**, une seule action par état. Les deux exemples ci-dessous montrent des cas où la politique optimale ne peut **pas** être déterministe — pas à cause de l'exploration, mais structurellement.
 
-Toute policy non-uniforme est exploitable. La policy optimale Nash est uniformément aléatoire :
+#### B.1 Rock-paper-scissors (environnement adversarial)
+
+> [!info] Adversarial = un adversaire intelligent en face
+> Contrairement à FrozenLake (où le seul "hasard" vient de la glace qui glisse), ici un **adversaire observe ta stratégie et s'adapte** pour te battre — un autre joueur, pas juste de l'aléatoire fixe.
+
+Toute politique fixe non-uniforme est exploitable (l'adversaire devine le biais et joue le coup qui bat). La seule politique non-exploitable est uniformément aléatoire :
 
 $$P(\text{rock}) = P(\text{paper}) = P(\text{scissors}) = \tfrac{1}{3}.$$
 
-#### B.2 Aliased gridworld
-		
-> [!example] Environnement partiellement observable
+#### B.2 Aliased gridworld (environnement partiellement observable)
+
+> [!info] Partiellement observable = l'agent ne voit pas l'état réel
+> L'agent perçoit une **observation** (ici : les murs autour de lui), pas sa position exacte. Deux états différents peuvent produire la même observation — l'agent ne peut alors pas les distinguer ("aliasing"). Nom savant : **POMDP**.
+
+> [!example] Couloir à 5 cases : squelette — case grise — 💰 — case grise — squelette
 > ![[images/3-Apprentissage automatique/07_Reinforcement learning/Deep RL/Policy based/im1.png]]
 >
-> Agent senses uniquement les murs autour. Les **deux cases grises sont indistinguables**. Domaine non-Markovien.
+> Les deux cases grises ont la **même config de murs** → même observation, indistinguables pour l'agent.
 >
-> Une policy déterministe doit choisir "toujours gauche" ou "toujours droite" dans les cases grises → l'agent peut rester coincé :
+> Une politique **déterministe** doit choisir la même action dans les deux (puisqu'elles sont perçues identiquement) — ici "toujours gauche" : correct pour la case grise de droite, mais envoie l'agent tout droit dans le squelette depuis la case grise de gauche :
 >
 > ![[images/3-Apprentissage automatique/07_Reinforcement learning/Deep RL/Policy based/im2.png]]
 >
-> Une **stochastic policy** (E ou W avec proba 1/2 dans les cases grises) atteint le but avec haute proba :
+> Une politique **stochastique** (gauche/droite 50/50 sur les cases grises) donne, depuis n'importe laquelle des deux, une bonne chance de partir dans la bonne direction — l'agent atteint le but avec haute probabilité au lieu d'être condamné dans l'un des deux cas :
 >
 > ![[images/3-Apprentissage automatique/07_Reinforcement learning/Deep RL/Policy based/im3 (1).png]]
 
-> 💡 **Conclusion.** Stochastic policies utiles dans des domaines :
-> - **Adversariaux** ou non-stationnaires.
-> - **Non-Markoviens** (état non pleinement observable).
+> 💡 **Conclusion.** Dans un environnement adversarial ou partiellement observable, la politique optimale peut être *intrinsèquement* aléatoire — chose que seul le policy-based représente directement (le value-based ne produit qu'un $\arg\max$, donc du déterministe).
 
 ### C. Policy Gradient — REINFORCE
+
+> [!info] D'où vient le nom
+> REINFORCE (Williams, 1992) est un acronyme rétroactif : *"**RE**ward **I**ncrement = **N**onnegative **F**actor × **O**ffset **R**einforcement × **C**haracteristic **E**ligibility"* — en gros, une vieille formulation de la règle de mise à jour qu'on va retrouver ci-dessous. Retiens juste : c'est le premier algo de policy gradient, celui qui sert de base à tous les autres (C.3).
+
+**Le plan de C.** On veut ajuster $\theta$ (les poids de $\pi_\theta$) pour maximiser la performance de la politique — donc de la **descente/montée de gradient** sur un objectif $V(\theta)$. Le problème : $V(\theta)$ est une espérance sur des trajectoires, et $\theta$ influence *quelles trajectoires sont probables* — pas juste une valeur qu'on dérive normalement. C.1 construit le gradient malgré ça (l'astuce du *likelihood ratio*), C.2 le simplifie en exploitant la structure temporelle, C.3 en fait un algo utilisable — **avec, à chaque étape, le même exemple qui se concrétise au fur et à mesure : CartPole.**
+
+> [!example] Le fil rouge de C : CartPole-v0
+> Équilibrer un pendule sur un chariot. Observation $x \in \mathbb{R}^4$, 2 actions (gauche/droite), $+1$ de reward par step debout, épisode terminé à $200$ steps ou à la chute.
+>
+> Politique choisie : une simple **régression logistique** plutôt qu'un NN (assez pour ce problème) :
+>
+> $$\pi_\theta(0 \mid x) = \frac{1}{1 + e^{-\theta \cdot x}}, \qquad \pi_\theta(1 \mid x) = 1 - \pi_\theta(0 \mid x).$$
+>
+> On va calculer, avec ce $\pi_\theta$ précis, chaque quantité abstraite introduite en C.1/C.2/C.3.
 
 #### C.1 Objectif et gradient
 
 > [!warning] Objectif
 > $$V(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}[R(\tau)] = \sum_\tau P(\tau; \theta) R(\tau)$$
 >
-> où $\tau = (s_0, a_0, r_0, \ldots, s_T)$ est une trajectoire.
+> où $\tau = (s_0, a_0, r_0, \ldots, s_T)$ est une trajectoire. On veut $\theta^* = \arg\max_\theta V(\theta)$.
 
 > [!note]- Dérivation du gradient (likelihood ratio trick)
 > $$\begin{aligned}
@@ -758,6 +645,13 @@ $$P(\text{rock}) = P(\text{paper}) = P(\text{scissors}) = \tfrac{1}{3}.$$
 
 > 💡 **Le gros résultat.** Le **dynamics model et la distribution initiale disparaissent** ! On n'a besoin que de $\pi_\theta$.
 
+> [!example] Concrètement sur CartPole
+> Le score function $\nabla_\theta \log \pi_\theta(a\mid x)$ se calcule à la main pour la régression logistique :
+>
+> $$\nabla_\theta \log \pi_\theta(0 \mid x) = x - x\,\pi_\theta(0 \mid x), \qquad \nabla_\theta \log \pi_\theta(1 \mid x) = -x\,\pi_\theta(0 \mid x).$$
+>
+> C'est exactement le $\nabla_\theta \log \pi_\theta(a_t\mid s_t)$ de la formule ci-dessus — juste explicité pour ce $\pi_\theta$ précis, sans avoir besoin de $\mathbf P$ ni de $\mu(s_0)$.
+
 > [!warning] Forme finale
 > $$\boxed{\nabla_\theta V(\theta) \approx \frac{1}{m} \sum_{i=1}^m R(\tau^{(i)}) \sum_{t=0}^{T-1} \nabla_\theta \log \pi_\theta(a_t^{(i)} \mid s_t^{(i)})}$$
 
@@ -772,6 +666,13 @@ où $G_t = \sum_{t' \geq t} r_{t'}$ est le **retour à partir de $t$**.
 > [!warning] Forme REINFORCE finale
 > $$\boxed{\nabla_\theta V(\theta) \approx \frac{1}{m} \sum_{i=1}^m \sum_{t=0}^{T-1} G_t^{(i)} \nabla_\theta \log \pi_\theta(a_t^{(i)} \mid s_t^{(i)})}$$
 
+> [!example] Concrètement sur CartPole — calculer $G_t$
+> Sur CartPole, chaque step debout rapporte $r_t = 1$. Épisode très court de 3 steps avant la chute, $\gamma = 0.9$ : $r_0 = r_1 = r_2 = 1$. En partant de la fin :
+>
+> $$G_2 = 1, \qquad G_1 = 1 + 0.9 \times 1 = 1.9, \qquad G_0 = 1 + 0.9 \times 1.9 = 2.71.$$
+>
+> C'est exactement le $G_t$ qu'on multiplie au score function dans la formule encadrée ci-dessus — plus l'épisode dure longtemps *après* $t$, plus $G_t$ est grand, donc plus la mise à jour pousse fort dans la direction des actions qui ont mené à un épisode long.
+
 #### C.3 Pseudo-code REINFORCE
 
 > [!note]- REINFORCE (Monte Carlo policy gradient)
@@ -781,22 +682,30 @@ où $G_t = \sum_{t' \geq t} r_{t'}$ est le **retour à partir de $t$**.
 >      - $\theta \leftarrow \theta + \alpha \cdot G_t \nabla_\theta \log \pi_\theta(a_t \mid s_t)$.
 > 3. Retourner $\theta$.
 
+> [!example] Concrètement sur CartPole — toutes les pièces assemblées
+> 1. $\theta$ initialisé à $0$ (ou aléatoire).
+> 2. Jouer un épisode complet avec $\pi_\theta$ (à chaque pas : tirer $a \sim \pi_\theta(\cdot\mid x)$, cf. la policy logistique du début de C) → on récupère $x_0, a_0, r_0, \ldots, x_{T-1}, a_{T-1}, r_{T-1}$.
+> 3. Calculer $G_t$ pour chaque $t$ avec `discount_rewards` (cf. C.2).
+> 4. Calculer $\nabla_\theta \log \pi_\theta(a_t \mid x_t)$ pour chaque $t$ avec les deux formules de C.1 (selon que $a_t = 0$ ou $1$).
+> 5. Mettre à jour : $\theta \leftarrow \theta + \alpha \sum_t G_t \, \nabla_\theta \log \pi_\theta(a_t \mid x_t)$ — exactement la forme REINFORCE finale de C.2, ligne par ligne.
+> 6. Répéter depuis l'étape 2, épisode après épisode.
+>
+> **Résultat.** Après ~500 épisodes, l'agent tient les 200 steps. Les courbes d'entraînement sont très bruitées (typique du policy gradient, cf. E — c'est justement le problème que la baseline va résoudre) :
+>
+> ![[algo-1 (1).png]]
+>
+> À l'évaluation (politique figée), 200/200 sur les 100 épisodes de test :
+>
+> ![[algo-2.png]]
+>
+> 💡 **Pour aller plus loin** : plus d'épisodes par update (réduit la variance), learning rate scheduling, multi-seed runs pour estimer la perf moyenne avec écart-type.
+
 ### D. Classes de policies différentiables
 
-#### D.1 Action space discret — softmax policy
-
-$$\pi_\theta(a \mid s) = \frac{e^{\phi(s, a)^T \theta}}{\sum_{a'} e^{\phi(s, a')^T \theta}}.$$
-
-> [!note]- Score function
-> $$\nabla_\theta \log \pi_\theta(a \mid s) = \phi(s, a) - \mathbb{E}_{a' \sim \pi_\theta}[\phi(s, a')].$$
-
-#### D.2 Action space continu — Gaussian policy
-
-$$a \sim \mathcal{N}(\mu(s), \sigma^2), \quad \mu(s) = \phi(s)^T \theta.$$
-
-Score function :
-
-$$\nabla_\theta \log \pi_\theta(a \mid s) = \frac{(a - \mu(s)) \phi(s)}{\sigma^2}.$$
+| Action space             | Policy                                                                                       | Score function $\nabla_\theta \log \pi_\theta(a\mid s)$     |
+| :----------------------- | :------------------------------------------------------------------------------------------- | :---------------------------------------------------------- |
+| **Discret** (softmax)    | $\pi_\theta(a \mid s) = \dfrac{e^{\phi(s, a)^T \theta}}{\sum_{a'} e^{\phi(s, a')^T \theta}}$ | $\phi(s, a) - \mathbb{E}_{a' \sim \pi_\theta}[\phi(s, a')]$ |
+| **Continu** (gaussienne) | $a \sim \mathcal{N}(\mu(s), \sigma^2), \; \mu(s) = \phi(s)^T \theta$                         | $\dfrac{(a - \mu(s)) \phi(s)}{\sigma^2}$                    |
 
 ### E. Vanilla Policy Gradient avec baseline
 
@@ -847,88 +756,16 @@ $$\nabla_\theta V(\theta) = \mathbb{E}_{\pi_\theta}\!\left[\sum_t (G_t - b(s_t))
 ### F. N-step estimators et bias-variance trade-off
 
 > 💡 **Idée.** On peut blender MC et TD pour le calcul du target :
->
-> | $k$ | Estimateur | Bias | Variance |
-> | :---: | :--- | :---: | :---: |
-> | 1 | $\hat G_t^{(1)} = r_t + \gamma V(s_{t+1})$ | Élevé | Faible |
-> | 2 | $\hat G_t^{(2)} = r_t + \gamma r_{t+1} + \gamma^2 V(s_{t+2})$ | Modéré | Modéré |
-> | $\infty$ | $\hat G_t^{(\infty)} = r_t + \gamma r_{t+1} + \ldots$ | Zéro | Élevé |
->
-> Et leurs versions advantage. Choisir $k$ intermédiaire pour le bon trade-off.
 
-### G. Mini-projet — REINFORCE sur CartPole
+| $k$ | Estimateur | Bias | Variance |
+| :---: | :--- | :---: | :---: |
+| 1 | $\hat G_t^{(1)} = r_t + \gamma V(s_{t+1})$ | Élevé | Faible |
+| 2 | $\hat G_t^{(2)} = r_t + \gamma r_{t+1} + \gamma^2 V(s_{t+2})$ | Modéré | Modéré |
+| $\infty$ | $\hat G_t^{(\infty)} = r_t + \gamma r_{t+1} + \ldots$ | Zéro | Élevé |
 
-> [!example] CartPole-v0 avec logistic regression policy
-> Environnement : équilibrer un pendule sur un chariot. Observation 4D, actions binaires (gauche/droite). Reward +1 par step debout. Termine à +200 ou chute.
+Et leurs versions advantage. Choisir $k$ intermédiaire pour le bon trade-off.
 
-> [!note]- Setup
-> ```python
-> import gym
-> env = gym.make('CartPole-v0')
-> # observation_space = Box(4,), action_space = Discrete(2)
-> ```
-
-**Policy :** logistic regression simple plutôt qu'un NN.
-
-$$\pi_\theta(0 \mid x) = \frac{1}{1 + e^{-\theta \cdot x}}, \quad \pi_\theta(1 \mid x) = 1 - \pi_\theta(0 \mid x).$$
-
-**Score function dérivé manuellement :**
-
-$$\nabla_\theta \log \pi_\theta(0 \mid x) = x - x \pi_\theta(0 \mid x), \quad \nabla_\theta \log \pi_\theta(1 \mid x) = -x \pi_\theta(0 \mid x).$$
-
-> [!note]- Implémentation Python
-> ```python
-> import numpy as np
-> 
-> class LogisticPolicy:
->     def __init__(self, theta, alpha, gamma):
->         self.theta = theta; self.alpha = alpha; self.gamma = gamma
->     
->     def logistic(self, y):
->         return 1 / (1 + np.exp(-y))
->     
->     def probs(self, x):
->         y = x @ self.theta
->         prob0 = self.logistic(y)
->         return np.array([prob0, 1 - prob0])
->     
->     def act(self, x):
->         probs = self.probs(x)
->         action = np.random.choice([0, 1], p=probs)
->         return action, probs[action]
->     
->     def grad_log_p(self, x):
->         y = x @ self.theta
->         grad_log_p0 = x - x * self.logistic(y)
->         grad_log_p1 = -x * self.logistic(y)
->         return grad_log_p0, grad_log_p1
->     
->     def discount_rewards(self, rewards):
->         discounted = np.zeros(len(rewards))
->         cum = 0
->         for i in reversed(range(len(rewards))):
->             cum = cum * self.gamma + rewards[i]
->             discounted[i] = cum
->         return discounted
->     
->     def update(self, rewards, obs, actions):
->         grad_log_p = np.array([self.grad_log_p(o)[a] for o, a in zip(obs, actions)])
->         discounted = self.discount_rewards(rewards)
->         dot = grad_log_p.T @ discounted
->         self.theta += self.alpha * dot
-> ```
-
-**Résultat.** Après ~500 épisodes, l'agent commence à équilibrer 200 steps. Les courbes sont **très bruitées** typique du policy gradient.
-
-![[algo-1.png]]
-
-À l'évaluation, la policy finale obtient 200 sur tous les 100 épisodes test.
-
-![[algo-2.png]]
-
-> 💡 **Pour aller plus loin.** Variance reduction (plus d'épisodes par update), learning rate scheduling, multi-seed runs pour estimer la perf moyenne avec std.
-
-### H. Trust Regions
+### G. Trust Regions
 
 *À développer.*
 
@@ -938,16 +775,65 @@ $$\nabla_\theta \log \pi_\theta(0 \mid x) = x - x \pi_\theta(0 \mid x), \quad \n
 
 ## III. Actor-Critic (Hybride)
 
-*À développer.*
+> 💡 **Le problème de fond.** En policy-based (II), on sait mettre à jour $\pi_\theta$ (le gradient), mais pour ça il faut d'abord *mesurer* si la politique est bonne — et on le fait avec $G_t$, un retour Monte Carlo bruité et coûteux (attendre la fin de l'épisode). En value-based (I), c'est l'inverse : on sait très bien mesurer une politique ($Q$, $V$), mais on ne sait pas en extraire directement une politique stochastique ou à actions continues. L'Actor-Critic combine les deux : un **acteur** ($\pi_\theta$) qui agit, un **critic** ($\hat q$ ou $\hat v$) qui le mesure en continu, à chaque pas. Cette section dérive l'algo pas à pas (A → D), en partant de REINFORCE.
 
-> 💡 **L'idée.** Combiner le meilleur des deux mondes :
-> - **Actor** = policy paramétrique $\pi_\theta$ (comme en policy gradient).
-> - **Critic** = value function paramétrique $\hat V_\mathbf{w}$ ou $\hat Q_\mathbf{w}$ (comme en value-based).
->
-> Le critic estime $V$ ou $Q$ pour calculer l'advantage en temps réel (au lieu de Monte Carlo). Cela réduit la variance et permet du **bootstrapping**, donc apprentissage online.
->
-> **Algos clés** :
-> - **A2C / A3C** (Advantage Actor-Critic, synchrone et asynchrone).
+### A. Le problème : REINFORCE dépend de $G_t$
+
+> [!warning] Rappel — update REINFORCE
+> $$\Delta \theta = \alpha \nabla_\theta\big(\log \pi(S_t, A_t, \theta)\big) \, R(\tau), \qquad R(\tau) = G_t = R_{t+1} + \gamma R_{t+2} + \ldots$$
+
+$G_t$ est le retour Monte Carlo — il faut attendre la **fin de l'épisode** pour le calculer. Deux problèmes : ça ne marche que pour des tâches épisodiques, et ça empêche toute mise à jour en ligne, pas à pas.
+
+### B. Q Actor-Critic — un critic appris en ligne à la place de $G_t$
+
+**L'idée.** Remplacer $G_t$ par $\hat q(S_t, A_t; \mathbf w)$ — une estimation apprise, pas un retour observé :
+
+> [!warning] Policy update (actor)
+> $$\Delta \theta = \alpha \nabla_\theta\big(\log \pi(S_t, A_t, \theta)\big) \, \hat q(S_t, A_t, \mathbf w)$$
+
+Reste à savoir d'où sort $\hat q$ : on le fait apprendre **en parallèle**, par TD (comme en I.B), avec son propre taux d'apprentissage $\beta$ :
+
+> [!warning] Value update (critic)
+> $$\Delta \mathbf w = \beta \Big( R_{t+1} + \gamma \hat q(S_{t+1}, A_{t+1}, \mathbf w) - \hat q(S_t, A_t, \mathbf w) \Big) \nabla_{\mathbf w} \hat q(S_t, A_t, \mathbf w)$$
+
+![[Pasted image 20260726191933.png|593]]
+
+$\theta$ et $\mathbf w$ sont deux jeux de paramètres différents, mais de même nature (deux approximateurs) : $\theta$ pour la policy (l'**acteur**, "quelle action jouer"), $\mathbf w$ pour $\hat q$ (le **critic**, "à quel point cette action était bonne").
+
+![[Pasted image 20260726192249.png|301]]
+
+**La boucle complète.** Au départ l'acteur est quasi-aléatoire. À chaque pas $t$ : l'acteur observe $S_t$, joue $A_t \sim \pi_\theta$ ; l'environnement renvoie $S_{t+1}, R_{t+1}$ ; le critic calcule $\hat q(S_t, A_t, \mathbf w)$ et sert cette valeur à l'acteur pour sa mise à jour ; le critic se met aussi à jour lui-même (TD, formule ci-dessus). **Tout se passe à chaque pas**, pas à la fin de l'épisode — c'est le gain direct par rapport à REINFORCE.
+
+![[Pasted image 20260726192520.png|464]]
+
+### C. Réduire la variance — l'Advantage
+
+**Le problème.** $\hat q(s,a)$ varie beaucoup d'une action à l'autre — le signal utilisé pour l'update est bruité, l'apprentissage est instable.
+
+**L'astuce.** Imaginons $Q(s,a)$ tiré d'une distribution centrée sur $V(s) = \mathbb{E}_\pi[Q(s,a)]$ (par définition de $V$, cf. I.A). Si on **soustrait $V(s)$** à $Q(s,a)$, la distribution résultante est centrée en $0$ — ça ne change rien en espérance, mais ça réduit la variance du signal :
+
+![[Pasted image 20260726193140.png|471]]
+
+> [!warning] Définition — Advantage
+> $$A(s,a) = Q(s,a) - V(s)$$
+
+**Pourquoi c'est le bon signal.** $Q(s,a)$ dit "combien je m'attends à gagner en jouant $a$ en $s$". $A(s,a)$ dit "combien je gagne **en plus**, par rapport à la moyenne des actions possibles en $s$" — exactement l'information utile pour savoir si $a$ vaut le coup d'être renforcée ou non.
+
+### D. Le raccourci pratique — TD Actor-Critic
+
+Utiliser $A(s,a)$ directement demanderait d'apprendre **deux** critics ($\hat q$ et $\hat v$) — cher, et redondant. Astuce : la **TD error**
+
+$$\delta = R_{t+1} + \gamma \hat v(S_{t+1}, \mathbf w) - \hat v(S_t, \mathbf w)$$
+
+est déjà, en espérance, une bonne estimation de $A(s,a)$ — donc un seul critic ($\hat v$ seulement) suffit.
+
+> [!warning] Forme finale — TD Actor-Critic
+> $$\boxed{\Delta \theta = \alpha \nabla_\theta\big(\log \pi(S_t, A_t, \theta)\big) \underbrace{\Big(R_{t+1} + \gamma \hat v(S_{t+1}, \mathbf w) - \hat v(S_t, \mathbf w)\Big)}_{\text{TD error } \delta \approx A(S_t,A_t)}}$$
+
+C'est **l'algorithme final** — souvent appelé *"one-step Actor-Critic"* (Sutton & Barto). Ce n'est pas exactement A2C au sens strict (qui ajoute des retours n-step et plusieurs workers en parallèle), mais c'est le cœur conceptuel exact qu'A2C/A3C mettent à l'échelle.
+
+> 💡 **Algos clés qui en découlent** :
+> - **A2C / A3C** (Advantage Actor-Critic, synchrone et asynchrone — ce même algo + n-step + parallélisation).
 > - **DDPG** (Deep Deterministic Policy Gradient — actor-critic en action continue).
 > - **TD3** (Twin Delayed DDPG — corrige l'overestimation de DDPG).
 > - **SAC** (Soft Actor-Critic — entropy-regularized, état de l'art en continu).
@@ -963,13 +849,19 @@ $$\nabla_\theta \log \pi_\theta(0 \mid x) = x - x \pi_\theta(0 \mid x), \quad \n
 | **DQN** | Value-based | Discret | NN + replay + fixed targets |
 | **Double DQN** | Value-based | Discret | Réduit overestimation |
 | **Dueling DQN** | Value-based | Discret | Sépare $V$ et $A$ |
-| **Behavioral Cloning** | Imitation | Tout | Supervised learning sur expert |
-| **DAGGER** | Imitation | Tout | Aggregation itérative de données |
-| **MaxEnt IRL** | Imitation | Tout | Récupère reward function |
 | **REINFORCE** | Policy-based | Tout | MC policy gradient |
 | **Vanilla PG + baseline** | Policy-based | Tout | Réduit la variance via $\hat A$ |
 | **TRPO/PPO** | Policy-based | Tout | Trust region, état de l'art |
 | **A2C/A3C** | Actor-Critic | Tout | Bootstrap pour réduire variance |
 | **DDPG/TD3/SAC** | Actor-Critic | Continu | Actions continues |
 
-> 💡 **Le résumé en une phrase.** Pour des **actions discrètes avec espace d'états visuel** (jeux Atari, images) → DQN/Double/Dueling. Pour des **actions continues** (robotique) → SAC ou PPO. Pour des **rewards sparses avec un expert disponible** → DAGGER ou IRL. Pour un **prototype rapide** → REINFORCE avec baseline.
+> 💡 **Le résumé en une phrase.** Pour des **actions discrètes avec espace d'états visuel** (jeux Atari, images) → DQN/Double/Dueling. Pour des **actions continues** (robotique) → SAC ou PPO. Pour un **prototype rapide** → REINFORCE avec baseline. Pas de reward function du tout → [[03_Imitation Learning]].
+
+---
+
+## To do
+
+> [!note] Points à approfondir plus tard
+> - **Graphes de convergence de $\mathbf w$.** Générer un vrai graphique (code, pas un placeholder) qui trace l'évolution de $\mathbf w$ (ou d'une composante, ou de la performance/durée d'épisode) au fil des épisodes d'entraînement, pour visualiser concrètement la convergence.
+> - **Comparer MC, SARSA et Q-learning (SARSAMAX) sur CartPole.** Un même graphe (ou une petite série de graphes) qui compare les trois méthodes côte à côte sur le même environnement — par exemple durée d'épisode moyenne en fonction du nombre d'épisodes d'entraînement, pour voir laquelle converge le plus vite et le plus stablement.
+> - **Prudence de SARSA vs. agressivité de Q-learning.** Illustrer concrètement sur CartPole (pas seulement l'exemple cliff walking de 01) que Q-learning, en évaluant la politique gloutonne plutôt que la politique réellement suivie, peut apprendre une politique plus "risquée" qui se comporte mal pendant l'exploration — alors que SARSA, en tenant compte du coût de l'exploration ($\varepsilon$-greedy), apprend une politique plus prudente. Point déjà discuté en 01 (SARSA vs Q-learning, section IV.B) mais jamais illustré numériquement sur CartPole.

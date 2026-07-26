@@ -5,7 +5,7 @@ title: MCTS — Monte Carlo Tree Search
 
 > Quand l'espace d'états est trop grand pour être énuméré (Go a $10^{172}$ états — plus que d'atomes dans l'univers), on ne peut pas construire l'arbre de jeu complet. Le **Monte Carlo Tree Search** contourne ce problème en construisant un arbre **partiel** qu'on étend itérativement par simulations stochastiques, en équilibrant exploration et exploitation via UCB1. C'est la brique algorithmique derrière AlphaGo / AlphaZero.
 
-> Pré-requis : [[01_RL Tabulaire]] (MDP, Bellman), [[03_Exploration (Bandits)]] (UCB1), [[02_Function Approximation (Deep RL)]] (réseaux profonds pour le couplage MCTS + NN).
+> Pré-requis : [[01_RL Tabulaire]] (MDP, Bellman), [[04_Exploration (Bandits)]] (UCB1), [[02_Function Approximation (Deep RL)]] (réseaux profonds pour le couplage MCTS + NN).
 
 > 💡 **Trois grandes parties** :
 > - **I. Models and Planning** — distinction model-based vs model-free.
@@ -73,7 +73,7 @@ Un **game tree** : nœuds = états du jeu, arêtes = actions possibles. Avec un 
 > - $N$ — somme des visit counts des frères atteignables.
 > - $c$ — hyperparamètre. Plus haut → plus d'exploration. Typiquement proche de 1.
 
-> 💡 **Lien avec [[03_Exploration (Bandits)]].** UCB1 vient directement de la théorie des bandits — chaque enfant d'un nœud est traité comme un bras d'un bandit avec sa propre estimation et sa propre incertitude.
+> 💡 **Lien avec [[04_Exploration (Bandits)]].** UCB1 vient directement de la théorie des bandits — chaque enfant d'un nœud est traité comme un bras d'un bandit avec sa propre estimation et sa propre incertitude.
 
 #### C.2 Phase 2 — Node Expansion
 

@@ -28,7 +28,7 @@ Ce cadre se distingue de l'apprentissage supervisé sur deux points essentiels :
 - **Cas totalement observable** (fully observable) : $o_t = s_t$, l'agent voit l'état réel du monde. C'est le cadre du **MDP** (Markov Decision Process), qui sera l'hypothèse par défaut dans toute cette partie.
 - **Cas partiellement observable** (partially observable) : $o_t \neq s_t$, l'agent ne voit qu'une observation bruitée ou incomplète de l'état réel. Pour décider, il maintient alors une distribution de probabilité sur l'état réel, appelée **état de croyance** (belief state). Ce cadre est modélisé par un **POMDP** (Partially Observable MDP), traité plus loin.
 
-**Pourquoi le RL plutôt que la recherche ?** Quand le modèle de l'environnement (la dynamique et les récompenses) est entièrement connu et que l'espace d'états est petit et déterministe, des méthodes de recherche classiques en IA comme $A^*$ ou minimax suffisent à trouver une séquence d'actions optimale. Le RL devient nécessaire dès qu'**au moins une** des trois difficultés suivantes apparaît :
+**Pourquoi le RL plutôt que le *search* ?** (*search* = recherche algorithmique dans un arbre/graphe, comme en IA classique — à ne pas confondre avec "recherche scientifique"). Quand le modèle de l'environnement (la dynamique et les récompenses) est entièrement connu et que l'espace d'états est petit et déterministe, des méthodes de *search* classiques en IA comme $A^*$ ou minimax suffisent à trouver une séquence d'actions optimale — en explorant l'arbre des possibilités, sans rien apprendre. Le RL devient nécessaire dès qu'**au moins une** des trois difficultés suivantes apparaît :
 
 1. **Espace d'états trop grand** (jeux Atari, Go, problèmes de contrôle continus) — la recherche exhaustive est infaisable, il faut généraliser via une approximation de fonction (function approximation).
 2. **Stochasticité** de la dynamique — il n'existe alors plus de "meilleure séquence d'actions", mais une politique optimale qui mappe états vers distributions sur actions.
@@ -38,8 +38,10 @@ Ce cadre se distingue de l'apprentissage supervisé sur deux points essentiels :
 
 On construit le MDP (Markov Decision Process) en trois temps : on part d'un processus de Markov (juste de la dynamique), on lui ajoute une récompense pour obtenir un MRP (Markov Reward Process), puis on ajoute des actions pour obtenir le MDP. Cette progression rend chaque ingrédient explicite et permet de comprendre où chaque hypothèse intervient.
 
-> [!example] Fil rouge : régime de marché
-> Pour ancrer chaque définition, on utilisera tout au long de cette section un exemple de **régime de marché** (market regime) à trois états : Bull (haussier), Sideways (latéral), Bear (baissier). Cet exemple suffit à illustrer toute la mécanique tabulaire et nous accompagnera ensuite jusqu'aux algorithmes de programmation dynamique. Les chiffres sont volontairement simples, choisis pour produire des résultats lisibles, pas calibrés sur des données réelles.
+> [!example] Fil rouge : FrozenLake
+> Pour ancrer chaque définition, on utilisera tout au long de cette note l'environnement classique **FrozenLake** (Sutton & Barto / Gymnasium) : une grille $4\times4$ où l'agent part de la case **S** (départ) et doit atteindre la case **G** (objectif) sans tomber dans une case **H** (trou, fin d'épisode, récompense nulle). Les autres cases **F** sont de la glace praticable. Complication : la glace est **glissante** — quand l'agent choisit une direction, il n'y a que $1/3$ de chance qu'il parte réellement dans cette direction ; avec probabilité $1/3$ chacune, il part dans l'une des deux directions perpendiculaires à la place. C'est donc un environnement **stochastique**, à $16$ états et $4$ actions (Gauche, Bas, Droite, Haut), qui illustre bien mieux l'incertitude du RL qu'un exemple déterministe.
+>
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/fl_grid.png|280]]
 
 #### Processus de Markov
 
@@ -50,9 +52,19 @@ On construit le MDP (Markov Decision Process) en trois temps : on part d'un proc
 > 
 > autrement dit : *l'état présent contient toute l'information utile pour prédire le futur*. Une fois qu'on connaît $s_t$, le passé n'apporte rien de plus. C'est ce qu'on résume en disant qu'un processus de Markov est **sans mémoire** (memoryless).
 
-![[rl_mp_markov_property.png]]
+> [!note] À ce stade, pas encore d'action
+> FrozenLake est nativement un MDP (il faut choisir une direction pour bouger). Pour illustrer un **pur** processus de Markov (sans action, cf. la progression Markov → MRP → MDP annoncée plus haut), on fixe artificiellement un comportement de référence — ici l'agent tire une direction **uniformément au hasard** parmi les 4 à chaque case. Ce choix fixé "absorbe" l'action dans la dynamique (exactement le mécanisme du callout *MDP + politique fixée = MRP* qu'on formalisera plus loin) et donne un pur $P(s' \mid s)$, sans action visible.
 
-**Figure 2.** Propriété de Markov. Étant donné $s_t =$ Bull, la distribution du prochain état $s_{t+1}$ est entièrement spécifiée par les probabilités de transition. Les états passés (à gauche) n'ajoutent aucune information.
+**Figure 2.** Étant donné $s_t = 0$ (la case départ, en vert), la distribution du prochain état $s_{t+1}$ est entièrement spécifiée par les probabilités de transition (glace glissante + direction aléatoire) — les états passés (colonne $t-1$, grisée) n'ajoutent aucune information supplémentaire.
+
+![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/fl_markov_property_v2.png|600]]
+
+![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/fl_transition.png|350]]
+*(Même transition, vue sur la grille plutôt qu'en graphe abstrait — utile pour garder le repère spatial.)*
+
+**Figure 2bis.** La même transition, sous la forme "graphe de Markov classique" (rond = état, flèche = probabilité de transition) — plus abstraite que la vue grille ci-dessus, mais c'est la représentation standard des chaînes de Markov dans la littérature. Avec $16$ états on ne peut pas tout dessiner ; les "…" indiquent que le graphe continue de la même façon depuis $s_1$ et $s_4$.
+
+![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/fl_graphe_transition.png|400]]
 
 **Hypothèses additionnelles.** Pour le cadre du RL tabulaire, on ajoute deux hypothèses standards :
 
@@ -84,42 +96,31 @@ $$P(s_i = s' \mid s_{i-1} = s) = P(s_j = s' \mid s_{j-1} = s) \quad \forall s, s
 
 **Lien définition–matrice.** Les deux objets précédents (propriété de Markov et matrice $\mathbf{P}$) décrivent la même chose sous deux angles. La propriété de Markov dit *qualitativement* qu'il suffit de connaître $s_t$ pour prédire $s_{t+1}$ ; la matrice $\mathbf{P}$ *stocke quantitativement* les probabilités conditionnelles à un pas $P(s_{t+1} \mid s_t)$ pour tous les couples $(s_t, s_{t+1}) \in S \times S$. Connaître $\mathbf{P}$, c'est connaître entièrement la dynamique du processus.
 
-> [!example] Régime de marché — la matrice $\mathbf{P}$
-> Avec $S = \{\text{Bull}, \text{Sideways}, \text{Bear}\}$, on choisit
+> [!example] FrozenLake — la matrice $\mathbf{P}$
+> Avec $16$ états, $\mathbf{P}$ est $16\times16$ — trop grande pour être écrite intégralement. On se contente d'une ligne représentative : l'état $s=0$ (case départ), sous la politique de référence "direction uniformément aléatoire". Chaque action a $1/3$ de chance d'aboutir dans la direction voulue et $1/3$ chacune dans les deux directions perpendiculaires (heurter un mur laisse l'agent sur place) :
 > 
-> $$
-> \mathbf{P} \;=\;
-> \begin{array}{r@{\hskip 8pt}c}
-> & \begin{array}{ccc} \text{Bull} & \text{Sideways} & \text{Bear} \end{array} \\
-> \begin{array}{r} \text{Bull} \\ \text{Sideways} \\ \text{Bear} \end{array} &
-> \left(\begin{array}{ccc}
-> 0.7 & 0.2 & 0.1 \\
-> 0.3 & 0.4 & 0.3 \\
-> 0.1 & 0.2 & 0.7
-> \end{array}\right)
-> \end{array}
-> $$
+> $$P(s' \mid s=0) = \begin{cases} 0.500 & s'=0 \text{ (reste sur place, mur à gauche/en haut)} \\ 0.333 & s'=4 \text{ (descend)} \\ 0.167 & s'=1 \text{ (droite)} \end{cases}$$
 > 
-> Lecture : depuis Bull, on reste en Bull avec probabilité $0.7$, on passe en Sideways avec $0.2$, et on bascule directement en Bear avec seulement $0.1$. L'idée modélisée est que les régimes sont **persistants** (diagonale dominante) et qu'on transite rarement directement d'un extrême à l'autre sans passer par le régime latéral.
-
-![[rl_mp_transition_graph.png|406]]
-
-**Figure 3.** Diagramme de transition du régime de marché. Chaque arête porte la probabilité de la transition correspondante ; chaque ligne du diagramme somme à 1.
+> (Cette ligne mélange les 4 actions à parts égales ; le détail action par action est repris en I.B-MDP.) Comme pour toute chaîne de Markov, chaque ligne de $\mathbf{P}$ somme à $1$ — c'est la définition d'une matrice stochastique en lignes.
 
 **Trajectoires (sample paths).** Une *réalisation* du processus est une suite d'états tirée selon $\mathbf{P}$ depuis un état initial. Tel quel, le processus de Markov ne fait que décrire une dynamique aléatoire — on n'a encore ni notion de "bien" ou "mal", ni de levier d'action. C'est ce qu'on ajoute dans les deux étapes suivantes.
 
 > [!note]- Comment simule-t-on une trajectoire ?
 > Deux choses différentes à ne pas confondre :
 > 
-> - **Propager une distribution.** Si $\mu^0$ est une distribution sur les états (par exemple $\mu^0 = [1, 0, 0]$ pour "on part de Bull avec certitude"), alors $\mu^k = \mu^0 \mathbf{P}^k$ donne la distribution à l'instant $k$. Cela décrit où l'on est *en moyenne sur tous les futurs possibles*. C'est l'angle utilisé par la programmation dynamique.
+> - **Propager une distribution.** Si $\mu^0$ est une distribution sur les états (par exemple $\mu^0 = [1, 0, \ldots, 0]$, un vecteur "one-hot" sur l'état $16$-dimensionnel pour "on part de la case $0$ avec certitude"), alors $\mu^k = \mu^0 \mathbf{P}^k$ donne la distribution à l'instant $k$. Cela décrit où l'on est *en moyenne sur tous les futurs possibles*. C'est l'angle utilisé par la programmation dynamique.
 > 
 > - **Échantillonner une trajectoire.** À chaque pas, on tire un état au hasard selon la ligne courante de $\mathbf{P}$ : sachant qu'on est en $s_t$, on échantillonne $s_{t+1} \sim \mathbf{P}[s_t, \cdot]$. C'est ainsi qu'on produit *une* réalisation concrète, comme la figure ci-dessous. C'est l'angle utilisé par les méthodes Monte Carlo.
 > 
 > **Lien entre les deux.** Si l'on simule des milliers de trajectoires et que l'on compte les fréquences des états à l'instant $k$, on retombe sur $\mu^k$ par la loi des grands nombres. Une trajectoire = un échantillon du processus ; la distribution = ce que voient toutes les trajectoires en moyenne. Cette tension entre *moyenner sur des échantillons* et *raisonner sur la distribution* est exactement la différence Monte Carlo / DP qu'on retrouvera plus loin.
 
-![[rl_mp_trajectoire.png]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/fl_trajectoire.png|300]]
 
-**Figure 4.** Une trajectoire de 120 pas simulée à partir de la matrice $\mathbf{P}$ ci-dessus, démarrant en Bull. On voit la persistance des régimes (plages de plusieurs pas dans le même état) et les transitions stochastiques entre eux.
+**Figure 4a.** Une trajectoire courte de 7 transitions, vue spatiale sur la grille, démarrant en $s=0$ : $0\to4\to4\to8\to9\to13\to14\to15$ — on voit le caractère glissant (le pas $0\to4\to4$ reste bloqué un tour, la glace ayant renvoyé l'agent sur sa case) et l'arrivée en $15$ (objectif). Cette trajectoire précise nous resservira telle quelle en III et IV (Monte Carlo, TD Learning) pour garder un exemple cohérent d'un bout à l'autre de la note.
+
+![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/fl_trajectoire_longue.png|700]]
+
+**Figure 4b.** Vue "série temporelle" sur 120 pas (état $s_t$ en fonction du pas $t$, en escalier — le format qu'on utilisera pour lire les tables de valeurs $V_k$ plus loin). Contrairement à FrozenLake tout seul (qui est épisodique : l'épisode s'arrête net dans un trou ou à l'objectif), on **relance** un nouvel épisode en $s=0$ à chaque fin d'épisode pour obtenir un flux continu sur 120 pas, comme dans l'exemple du régime de marché original. On voit l'agent osciller autour du départ, retomber régulièrement dans un trou (rouge, reset immédiat), et de temps en temps atteindre l'objectif (vert, reset aussi) — sous la politique aléatoire de référence, les trous sont bien plus fréquents que l'objectif.
 
 #### Markov Reward Process (MRP)
 
@@ -146,12 +147,12 @@ La récompense réelle $r_t$ peut donc être stochastique ; $R(s)$ en est l'esp�
 > 
 > Les deux sont équivalentes au décalage d'indice près. À retenir pour la lecture du livre de référence et de la majorité des papiers récents.
 
-> [!example] Régime de marché — récompenses
-> On prend pour récompense le rendement moyen mensuel (en %) du régime, l'agent étant supposé "passivement long" sur un indice :
+> [!example] FrozenLake — récompenses
+> La récompense de FrozenLake est volontairement minimale : $+1$ pour la transition qui atteint la case $G$ (objectif), $0$ pour tout le reste — y compris tomber dans un trou. (On l'associe ici à l'état d'arrivée $s'$ plutôt qu'à l'état de départ $s$ ; cf. la note "trois définitions de la récompense" plus bas, qui couvre exactement ce choix de convention.)
 > 
-> $$R(\text{Bull}) = +2, \quad R(\text{Sideways}) = 0, \quad R(\text{Bear}) = -2.$$
+> $$R(s') = \begin{cases} +1 & \text{si } s' = 15 \text{ (objectif)} \\ 0 & \text{sinon} \end{cases}$$
 > 
-> À ce stade l'agent ne fait rien : il subit le régime. La récompense mesure simplement la qualité moyenne d'être dans chaque état.
+> C'est un exemple classique de **récompense éparse** (sparse reward) : sur les 16 états, un seul rapporte quelque chose, et il faut une longue séquence d'actions correctes pour l'atteindre. C'est justement ce qui rend FrozenLake pédagogiquement intéressant — contrairement à un signal dense (comme le rendement à chaque pas dans un exemple financier), l'agent doit apprendre à propager la valeur de $G$ vers les états lointains via l'équation de Bellman, sans retour d'information à chaque pas.
 
 **Horizon (horizon).** L'horizon $H$ est le nombre de pas de temps d'un épisode. Il peut être fini ou infini. Le cas $H < \infty$ correspond aux MRP **finis** ; le cas $H = \infty$ aux MRP à horizon infini.
 
@@ -198,24 +199,19 @@ $$R(s, a) = \mathbb{E}[r_t \mid s_t = s, a_t = a].$$
 
 Les notions d'horizon, de retour et de facteur d'actualisation introduites pour le MRP se reportent telles quelles dans le MDP.
 
-> [!example] Régime de marché — actions et récompenses
-> On donne à l'agent trois actions correspondant à la position prise sur l'indice :
+> [!example] FrozenLake — actions et récompenses
+> Les 4 actions sont les 4 directions : $A = \{\text{Gauche}, \text{Bas}, \text{Droite}, \text{Haut}\}$. Contrairement au MRP précédent, l'action change bel et bien la dynamique ($P(s' \mid s, a) \ne P(s' \mid s)$) : c'est elle qui détermine la direction *voulue*, même si la glace glissante en dévie parfois le résultat.
 > 
-> $$A = \{\text{Long}, \text{Flat}, \text{Short}\}, \quad \text{codées } a \in \{+1, 0, -1\}.$$
+> Prenons l'état $s=14$ (juste en-dessous de l'objectif $G=15$). L'espérance de récompense $R(s,a) = \sum_{s'} P(s'\mid s,a)\, r(s')$ pour chaque action :
 > 
-> La récompense devient le PnL réalisé sur une période, soit la position multipliée par le rendement du régime :
+> | Action | Issues possibles ($1/3$ chacune) | $R(14, a)$ |
+> |---|---|:---:|
+> | Gauche | $10$, $13$, $14$ | $0.000$ |
+> | Bas | $13$, $14$, $\mathbf{15}$ | $0.333$ |
+> | Droite | $14$, $\mathbf{15}$, $10$ | $0.333$ |
+> | Haut | $\mathbf{15}$, $10$, $13$ | $0.333$ |
 > 
-> $$R(s, a) = a \cdot \mu(s), \qquad \mu(\text{Bull}) = +2, \; \mu(\text{Sideways}) = 0, \; \mu(\text{Bear}) = -2.$$
-> 
-> | $R(s, a)$       | Long ($+1$) | Flat ($0$) | Short ($-1$) |
-> | --------------- | :---------: | :--------: | :----------: |
-> | **Bull** ($+2$)    | $+2$        | $0$        | $-2$         |
-> | **Sideways** ($0$) | $0$         | $0$        | $0$          |
-> | **Bear** ($-2$)    | $-2$        | $0$        | $+2$         |
-> 
-> Intuitivement, la politique optimale est évidente : **Long en Bull, Short en Bear, indifférent en Sideways**. Une politique aléatoire ferait beaucoup moins bien. On vérifiera ce résultat formellement quand on disposera des outils (Policy Iteration, Value Iteration).
-> 
-> **Hypothèse simplificatrice.** Pour cet exemple, l'action *ne change pas* la dynamique des régimes : $P(s' \mid s, a) = P(s' \mid s)$. C'est réaliste — un trader ne déplace pas le régime de marché par sa position — et garde la matrice $\mathbf{P}$ inchangée par rapport au MRP. L'action n'agit que sur la récompense. Dans un cadre plus riche on pourrait imaginer une action "rebalancer" qui augmente la probabilité d'aller vers Sideways, mais on n'en a pas besoin ici.
+> Lecture : à cause de la glace glissante, Bas, Droite et Haut ont chacune *exactement une* de leurs 3 issues possibles qui tombe sur $G$ (en gras) — d'où la même espérance $1/3$ pour les trois, alors qu'aller à Gauche s'en éloigne et ne touche jamais $G$ depuis cet état. Intuitivement, la politique optimale ici est n'importe laquelle de {Bas, Droite, Haut}, mais sûrement pas Gauche — on le vérifiera formellement avec Policy/Value Iteration.
 
 **Politique (policy).** Une **politique** $\pi$ est une règle de choix d'action. On distingue :
 
@@ -224,26 +220,16 @@ Les notions d'horizon, de retour et de facteur d'actualisation introduites pour 
 
 La politique stochastique englobe la politique déterministe (cas où la distribution est concentrée sur une seule action). On verra que dans un MDP fini avec $\gamma < 1$, il existe toujours une politique optimale **déterministe** — c'est un résultat fort qui sera réutilisé en programmation dynamique.
 
-> [!example] Représentation matricielle d'une politique
-> Une politique stochastique sur notre exemple est un tableau $|S| \times |A|$ où chaque ligne est une distribution sur les actions (somme = 1). Par exemple, un agent prudent en marché baissier pourrait choisir :
+> [!example] Représentation d'une politique sur FrozenLake
+> Une politique stochastique complète serait un tableau $16 \times 4$ (une ligne par état, une colonne par action) — trop grand pour tenir dans le texte. On en montre une ligne, à l'état $s=14$ : un agent encore peu sûr de lui pourrait jouer $\pi(\cdot \mid 14) = (0.05, 0.30, 0.30, 0.35)$ pour (Gauche, Bas, Droite, Haut) — mise principalement sur les trois bonnes directions identifiées plus haut, un peu d'exploration résiduelle sur Gauche.
 > 
-> | $\pi(a \mid s)$ | Long | Flat | Short |
-> |---|:---:|:---:|:---:|
-> | **Bull**     | 0.8 | 0.15 | 0.05 |
-> | **Sideways** | 0.5 | 0.4 | 0.1 |
-> | **Bear**     | 0.0 | 0.3 | 0.7 |
+> Pour une politique **déterministe**, la représentation la plus naturelle sur une grille n'est pas un tableau mais une **carte de flèches** — un net avantage pédagogique de FrozenLake sur un exemple à 3 états abstraits :
 > 
-> Lecture : « en Bull, je suis Long 80% du temps, Flat 15%, Short 5% ». Les chiffres ici sont arbitraires — c'est l'agent qui les choisit.
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/fl_policy_grid.png|260]]
 > 
-> La politique déterministe $\pi^* = (\text{Long}, \text{Flat}, \text{Short})$ est le cas particulier où chaque ligne contient un seul $1$ :
+> Chaque flèche est $\pi_*(s) = \arg\max_a(\ldots)$ pour cet état (calculée par Value Iteration, cf. II.D) ; les cases $H$ et $G$ sont terminales, sans action à choisir. On vérifiera formellement en Section II que c'est bien la politique optimale.
 > 
-> | $\pi(a \mid s)$ | Long | Flat | Short |
-> |---|:---:|:---:|:---:|
-> | **Bull**     | **1** | 0 | 0 |
-> | **Sideways** | 0 | **1** | 0 |
-> | **Bear**     | 0 | 0 | **1** |
-> 
-> **Attention à ne pas confondre $\pi$ avec la matrice de transition $\mathbf{P}$ :** les deux sont des tableaux row-stochastic (lignes positives qui somment à 1), mais ils décrivent des choses totalement différentes. $\mathbf{P}$ est la dynamique du marché — l'agent la subit, il ne la contrôle pas. $\pi$ est la stratégie de l'agent — c'est ce qu'on optimise. Les colonnes ne sont même pas du même type : pour $\mathbf{P}$ ce sont des états (où l'on arrive), pour $\pi$ ce sont des actions (ce qu'on décide).
+> **Attention à ne pas confondre $\pi$ avec la matrice de transition $\mathbf{P}$ :** les deux sont "row-stochastic" (chaque ligne somme à 1), mais $\mathbf{P}(s'\mid s,a)$ est la physique de la glace — l'agent la subit, il ne la contrôle pas — alors que $\pi(a\mid s)$ est sa stratégie, ce qu'on optimise.
 
 > [!important] MDP + politique fixée = MRP
 > Si on fixe une politique $\pi$ dans un MDP, on "absorbe" l'action dans la dynamique : le système devient un MRP avec
@@ -282,6 +268,35 @@ $$q_\pi(s, a) = R(s, a) + \gamma \sum_{s'} P(s' \mid s, a) \, v_\pi(s').$$
 
 La première dit : la valeur d'un état = la moyenne des Q-valeurs des actions disponibles, pondérées par la politique. La seconde dit : la Q-valeur d'une action = la récompense immédiate + l'espérance de la valeur de l'état suivant, actualisée. Ces deux relations sont les briques élémentaires de tous les algorithmes de programmation dynamique.
 
+> [!note]- Preuve — d'où sort $q_\pi(s,a) = R(s,a) + \gamma \sum_{s'} P(s' \mid s, a)\, v_\pi(s')$ ?
+> On part de la définition de $q_\pi$ : la valeur du couple $(s,a)$, c'est l'espérance du retour si on est en $s$, qu'on **choisit** l'action $a$ (donc plus besoin de $\pi$ pour ce premier pas), puis qu'on suit $\pi$ ensuite.
+> 
+> $$q_\pi(s,a) = \mathbb{E}\big[G_t \mid s_t = s,\, a_t = a\big].$$
+> 
+> On décompose le retour comme avant, $G_t = r_t + \gamma G_{t+1}$ :
+> 
+> $$q_\pi(s,a) = \mathbb{E}[r_t \mid s_t=s, a_t=a] + \gamma\, \mathbb{E}[G_{t+1} \mid s_t=s, a_t=a].$$
+> 
+> Le premier terme est direct : $s$ et $a$ sont fixés, donc $\mathbb{E}[r_t \mid s_t=s,a_t=a] = R(s,a)$ par définition de $R$.
+> 
+> **Le second terme est le seul point délicat**, et c'est là qu'intervient la **loi de l'espérance totale** : pour une variable aléatoire $X$ et une v.a. discrète $Y$,
+> 
+> $$\mathbb{E}[X] = \sum_y P(Y=y)\, \mathbb{E}[X \mid Y=y].$$
+> 
+> Ici $X = G_{t+1}$ et $Y = s_{t+1}$ (l'état où on atterrit). On conditionne donc sur *quel* état suivant $s'$ est réalisé, avec probabilité $P(s' \mid s,a)$ — c'est exactement la définition de la dynamique du MDP :
+> 
+> $$\mathbb{E}[G_{t+1} \mid s_t=s, a_t=a] = \sum_{s'} P(s' \mid s,a)\, \mathbb{E}\big[G_{t+1} \mid s_t=s, a_t=a, s_{t+1}=s'\big].$$
+> 
+> Reste à simplifier ce dernier terme conditionnel. C'est ici qu'intervient la **propriété de Markov** : une fois qu'on connaît $s_{t+1}=s'$, l'avenir ($G_{t+1}$, qui ne dépend que de la trajectoire à partir de $t+1$) est **indépendant** de comment on est arrivé là (peu importe $s_t$ et $a_t$) — la mémoire du chemin passé n'apporte rien de plus. Donc conditionner en plus sur $s_t=s, a_t=a$ est redondant :
+> 
+> $$\mathbb{E}\big[G_{t+1} \mid s_t=s, a_t=a, s_{t+1}=s'\big] = \mathbb{E}\big[G_{t+1} \mid s_{t+1}=s'\big] = v_\pi(s').$$
+> 
+> (La dernière égalité, c'est juste la définition de $v_\pi$ appliquée à l'instant $t+1$ au lieu de $t$ — le retour futur ne dépend pas de "quand" on est, seulement d'où on part.)
+> 
+> En recollant tous les morceaux :
+> 
+> $$q_\pi(s,a) = R(s,a) + \gamma \sum_{s'} P(s' \mid s,a)\, v_\pi(s').$$
+
 **Équation de Bellman.** Calculer $v_\pi$ par sa définition (somme infinie d'espérances sur tous les futurs possibles) est infaisable. Heureusement, $v_\pi$ vérifie une **équation récursive** qui transforme cette somme infinie en système linéaire fini :
 
 > [!warning] Équation de Bellman pour $v_\pi$
@@ -291,8 +306,20 @@ La première dit : la valeur d'un état = la moyenne des Q-valeurs des actions d
 > 
 > En substance : *la valeur de l'état présent = la récompense que je vais toucher maintenant + la valeur actualisée de l'état où je vais arriver, le tout moyenné sur la stochasticité de $\pi$ et de $\mathbf{P}$*.
 
-![[Pasted image 20260501145219.png]]
-**Figure 5.** Lecture visuelle de l'équation de Bellman, partant de l'état Bull. Trois niveaux : (1) on se trouve dans un état $s$ ; (2) on choisit une action $a$ selon $\pi(a \mid s)$, ce qui déclenche la récompense immédiate $R(s, a)$ ; (3) on transite vers un état suivant $s'$ selon $P(s' \mid s, a)$, et la valeur future $v_\pi(s')$ est actualisée par $\gamma$. La somme sur les actions correspond au $\sum_a \pi(a \mid s)$, la somme sur les états suivants au $\sum_{s'} P(s' \mid s, a)$. L'action Flat est omise pour la lisibilité.
+> [!note]- Preuve express (à partir de $q_\pi$, déjà prouvé plus haut)
+> On combine simplement les deux identités déjà établies : $v_\pi(s) = \sum_a \pi(a\mid s)\, q_\pi(s,a)$ et $q_\pi(s,a) = R(s,a) + \gamma \sum_{s'} P(s'\mid s,a)\, v_\pi(s')$. En substituant la seconde dans la première :
+> 
+> $$v_\pi(s) = \sum_a \pi(a\mid s) \Big[ R(s,a) + \gamma \sum_{s'} P(s' \mid s,a)\, v_\pi(s') \Big].$$
+> 
+> Reste à faire rentrer $R(s,a)$ dans la somme sur $s'$, pour obtenir la forme "propre" de l'équation. C'est licite : $\sum_{s'} P(s' \mid s,a) = 1$ (c'est une distribution de probabilité sur $s'$), donc $R(s,a) = \sum_{s'} P(s'\mid s,a)\, R(s,a)$ — on multiplie par $1$ écrit sous cette forme. D'où :
+> 
+> $$v_\pi(s) = \sum_a \pi(a\mid s) \sum_{s'} P(s' \mid s,a) \big[ R(s,a) + \gamma\, v_\pi(s') \big],$$
+> 
+> ce qui est bien l'équation de Bellman encadrée ci-dessus.
+
+![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/fl_bellman_backup.png|650]]
+
+**Figure 5.** Lecture visuelle de l'équation de Bellman sur $s=14$ (juste sous l'objectif), avec une politique arbitraire $\pi(\text{Bas}\mid14)=\pi(\text{Droite}\mid14)=0.5$ (Gauche et Haut omises pour la lisibilité, comme l'ancien exemple omettait Flat). Trois niveaux : (1) l'état présent $s=14$ (rond blanc) ; (2) une action choisie selon $\pi(a\mid s)$ (point noir) ; (3) transition vers un état suivant $s'$ selon $P(s'\mid s,a)$ (rond bleu/vert), avec sous chaque feuille la récompense $r$ et la valeur future actualisée $\gamma v_*(s')$ (valeurs numériques reprises du calcul de $V_*$ en I.C). La somme sur les actions correspond à $\sum_a \pi(a\mid s)$, la somme sur les états suivants à $\sum_{s'} P(s'\mid s,a)$.
 
 > [!note]- Preuve (courte)
 > On part de la définition $v_\pi(s) = \mathbb{E}_\pi[G_t \mid s_t = s]$ et on décompose le retour : $G_t = r_t + \gamma G_{t+1}$.
@@ -347,26 +374,28 @@ $$v_*(s) = \max_{a} q_*(s, a), \qquad q_*(s, a) = R(s, a) + \gamma \sum_{s'} P(s
 
 La première dit que la valeur optimale d'un état = la valeur de la meilleure action depuis cet état. La seconde permet de reconstruire $q_*$ à partir de $v_*$ et du modèle.
 
-> [!example] Régime de marché — calcul des fonctions de valeur
-> On fixe $\gamma = 0.9$ et on évalue deux politiques sur notre exemple, en utilisant la formule close $V^\pi = (I - \gamma \mathbf{P})^{-1} R^\pi$.
+> [!example] FrozenLake — calcul des fonctions de valeur
+> On fixe $\gamma = 0.9$ et on compare $V^\pi(s)$ (fonction de valeur d'**état** — pas de politique ici, juste un nombre par état) pour deux politiques, via la formule close $V^\pi = (I - \gamma \mathbf{P}^\pi)^{-1} R^\pi$ — ici $\mathbf{P}^\pi$ est $16\times16$, donc l'inversion se fait par ordinateur plutôt qu'à la main, mais la formule et son sens restent identiques à l'exemple à 3 états. Comme les états sont disposés sur la grille $4\times4$, on affiche $V(s)$ directement dessus plutôt qu'en liste : chaque case affiche $V$ de l'état physique correspondant.
 > 
-> **Politique passive "toujours Long".** $R^\pi = (R(\text{Bull}, \text{Long}), R(\text{Sideways}, \text{Long}), R(\text{Bear}, \text{Long})) = (+2, 0, -2)$. On obtient :
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/fl_V_random.png|280]]
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/fl_V_star.png|280]]
 > 
-> $$V^{\text{Long}}(\text{Bull}) \approx 4.35, \quad V^{\text{Long}}(\text{Sideways}) = 0, \quad V^{\text{Long}}(\text{Bear}) \approx -4.35.$$
+> Valeurs minuscules partout à gauche (politique aléatoire) : en tirant une direction au hasard, la probabilité d'atteindre $G$ avant de tomber dans un trou est très faible depuis la case de départ. À droite (politique quasi-optimale $\pi_*$, celle de la carte de flèches plus haut), énorme différence relative (jusqu'à $\times 15$ à la case départ). Mais même optimale, la glace glissante empêche de s'approcher de la certitude : $V_*(\text{départ}) \approx 0.069$, donc l'agent optimal n'atteint le but qu'environ $7\%$ du temps en partant de $0$ — la stochasticité de l'environnement plafonne la performance, un phénomène que l'ancien exemple (où l'action ne changeait pas la dynamique) ne pouvait pas illustrer.
 > 
-> Lecture : être en Bull aujourd'hui en suivant cette politique vaut $4.35$ — beaucoup plus que la récompense immédiate de $+2$, parce que la persistance des régimes ($P(\text{Bull} \mid \text{Bull}) = 0.7$) fait qu'on touchera encore $+2$ pendant plusieurs pas en moyenne. Inversement, Bear est punitif sur le long terme. Sideways vaut exactement $0$ par symétrie de la matrice.
-> 
-> **Politique candidate $\pi^* = (\text{Long}, \text{Flat}, \text{Short})$.** Ici $R^{\pi^*} = (+2, 0, +2)$ (Short en Bear rapporte $-1 \cdot (-2) = +2$). On obtient :
-> 
-> $$V^{\pi^*}(\text{Bull}) \approx 15.61, \quad V^{\pi^*}(\text{Sideways}) \approx 13.17, \quad V^{\pi^*}(\text{Bear}) \approx 15.61.$$
-> 
-> Énorme différence : en s'adaptant au régime, on convertit chaque état (sauf Sideways) en gain. Sideways vaut un peu moins que Bull/Bear parce que c'est un régime moins persistant ($0.4$ contre $0.7$) — on y stagne moins longtemps avant de basculer vers un régime rentable.
-> 
-> **Conjecture.** $\pi^*$ est très probablement la politique optimale. On le démontrera formellement avec Policy Iteration et Value Iteration dans la prochaine section.
+> **Conjecture.** $\pi_*$ ci-dessus est très probablement la politique optimale. On le démontrera formellement avec Policy Iteration et Value Iteration dans la prochaine section.
 
 ## II. Programmation dynamique (model-based)
 
 **Le contexte.** On dispose d'un MDP entièrement connu : on a la matrice de transition $\mathbf{P}$ et la fonction de récompense $R$. La question : **comment calculer $v_\pi$ (évaluation) et $\pi_*$ (optimisation) en pratique ?**
+
+> [!important] C'est quoi, "programmation dynamique", au juste ?
+> Erreur fréquente : penser que la programmation dynamique (DP), c'est juste une fonction qui s'appelle elle-même, $f(f(\ldots))$ — c'est-à-dire de la simple **récursion**. Ce n'est pas ça. La différence tient en un mot : le **stockage**.
+>
+> Prenons l'exemple classique de Fibonacci, $f(n) = f(n-1) + f(n-2)$. En récursion naïve, pour calculer $f(5)$, on rappelle $f(4)$ et $f(3)$ ; pour calculer $f(4)$, on rappelle à nouveau $f(3)$ et $f(2)$ ; etc. **Le même sous-problème ($f(3)$, $f(2)$...) est recalculé de nombreuses fois**, et le nombre total d'appels explose exponentiellement avec $n$.
+>
+> La programmation dynamique résout **exactement la même récurrence**, mais avec une règle en plus : **on stocke le résultat de chaque sous-problème la première fois qu'on le calcule**, dans un tableau (ou un dictionnaire). Si on doit recalculer $f(3)$ plus tard, on va juste le lire dans le tableau au lieu de le recalculer. Chaque sous-problème n'est résolu **qu'une seule fois** — on passe d'un temps exponentiel à un temps linéaire (ou polynomial).
+>
+> **Le lien avec le RL tabulaire.** C'est très exactement ce que font Policy Evaluation, Policy Iteration et Value Iteration : à chaque itération $k$, on calcule $V_{k+1}(s)$ pour **tous les états**, et on **stocke** le résultat dans un tableau $V$ — c'est littéralement ça, le "tabulaire" du titre de la note. L'itération suivante relit ce tableau au lieu de tout recalculer depuis zéro. La "fonction qui s'appelle elle-même" que tu avais en tête, c'est bien la récursivité de l'équation de Bellman ($v_\pi(s)$ dépend de $v_\pi(s')$) — mais sans le stockage à chaque étape, ce ne serait qu'une récursion naïve, pas de la programmation dynamique.
 
 **Rappel : deux façons de raisonner sur un processus stochastique.** On a déjà rencontré cette dichotomie dans la note "Comment simule-t-on une trajectoire ?" de la section sur les processus de Markov :
 
@@ -409,49 +438,37 @@ $$\Delta = \max_s \big| V_{k+1}(s) - V_k(s) \big| < \theta$$
 
 où $\theta$ est un seuil de tolérance fixé à l'avance (typiquement $10^{-6}$).
 
-> [!note]- Pseudo-code (Iterative Policy Evaluation)
-> ```
-> Entrée : MDP (S, A, P, R, gamma), politique pi, tolérance theta > 0
-> Sortie : V ≈ v_pi
-> 
-> Initialiser V(s) = 0 pour tout s in S
-> Répéter :
->     Delta ← 0
->     Pour chaque s in S :
->         v_old ← V(s)
->         V(s) ← sum_a pi(a|s) sum_s' P(s'|s,a) [R(s,a) + gamma * V(s')]
->         Delta ← max(Delta, |v_old - V(s)|)
-> Jusqu'à Delta < theta
-> Retourner V
-> ```
+![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/algo-1.png|349]]
 
-> [!example] Régime de marché — Iterative Policy Evaluation à la main
-> On évalue la politique passive *toujours Long* avec $\gamma = 0.9$. La politique étant déterministe ($\pi(\text{Long} \mid s) = 1$), le $\sum_a$ s'effondre et la règle de mise à jour devient simplement :
+
+> [!example] FrozenLake — le modèle $(P, R)$, fixe pendant tout Policy Iteration
+> Avant de lancer quoi que ce soit : $\mathbf{P}$ et $R$ sont connus et ne changent **jamais** pendant Policy Evaluation/Improvement/Iteration — seule la politique $\pi$ (et donc $V$, $Q$) évolue. Les voici, sous forme de heatmaps : $R(s,a)$ (une seule case non nulle : atteindre $G$ depuis $s=14$), puis les 4 matrices $P(s'\mid s, a)$, une par action — chaque case colorée montre vers quel $s'$ on peut atterrir. Sur FrozenLake *slippery*, $P(s'\mid s,a)$ ne prend que 4 valeurs possibles ; légende : noir = $0$, bleu = $1/3$, orange = $2/3$, rouge = $1$ (états terminaux $H$/$G$, qui se bouclent sur eux-mêmes avec probabilité $1$).
 > 
-> $$V_{k+1}(s) = R(s, \text{Long}) + 0.9 \sum_{s'} P(s' \mid s) \, V_k(s').$$
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/fl_model_R.png|280]]
+![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/fl_model_P_2x2.png|700]]
+
+> [!example] FrozenLake — Iterative Policy Evaluation à la main
+> On évalue la politique initiale $\pi_0$ (*toujours Bas*) avec $\gamma = 0.9$. La politique étant déterministe, le $\sum_a$ s'effondre et la règle de mise à jour devient $V_{k+1}(s) = R(s,\text{Bas}) + 0.9\sum_{s'} P(s'\mid s,\text{Bas})\,V_k(s')$. Trace sur 3 états représentatifs (départ à $V_0=0$ partout) :
 > 
-> Avec $R^\pi = (+2, 0, -2)$ et la matrice $\mathbf{P}$ du régime de marché, en partant de $V_0 = (0, 0, 0)$ :
-> 
-> | $k$ | $V_k(\text{Bull})$ | $V_k(\text{Sideways})$ | $V_k(\text{Bear})$ |
+> | $k$ | $V_k(9)$ | $V_k(13)$ | $V_k(14)$ |
 > |---|:---:|:---:|:---:|
 > | 0 | 0.000 | 0.000 | 0.000 |
-> | 1 | 2.000 | 0.000 | −2.000 |
-> | 2 | 3.080 | 0.000 | −3.080 |
-> | 3 | 3.663 | 0.000 | −3.663 |
-> | 4 | 3.974 | 0.000 | −3.974 |
-> | 5 | 4.143 | 0.000 | −4.143 |
-> | $\infty$ | **4.348** | **0.000** | **−4.348** |
+> | 1 | 0.000 | 0.000 | 0.333 |
+> | 2 | 0.000 | 0.100 | 0.433 |
+> | 3 | 0.060 | 0.160 | 0.493 |
+> | 4 | 0.087 | 0.196 | 0.529 |
+> | 5 | 0.114 | 0.218 | 0.551 |
+> | $\infty$ | **0.163** | **0.250** | **0.583** |
 > 
-> **Détail du calcul de $V_2(\text{Bull})$** (les autres lignes suivent le même schéma) :
+> **Détail du calcul de $V_2(14)$** (les autres suivent le même schéma) : depuis $s=14$, l'action Bas mène à $\{13, 14, 15\}$ avec $1/3$ chacun,
 > 
-> $$V_2(\text{Bull}) = +2 + 0.9 \times \big[ 0.7 \cdot 2 + 0.2 \cdot 0 + 0.1 \cdot (-2) \big] = 2 + 0.9 \times 1.2 = 3.080.$$
+> $$V_2(14) = \underbrace{\tfrac13\cdot0 + \tfrac13\cdot1 + \tfrac13\cdot0}_{R(14,\text{Bas})=0.333} + 0.9\Big[\tfrac13 V_1(13) + \tfrac13 V_1(14) + \tfrac13 V_1(15)\Big] = 0.333 + 0.9\times\tfrac13(0+0.333+0) = 0.433.$$
 > 
-> Trois observations :
-> - **Sideways reste à 0** à chaque itération. C'est dû à la symétrie : $R(\text{Sideways}, \text{Long}) = 0$ et la transition depuis Sideways est symétrique entre Bull (+) et Bear (−).
-> - **Symétrie Bull/Bear** : $V_k(\text{Bull}) = -V_k(\text{Bear})$ à chaque étape. Même raison.
-> - **Convergence géométrique** : l'écart à la valeur finale est divisé par environ $\gamma = 0.9$ à chaque itération. Après 50 itérations on est à $10^{-3}$ près ; après 100 à $10^{-5}$ près.
+> Deux observations :
+> - **Convergence géométrique**, comme dans l'exemple à 3 états — l'écart à la valeur finale se réduit d'un facteur proche de $\gamma=0.9$ à chaque itération.
+> - **Propagation depuis $G$** : $V(14)$ (voisin direct de l'objectif) décolle dès $k=1$, alors que $V(9)$ (deux cases plus loin) reste à $0$ jusqu'à $k=3$ — la valeur de l'objectif met plusieurs itérations à "remonter" jusqu'aux états lointains. C'est la conséquence directe de la récompense éparse notée en I.B.
 > 
-> On retombe sur $V^\pi = (4.348, 0, -4.348)$ — c'est exactement la même valeur que celle calculée par la formule close $V = (I - \gamma \mathbf{P})^{-1} R$ en I.C, comme attendu. **Les deux approches résolvent la même équation, l'une exactement et l'autre par approximation itérative.**
+> La grille complète de $V^{\pi_0}$ (tous les états) est le panneau "iter 1" de la Figure ci-dessous (II.C) — on y voit que $\pi_0$ ("toujours Bas") est déjà loin d'être stupide (elle traverse la grille verticalement) mais reste sous-optimale sur la première ligne, où Bas mène tout droit dans les trous $s=5$ ou $s=7$.
 
 ### B. Policy Improvement
 
@@ -506,44 +523,25 @@ $$v_\pi(s) = v_{\pi'}(s) = \max_a \, q_\pi(s, a) = \max_a \Big[ R(s, a) + \gamma
 
 Mais cette dernière égalité, c'est **exactement l'équation de Bellman d'optimalité** vue en I.C. Donc $v_\pi = v_*$, et $\pi$ est déjà optimale.
 
+algo
+
+![[algo-3.png|313]]
+
 > 💡 **Conclusion.** Tant que la politique gloutonne donne une amélioration stricte, on peut continuer à améliorer. Le seul moment où l'on ne peut plus améliorer, c'est quand on est *déjà* à l'optimum. C'est exactement le mécanisme de bouclage qui justifiera **Policy Iteration** dans la sous-section suivante : alterner évaluation et amélioration jusqu'à ce que ça ne bouge plus, et on a $\pi_*$.
 
-> [!example] Régime de marché — une étape d'amélioration
-> On part de la politique passive $\pi=$ *toujours Long*, qu'on a évaluée en II.A : $V^\pi = (4.348,\, 0,\, -4.348)$.
+> [!example] FrozenLake — une étape d'amélioration
+> On part de $\pi_0$ (*toujours Bas*), qu'on a évaluée en II.A ($V^{\pi_0}$ ci-dessus). On calcule $q_{\pi_0}(s,a) = R(s,a) + \gamma\sum_{s'} P(s'\mid s,a)\,V^{\pi_0}(s')$ pour tous les couples $(s,a)$ — la grille complète est le panneau "Q(s,a) — iter 1" de la Figure en II.C. Deux états représentatifs :
 > 
-> **Étape 1 : calculer $q_\pi(s, a)$ pour tous les couples.** On utilise
+> | | Gauche | Bas | Droite | Haut | argmax |
+> |---|:---:|:---:|:---:|:---:|:---:|
+> | $q_{\pi_0}(0, a)$ | $\mathbf{0.020}$ | 0.019 | 0.019 | 0.016 | **Gauche** |
+> | $q_{\pi_0}(14, a)$ | 0.317 | $\mathbf{0.583}$ | 0.576 | 0.476 | **Bas** |
 > 
-> $$q_\pi(s, a) = R(s, a) + \gamma \sum_{s'} P(s' \mid s) \, V^\pi(s').$$
+> **État $s=0$ (départ) : changement.** $\pi_0(0)$ = Bas, mais $\arg\max_a q_{\pi_0}(0,a)$ = Gauche (de justesse : $0.020$ contre $0.019$). Contre-intuitif — Gauche mène droit dans un mur ! Mais justement : heurter le mur laisse l'agent sur place ($1/3$ de chance), ce qui est légèrement moins risqué ici que Bas (qui a $1/3$ de chance de finir en $s=4$ puis, plus tard, dans le trou $s=5$). Avec une valeur $V^{\pi_0}$ encore très fraîche (2 itérations à peine), ces écarts sont ténus — Policy Iteration va les affiner.
 > 
-> Comme l'action ne change pas la dynamique ($P(s' \mid s, a) = P(s' \mid s)$), le terme $\gamma \sum_{s'} P(s' \mid s) V^\pi(s')$ ne dépend que de $s$. On le calcule une fois par état :
+> **État $s=14$ (voisin de l'objectif) : inchangé.** $\pi_0(14)=$ Bas était déjà l'action gloutonne ($q=0.583$, la plus grande) — pas de changement ici.
 > 
-> | $s$ | $\sum_{s'} P(s' \mid s) V^\pi(s')$ | $\gamma \times \text{(...)}$ |
-> | --- | :---: | :---: |
-> | Bull     | $0.7 \cdot 4.348 + 0.2 \cdot 0 + 0.1 \cdot (-4.348) = 2.609$ | $+2.348$ |
-> | Sideways | $0.3 \cdot 4.348 + 0.4 \cdot 0 + 0.3 \cdot (-4.348) = 0$     | $\phantom{+}0.000$ |
-> | Bear     | $0.1 \cdot 4.348 + 0.2 \cdot 0 + 0.7 \cdot (-4.348) = -2.609$ | $-2.348$ |
-> 
-> En ajoutant $R(s, a)$, on obtient le tableau des Q-valeurs :
-> 
-> | $q_\pi(s, a)$ | Long ($a=+1$) | Flat ($a=0$) | Short ($a=-1$) |
-> |---|:---:|:---:|:---:|
-> | **Bull**     | $+2 + 2.348 = \mathbf{+4.348}$ | $\phantom{+}0 + 2.348 = +2.348$ | $-2 + 2.348 = +0.348$ |
-> | **Sideways** | $\phantom{+}0 + 0 = \mathbf{0}$ | $\phantom{+}0 + 0 = \mathbf{0}$ | $\phantom{+}0 + 0 = \mathbf{0}$ |
-> | **Bear**     | $-2 - 2.348 = -4.348$ | $\phantom{+}0 - 2.348 = -2.348$ | $+2 - 2.348 = \mathbf{-0.348}$ |
-> 
-> (en gras, l'argmax de chaque ligne)
-> 
-> **Étape 2 : politique gloutonne.** $\pi'(s) = \arg\max_a q_\pi(s, a)$ donne :
-> 
-> - **Bull** : Long (inchangé).
-> - **Sideways** : tie à 3 — n'importe quelle action convient. On choisit Flat par convention.
-> - **Bear** : Short. **Changement** par rapport à $\pi$ qui jouait Long.
-> 
-> Donc $\pi' = (\text{Long}, \text{Flat}, \text{Short})$ !! La politique stochastique est devenu déterministe !!
-> 
-> **Le résultat fascinant.** $\pi'$ est exactement la politique candidate $\pi^*$ que nous avions conjecturée en I.C ! On a donc *récupéré la politique optimale en une seule étape* de Policy Improvement, en partant d'une politique passive. Et la valeur a fait un bond énorme :
-> 
-> $$V^{\pi} \approx (4.35,\, 0,\, -4.35) \quad \xrightarrow{\text{1 étape}} \quad V^{\pi'} \approx (15.61,\, 13.17,\, 15.61).$$
+> **Politique améliorée $\pi_1$.** En répétant ce calcul sur les 16 états (résultat complet : panneau "pi(a\|s) — iter 2" de la Figure ci-dessous), on obtient une nouvelle politique déterministe, différente de $\pi_0$ sur plusieurs états. Le théorème de Policy Improvement garantit $V^{\pi_1}(s) \ge V^{\pi_0}(s)$ partout — et sur $s=0$, on passe de $V^{\pi_0}(0)=0.019$ à $V^{\pi_1}(0)=0.069$, soit $\times 3.6$.
 > 
 > C'est précisément ce mécanisme qu'on va automatiser en C avec **Policy Iteration** : évaluer, améliorer, ré-évaluer, ré-améliorer... jusqu'à ce que la politique cesse de changer.
 
@@ -563,53 +561,19 @@ $$\pi_0 \xrightarrow{\text{A}} V^{\pi_0} \xrightarrow{\text{B}} \pi_1 \xrightarr
 
 Donc Policy Iteration termine en **au plus $|A|^{|S|}$ tours**. En pratique, c'est généralement bien plus rapide.
 
-> [!warning] Algorithme Policy Iteration
-> 1. Initialiser une politique $\pi_0$ arbitraire.
-> 2. **Boucle** : pour $k = 0, 1, 2, \ldots$ :
->    - **Évaluation** : calculer $V^{\pi_k}$ par Iterative Policy Evaluation (II.A).
->    - **Amélioration** : poser $\pi_{k+1}(s) = \arg\max_a \big[ R(s, a) + \gamma \sum_{s'} P(s' \mid s, a) V^{\pi_k}(s') \big]$.
->    - Si $\pi_{k+1} = \pi_k$, sortir de la boucle.
-> 3. Retourner $(\pi_*, V^{\pi_*}) = (\pi_k, V^{\pi_k})$.
+![[algo-4.png|360]]
+Caption. Pseudo code
 
-> [!note]- Pseudo-code détaillé
-> ```
-> Entrée : MDP (S, A, P, R, gamma), tolérance theta > 0
-> Sortie : politique optimale pi, valeur optimale V
+> [!example] FrozenLake — Policy Iteration boucle en 2 tours
+> On part de $\pi_0$ (*toujours Bas*). La figure ci-dessous montre l'évolution complète de $V$, $Q$ et $\pi$ sur les 2 itérations nécessaires à la convergence — nettement plus rapide que les 6 itérations qu'il aurait fallu en partant d'une politique arbitraire moins bien choisie (ex. *toujours Gauche*, qui reste bloquée sur place partout et ne "voit" jamais l'objectif au premier passage).
 > 
-> Initialiser pi(s) arbitrairement pour tout s in S
-> Répéter :
->     # Étape A : Policy Evaluation
->     V ← policy_evaluation(pi, theta)
->     
->     # Étape B : Policy Improvement
->     stable ← True
->     Pour chaque s in S :
->         a_old ← pi(s)
->         pi(s) ← argmax_a sum_s' P(s'|s,a) [R(s,a) + gamma * V(s')]
->         Si a_old ≠ pi(s) :
->             stable ← False
-> Jusqu'à stable
-> Retourner (pi, V)
-> ```
-
-> [!example] Régime de marché — Policy Iteration boucle en 2 tours
-> On part de la politique passive $\pi_0=$ *toujours Long*.
+> ![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/fl_policy_iteration_evolution.png]]
 > 
-> **Tour 1.**
-> - **A** (déjà fait en II.A) : $V^{\pi_0} = (4.348,\, 0,\, -4.348)$.
-> - **B** (déjà fait en II.B) : $\pi_1 = (\text{Long}, \text{Flat}, \text{Short})$. Politique modifiée → on continue.
+> **Tour 1.** Évaluation de $\pi_0$ (bloc II.A) → $V^{\pi_0}$ (colonne de gauche, "iter 1"). Amélioration (bloc II.B) → $\pi_1$, différente de $\pi_0$ sur plusieurs états (colonne de droite, "iter 1" montre encore $\pi_0$, la politique *avant* la mise à jour — comparer avec "iter 2" pour voir le changement).
 > 
-> **Tour 2.**
-> - **A** : $V^{\pi_1} = (15.61,\, 13.17,\, 15.61)$ (formule close).
-> - **B** : on calcule $q_{\pi_1}(s, a)$ pour tous les couples. Pour chaque $s$, l'argmax doit retomber sur $\pi_1(s)$ — sinon on aurait une amélioration. Vérifions sur Bull :
->   
->   $$q_{\pi_1}(\text{Bull}, a) = R(\text{Bull}, a) + 0.9 \cdot (0.7 \cdot 15.61 + 0.2 \cdot 13.17 + 0.1 \cdot 15.61) = R(\text{Bull}, a) + 13.61.$$
->   
->   Donc $q_{\pi_1}(\text{Bull}, \cdot) = (15.61, 13.61, 11.61)$ pour (Long, Flat, Short). Argmax : **Long** ✓.
->   
->   Calcul similaire pour Sideways et Bear : argmax = (Long, Flat, Short) = $\pi_1$. **Politique inchangée → on s'arrête**.
+> **Tour 2.** Évaluation de $\pi_1$ → $V^{\pi_1}$ ("iter 2", identique à $V_*$ calculé en I.C). Amélioration : pour chaque $s$, on vérifie que $\arg\max_a Q(s,a)$ retombe sur $\pi_1(s)$ déjà en place — plus aucun changement, donc **politique stable → on s'arrête**.
 > 
-> **Conclusion.** $\pi_* = (\text{Long}, \text{Flat}, \text{Short})$ est optimale, avec $V_* = (15.61,\, 13.17,\, 15.61)$. Ce qui confirme la conjecture posée en I.C, cette fois avec une preuve algorithmique.
+> **Conclusion.** $\pi_1 = \pi_*$ est optimale, avec $V_*$ identique à celui calculé en I.C (par exemple $V_*(0) \approx 0.069$). Ce qui confirme, cette fois avec une preuve algorithmique complète, la politique qu'on avait seulement conjecturée par calcul direct en I.C.
 
 ### D. Value Iteration
 
@@ -645,51 +609,26 @@ $$\pi_*(s) = \arg\max_a \Big[ R(s, a) + \gamma \sum_{s'} P(s' \mid s, a) \, V_*(
 > 
 > C'est la règle Value Iteration. La politique optimale est récupérée à la fin par un argmax final.
 
-> [!note]- Pseudo-code (Value Iteration)
-> ```
-> Entrée : MDP (S, A, P, R, gamma), tolérance theta > 0
-> Sortie : politique optimale pi, valeur optimale V
-> 
-> Initialiser V(s) = 0 pour tout s in S
-> Répéter :
->     Delta ← 0
->     Pour chaque s in S :
->         v_old ← V(s)
->         V(s) ← max_a sum_s' P(s'|s,a) [R(s,a) + gamma * V(s')]
->         Delta ← max(Delta, |v_old - V(s)|)
-> Jusqu'à Delta < theta
-> 
-> # Extraction de la politique optimale
-> Pour chaque s in S :
->     pi(s) ← argmax_a sum_s' P(s'|s,a) [R(s,a) + gamma * V(s')]
-> Retourner (pi, V)
-> ```
+![[algo-5.png|324]]
 
-> [!example] Régime de marché — Value Iteration à la main
-> On lance VI à partir de $V_0 = (0, 0, 0)$ avec $\gamma = 0.9$. À chaque itération, pour chaque $s$ :
+> [!example] FrozenLake — Value Iteration à la main
+> On lance VI à partir de $V_0=0$ partout, $\gamma=0.9$. À chaque itération, pour chaque $s$ : $V_{k+1}(s) = \max_a \sum_{s'} P(s'\mid s,a)[r + \gamma V_k(s')]$ — pas de politique fixée, on prend le max sur les 4 actions à chaque case. Trace sur les 3 mêmes états qu'en II.A :
 > 
-> $$V_{k+1}(s) = \max_a \big[ a \cdot \mu(s) + 0.9 \cdot E_k(s) \big], \quad \text{où } E_k(s) = \sum_{s'} P(s' \mid s) V_k(s').$$
-> 
-> Comme l'action ne modifie pas la dynamique, le $\max_a$ se réduit à $|\mu(s)|$ : on prend Long si $\mu(s) > 0$, Short si $\mu(s) < 0$, n'importe quoi si $\mu(s) = 0$. On a donc $\max_a a \cdot \mu(s) = (+2, 0, +2)$ pour (Bull, Sideways, Bear).
-> 
-> | $k$ | $V_k(\text{Bull})$ | $V_k(\text{Sideways})$ | $V_k(\text{Bear})$ |
+> | $k$ | $V_k(9)$ | $V_k(13)$ | $V_k(14)$ |
 > |---|:---:|:---:|:---:|
 > | 0 | 0.000 | 0.000 | 0.000 |
-> | 1 | 2.000 | 0.000 | 2.000 |
-> | 2 | 3.440 | 1.080 | 3.440 |
-> | 3 | 4.671 | 2.246 | 4.671 |
-> | 4 | 5.768 | 3.330 | 5.768 |
-> | 5 | 6.753 | 4.313 | 6.753 |
-> | $\infty$ | **15.610** | **13.170** | **15.610** |
-> 
-> **Détail du calcul de $V_2(\text{Bull})$** :
-> 
-> $$E_1(\text{Bull}) = 0.7 \cdot 2 + 0.2 \cdot 0 + 0.1 \cdot 2 = 1.6, \qquad V_2(\text{Bull}) = 2 + 0.9 \cdot 1.6 = 3.440.$$
+> | 1 | 0.000 | 0.000 | 0.333 |
+> | 2 | 0.000 | 0.100 | 0.433 |
+> | 3 | 0.060 | 0.160 | 0.493 |
+> | 4 | 0.087 | 0.214 | 0.529 |
+> | 5 | 0.122 | 0.249 | 0.556 |
+> | 8 | 0.178 | 0.316 | 0.600 |
+> | $\infty$ (144 itér.) | **0.247** | **0.380** | **0.639** |
 > 
 > **Trois observations :**
-> - **Symétrie Bull/Bear** : ici $V_k(\text{Bull}) = V_k(\text{Bear})$ (et plus l'opposé comme en II.A). C'est parce que VI prend la *meilleure* action partout : Long en Bull, Short en Bear, qui rapportent toutes deux $+2$. Bear devient un état rentable.
-> - **Convergence plus lente** que Policy Evaluation pour la politique passive : on part de $0$ et il faut atteindre $\sim 15$ au lieu de $\sim 4$. La progression géométrique en $\gamma^k = 0.9^k$ reste la même, mais l'écart total est plus grand.
-> - **Politique optimale extraite à la fin** : $\pi_*(s) = \arg\max_a (a \cdot \mu(s)) = (\text{Long}, \text{tie}, \text{Short})$. En cassant le tie en faveur de Flat, on retombe sur $\pi_* = (\text{Long}, \text{Flat}, \text{Short})$. Le même résultat que Policy Iteration.
+> - **Identique à $V_*$** calculé en I.C — normal, c'est la même équation de Bellman d'optimalité, juste résolue par itération plutôt que par l'algorithme Value Iteration "générique" appelé différemment.
+> - **Convergence beaucoup plus lente à converger complètement** ($144$ itérations pour $10^{-10}$ près) que le nombre de *tours* de Policy Iteration ($2$) — mais chaque itération de VI est nettement moins chère qu'un tour de PI, qui contient lui-même toute une boucle de Policy Evaluation interne. C'est tout le compromis évoqué en introduction de II.D : VI fait moins de travail par itération, PI fait moins d'itérations externes.
+> - **Politique optimale extraite à la fin** : $\pi_*(s) = \arg\max_a[\ldots]$ — c'est exactement la carte de flèches obtenue en I.C et confirmée par Policy Iteration en II.C. Les trois méthodes (formule close, Policy Iteration, Value Iteration) convergent vers la même réponse, par des chemins de calcul différents.
 
 > 💡 **Bilan DP.** On a vu trois algorithmes (Policy Evaluation, Policy Iteration, Value Iteration) qui sont en réalité **trois lectures de la même équation de Bellman**. Évaluer = itérer Bellman avec une politique fixée. Optimiser = itérer Bellman avec un $\max$. Tous convergent en $\gamma^k$ grâce à la propriété de contraction de l'opérateur de Bellman (résultat admis ici). Reste un seul problème : tout ça suppose qu'on **connaît le modèle** $\mathbf{P}$ et $R$. C'est ce qu'on lâche maintenant en passant à Monte Carlo et TD Learning.
 
@@ -699,15 +638,18 @@ $$\pi_*(s) = \arg\max_a \Big[ R(s, a) + \gamma \sum_{s'} P(s' \mid s, a) \, V_*(
 
 Les méthodes **Monte Carlo** (MC) abandonnent l'hypothèse de modèle connu. Elles n'ont besoin que d'**expérience** : des trajectoires complètes échantillonnées dans l'environnement.
 
-**L'idée.** La fonction de valeur $v_\pi(s) = \mathbb{E}_\pi[G_t \mid s_t = s]$ est une **espérance**. Si on ne peut plus la calculer exactement (DP), on peut l'**estimer par moyenne empirique** : on génère plein d'épisodes en suivant $\pi$, on récupère les retours observés depuis chaque visite à $s$, et on en prend la moyenne. Loi des grands nombres → ça converge vers $v_\pi(s)$.
+**L'idée.** La fonction de valeur $v_\pi(s) = \mathbb{E}_\pi[G_t \mid s_t = s]$ est une **espérance conditionnelle**. En DP, on la calculait *exactement*, parce qu'on connaissait $\mathbf{P}$ et $R$ (on pouvait sommer sur tous les futurs possibles). Sans modèle, cette somme exacte est hors de portée. L'idée de Monte Carlo, c'est justement le nom : **remplacer une espérance qu'on ne peut pas calculer par une moyenne empirique sur des échantillons tirés de cette même distribution** —
+
+$$v_\pi(s) = \mathbb{E}_\pi[G_t \mid s_t = s] \;\approx\; \frac{1}{N(s)} \sum_{i=1}^{N(s)} G_t^{(i)},$$
+
+où chaque $G_t^{(i)}$ est un retour *réellement observé* en jouant $\pi$ (un échantillon de la variable aléatoire $G_t$), et $N(s)$ le nombre de tels échantillons collectés pour l'état $s$. C'est tout le principe : on génère plein d'épisodes en suivant $\pi$, on récupère les retours observés depuis chaque visite à $s$, et on en prend la moyenne. Par la loi des grands nombres, cette moyenne empirique converge vers l'espérance $v_\pi(s)$ quand $N(s) \to \infty$.
 
 > 💡 **MC est tout entier du côté "échantillonner".** C'est l'autre versant de la dichotomie qu'on avait posée en I.B (rappelée en intro de II) : DP propage la distribution exacte (modèle connu), MC moyenne sur des trajectoires concrètes (modèle inconnu). Les deux cherchent à résoudre Bellman, mais avec deux outils statistiques différents.
 
-**Trois propriétés à retenir avant d'attaquer les algos.**
-
-- **Tâches épisodiques uniquement.** Le retour $G_t = r_t + \gamma r_{t+1} + \gamma^2 r_{t+2} + \ldots$ doit être un nombre bien défini, donc fini. MC suppose donc que les épisodes terminent toujours (état terminal, ou troncature après $T$ pas).
-- **Pas de bootstrap.** *Bootstrap* = utiliser une estimation de $V(s')$ pour mettre à jour $V(s)$. C'est ce que fait DP (et plus tard TD). MC, lui, calcule chaque retour **à partir des récompenses réelles** observées jusqu'à la fin de l'épisode — sans jamais utiliser d'autres $V$. Conséquence : les estimations de chaque état sont **indépendantes**. C'est plus simple à analyser, mais on ne profite pas de la structure récursive de Bellman.
-- **Mise à jour en fin d'épisode.** Pour calculer $G_t$, il faut connaître toutes les récompenses jusqu'à la fin. Donc MC ne peut pas mettre à jour à chaque pas — il attend la fin de chaque épisode. Pas d'apprentissage en ligne, contrairement à TD (IV).
+> [!important] Trois propriétés à retenir avant d'attaquer les algos
+> - **Tâches épisodiques uniquement.** Le retour $G_t = r_t + \gamma r_{t+1} + \gamma^2 r_{t+2} + \ldots$ doit être un nombre bien défini, donc fini. MC suppose donc que les épisodes terminent toujours (état terminal, ou troncature après $T$ pas).
+> - **Pas de bootstrap.** *Bootstrap* = utiliser une estimation de $V(s')$ pour mettre à jour $V(s)$. C'est ce que fait DP (et plus tard TD). MC, lui, calcule chaque retour **à partir des récompenses réelles** observées jusqu'à la fin de l'épisode — sans jamais utiliser d'autres $V$. Conséquence : les estimations de chaque état sont **indépendantes**. C'est plus simple à analyser, mais on ne profite pas de la structure récursive de Bellman.
+> - **Mise à jour en fin d'épisode.** Pour calculer $G_t$, il faut connaître toutes les récompenses jusqu'à la fin. Donc MC ne peut pas mettre à jour à chaque pas — il attend la fin de chaque épisode. Pas d'apprentissage en ligne, contrairement à TD (IV).
 
 ### A. MC Prediction (MC Evaluation)
 
@@ -821,67 +763,6 @@ C'est la forme qui apparaît dans les pseudo-codes ci-dessus.
 > 
 > revient **partout** dans le RL — TD, SARSA, Q-learning, deep RL... C'est tellement central que beaucoup d'algorithmes se résument à *"prends cette forme et change la cible"*. En MC, la cible est le retour $G_t$ ; en TD on verra que la cible devient $r_t + \gamma V(s_{t+1})$. Le **pas d'apprentissage** $\alpha$ vaut $1/N(s)$ pour MC pur (vraie moyenne), mais on le remplace souvent par une constante (par exemple $\alpha = 0.1$) pour donner plus de poids aux observations récentes — utile quand l'environnement n'est pas parfaitement stationnaire ou quand on alterne avec des étapes d'amélioration.
 
-> [!example] Régime de marché — First-Visit MC à la main
-> 
-> **Setup.** On évalue la politique passive *toujours Long* avec $\gamma = 0.9$. Notre régime de marché n'est *a priori* pas épisodique, donc on triche pédagogiquement : on tronque chaque épisode à $T = 4$ transitions (4 récompenses). Plus l'épisode est court, plus l'estimateur est biaisé vers le bas (on coupe le futur lointain), mais la mécanique reste identique.
-> 
-> **Trois épisodes simulés**, chacun démarré en Bull, où les transitions ont été tirées (à la main, de manière représentative) selon la matrice $\mathbf{P}$ :
-> 
-> | Épisode | Trajectoire d'états (5 états, 4 transitions) | Récompenses observées $r_0, r_1, r_2, r_3$ |
-> |:---:|:---|:---|
-> | 1 | Bull → Bull → Bull → Sideways → Bull | $+2,\, +2,\, +2,\, 0$ |
-> | 2 | Bull → Sideways → Bear → Bear → Bear | $+2,\, 0,\, -2,\, -2$ |
-> | 3 | Bull → Bull → Sideways → Sideways → Bull | $+2,\, +2,\, 0,\, 0$ |
-> 
-> *(Note : la récompense $r_t$ est observée en quittant l'état $s_t$ ; elle vaut $R(s_t, \text{Long}) = \mu(s_t)$.)*
-> 
-> **Calcul des retours pour l'épisode 1** (les autres se font pareil) :
-> 
-> $$\begin{aligned}
-> G_0 &= 2 + 0.9 \cdot 2 + 0.81 \cdot 2 + 0.729 \cdot 0 = 5.42 \quad (\text{état Bull}) \\
-> G_1 &= 2 + 0.9 \cdot 2 + 0.81 \cdot 0 = 3.80 \quad (\text{état Bull}) \\
-> G_2 &= 2 + 0.9 \cdot 0 = 2.00 \quad (\text{état Bull}) \\
-> G_3 &= 0 \quad (\text{état Sideways})
-> \end{aligned}$$
-> 
-> **First-Visit MC pour Bull** : on collecte le retour de la **première** visite à Bull dans chaque épisode.
-> 
-> | Épisode | Première visite à Bull à $t = ?$ | Retour collecté |
-> |:---:|:---:|:---:|
-> | 1 | 0 | $5.42$ |
-> | 2 | 0 | $-1.078$ |
-> | 3 | 0 | $3.80$ |
-> 
-> $$\hat V_{\text{FV}}(\text{Bull}) \;=\; \frac{5.42 + (-1.078) + 3.80}{3} \;=\; \frac{8.142}{3} \;\approx\; 2.71.$$
-> 
-> La vraie valeur (calculée en I.C par formule close) est $V^\pi(\text{Bull}) \approx 4.35$. L'estimation MC est **biaisée vers le bas** (à cause de la troncature à $T=4$ qui ignore les récompenses lointaines) **et bruitée** (3 épisodes c'est très peu). Avec des centaines d'épisodes longs, on convergerait vers $4.35$.
-> 
-> **Every-Visit MC pour Bull** : on collecte le retour à **chaque** visite de Bull.
-> 
-> | Épisode | Visites à Bull | Retours |
-> |:---:|:---:|:---:|
-> | 1 | $t = 0, 1, 2$ | $5.42,\, 3.80,\, 2.00$ |
-> | 2 | $t = 0$ | $-1.078$ |
-> | 3 | $t = 0, 1$ | $3.80,\, 2.00$ |
-> 
-> Total : 6 retours, somme $= 15.94$, moyenne $= 2.66$. Très proche de l'estimation First-Visit (la différence n'est significative qu'avec beaucoup d'épisodes).
-> 
-> **Mise à jour incrémentale** (sur First-Visit pour Bull) :
-> 
-> | Épisode | Retour $G$ | $N(\text{Bull})$ | Mise à jour : $V \leftarrow V + \frac{1}{N}(G - V)$ | $V$ après |
-> |:---:|:---:|:---:|:---|:---:|
-> | 1 | $5.42$ | $1$ | $0 + (5.42 - 0)/1$ | $5.420$ |
-> | 2 | $-1.078$ | $2$ | $5.42 + (-1.078 - 5.42)/2$ | $2.171$ |
-> | 3 | $3.80$ | $3$ | $2.171 + (3.80 - 2.171)/3$ | $2.714$ |
-> 
-> On retombe bien sur $\hat V_{\text{FV}}(\text{Bull}) = 2.714$ — la mise à jour incrémentale calcule la même moyenne, sans stocker les retours.
-> 
-> **Trois choses importantes à retenir de cet exemple :**
-> 
-> - **Convergence lente.** 3 épisodes courts donnent une estimation très imprécise. MC est notoirement gourmand en données — c'est un défaut inhérent à toute méthode Monte Carlo. C'est aussi ce qui motive TD (IV), qui apprend plus vite grâce au bootstrap.
-> - **MC fonctionne sans connaître $\mathbf{P}$.** À aucun moment on n'a utilisé la matrice de transition pour calculer les retours. On a juste observé des trajectoires et moyenné. C'est *toute* la puissance de la méthode.
-> - **Pas de bootstrap.** Chaque retour $G_t$ est calculé à partir de récompenses **réelles** observées, pas d'autres estimations $V(s')$. Cela contraste avec DP (qui utilise $V(s')$ dans la mise à jour) et avec TD (qui combinera les deux).
-
 ### B. Policy Control
 
 **L'idée.** En III.A on évaluait $v_\pi$ à partir d'épisodes — c'était le pendant MC de Policy Evaluation. Maintenant on veut le pendant MC de **Policy Iteration** : alterner évaluation et amélioration jusqu'à converger vers $\pi_*$, mais sans modèle. Deux problèmes nouveaux apparaissent par rapport à II.C.
@@ -973,26 +854,9 @@ Une recette simple pour satisfaire GLIE : faire **décroître $\varepsilon$ comm
 >      - $Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \dfrac{1}{N(s_t, a_t)} \big( G - Q(s_t, a_t) \big)$
 > 3. Retourner $\pi_*(s) = \arg\max_a Q(s, a)$.
 
-> [!note]- Pseudo-code MC Control
-> ```
-> Entrée : MDP (sans modèle), gamma, schedule epsilon_k
-> Sortie : politique optimale pi (et Q-fonction associée)
-> 
-> Initialiser Q(s, a) = 0, N(s, a) = 0 pour tout (s, a)
-> 
-> Pour chaque épisode k = 1, 2, 3, ... :
->     epsilon ← epsilon_k        # par exemple 1/k pour satisfaire GLIE
->     pi ← politique epsilon-greedy par rapport à Q
->     
->     Générer un épisode (s_0, a_0, r_0, s_1, a_1, r_1, ..., s_T) suivant pi
->     
->     Pour chaque pas t = 0, 1, ..., T-1 :
->         G ← r_t + gamma * r_{t+1} + ... + gamma^(T-t-1) * r_{T-1}
->         N(s_t, a_t) ← N(s_t, a_t) + 1
->         Q(s_t, a_t) ← Q(s_t, a_t) + (G - Q(s_t, a_t)) / N(s_t, a_t)
-> 
-> Retourner pi(s) = argmax_a Q(s, a)
-> ```
+
+![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/im5.png|558]]
+Caption. Pseudo-code MC Control
 
 #### Pas constant α et politique non-stationnaire
 
@@ -1009,44 +873,6 @@ C'est exactement ce que fait un pas constant : la mise à jour est une moyenne m
 > $$\text{nouvelle estimation} \;\leftarrow\; \text{ancienne estimation} + \alpha \big(\text{cible} - \text{ancienne estimation}\big),$$
 > 
 > avec cible $= G_t$ pour MC, et le rôle de $\alpha$ est de régler l'inertie. En TD (IV) on changera la cible — mais le squelette reste identique.
-
-> [!example] Régime de marché — discussion qualitative de MC Control
-> 
-> Faire tourner MC Control numériquement à la main demanderait des dizaines voire des centaines d'épisodes (le temps que $Q$ se stabilise et que $\varepsilon$ décroisse), ce n'est pas pertinent ici. À la place, on raisonne **qualitativement** sur ce que l'algorithme fait sur notre exemple.
-> 
-> **Conditions de départ.** Politique initiale ε-greedy avec $Q(s, a) = 0$ partout : équivalent à uniformément aléatoire. L'agent va donc faire toutes les actions à peu près également au début, observer plein de retours, et raffiner $Q$.
-> 
-> **Ce que l'algorithme va découvrir.** Asymptotiquement, $Q$ converge vers $q_*$. Or on a déjà calculé $q_*$ implicitement en II.D : avec $V_* = (15.61, 13.17, 15.61)$, on a
-> 
-> $$q_*(s, a) = R(s, a) + \gamma \sum_{s'} P(s' \mid s) V_*(s').$$
-> 
-> Le terme d'espérance $\gamma \sum_{s'} P(s' \mid s) V_*(s')$ ne dépend que de $s$ ; on le calcule pour les trois états (rappel : la dynamique ne dépend pas de l'action) :
-> 
-> | $s$ | $\gamma \cdot \mathbb{E}[V_* \mid s]$ |
-> | :---: | :---: |
-> | Bull | $0.9 \cdot (0.7 \cdot 15.61 + 0.2 \cdot 13.17 + 0.1 \cdot 15.61) = 13.61$ |
-> | Sideways | $0.9 \cdot (0.3 \cdot 15.61 + 0.4 \cdot 13.17 + 0.3 \cdot 15.61) = 13.17$ |
-> | Bear | $0.9 \cdot (0.1 \cdot 15.61 + 0.2 \cdot 13.17 + 0.7 \cdot 15.61) = 13.61$ |
-> 
-> En ajoutant $R(s, a) = a \cdot \mu(s)$, on obtient le tableau cible que MC Control va apprendre :
-> 
-> | $q_*(s, a)$ | Long | Flat | Short |
-> |---|:---:|:---:|:---:|
-> | **Bull** | $\mathbf{15.61}$ | $13.61$ | $11.61$ |
-> | **Sideways** | $13.17$ | $\mathbf{13.17}$ | $13.17$ |
-> | **Bear** | $11.61$ | $13.61$ | $\mathbf{15.61}$ |
-> 
-> Argmax par ligne (en gras) : $\pi_* = (\text{Long}, \text{Flat ou autre}, \text{Short})$ — exactement la politique optimale qu'on avait identifiée en II.
-> 
-> **Le rôle crucial de l'exploration.** Sans ε-greedy, l'agent partant en Bear avec $Q = 0$ partout pourrait choisir Long arbitrairement (cas de tie au tout début), recevoir $-2$, et estimer $Q(\text{Bear}, \text{Long}) = -2 < 0 = Q(\text{Bear}, \text{Short})$. Il prendrait alors Short. Mais imaginons à l'inverse qu'il parte avec Short en Bear et reçoive un retour bruité légèrement négatif (parce que la trajectoire est passée par Sideways et Bull avec des récompenses faibles) : il pourrait à tort estimer $Q(\text{Bear}, \text{Short}) < Q(\text{Bear}, \text{Long}) = 0$ et se mettre à toujours jouer Long en Bear — c'est le piège Door A/Door B. **L'exploration ε-greedy garantit qu'il continuera à essayer Short, et que sur le long terme l'estimation se stabilisera autour de la vraie valeur $+15.61$.**
-> 
-> **Trois leçons à retenir.**
-> 
-> - **Sans modèle, on apprend $Q$.** Argument structurant : tous les algos model-free de la suite (SARSA, Q-learning, DQN) reposent sur cette même idée.
-> - **L'exploration n'est pas optionnelle.** ε-greedy + GLIE assurent que toutes les paires $(s, a)$ continuent à être visitées, donc que toutes les estimations $Q(s, a)$ peuvent être corrigées.
-> - **Convergence asymptotique mais lente.** En pratique, MC Control demande beaucoup d'épisodes, surtout quand $\varepsilon$ décroît lentement. C'est l'inconvénient classique de Monte Carlo, qu'on adressera avec TD en IV — qui apprend en ligne, sans attendre la fin de chaque épisode.
-
-### C. Off-policy Prediction
 
 ## IV. TD Learning
 
@@ -1140,45 +966,6 @@ En pratique, le compromis penche presque toujours en faveur de TD : la réductio
 > 
 > Note : pas de boucle externe sur les épisodes — TD est en ligne. Si l'environnement est épisodique, on relance une trajectoire à chaque épisode terminé, mais la mise à jour reste la même à chaque pas.
 
-> [!example] Régime de marché — TD(0) à la main
-> 
-> **Setup.** On évalue la politique passive *toujours Long* avec $\gamma = 0.9$ et $\alpha = 0.1$. Initialisation $V_0 = (0, 0, 0)$ pour (Bull, Sideways, Bear). Cible : $V^\pi = (4.348,\, 0,\, -4.348)$ (calculée en I.C).
-> 
-> **L'avantage de TD ici.** Notre régime de marché n'est *pas* épisodique — c'est un flux infini de transitions. En III.A on avait dû tronquer artificiellement à $T = 4$ pour faire tourner MC. **TD n'a pas besoin de ça** : une seule longue trajectoire suffit. C'est précisément l'argument pratique de TD.
-> 
-> **Trajectoire de 8 transitions** (tirée à la main, représentative selon $\mathbf{P}$) :
-> 
-> $\text{Bull} \to \text{Bull} \to \text{Sideways} \to \text{Bear} \to \text{Bear} \to \text{Sideways} \to \text{Bull} \to \text{Bull} \to \text{Sideways}$
-> 
-> Récompenses (l'agent est Long, donc $r_t = \mu(s_t)$) :
-> 
-> $r_0 = +2,\ r_1 = +2,\ r_2 = 0,\ r_3 = -2,\ r_4 = -2,\ r_5 = 0,\ r_6 = +2,\ r_7 = +2.$
-> 
-> **Mise à jour pas à pas** : $V(s_t) \leftarrow V(s_t) + 0.1 \cdot [r_t + 0.9 \cdot V(s_{t+1}) - V(s_t)]$.
-> 
-> | Pas | $s_t \to s_{t+1}$ | $r_t$ | TD target $r_t + \gamma V(s_{t+1})$ | TD error $\delta_t$ | $V$ après mise à jour |
-> |:---:|:---:|:---:|:---:|:---:|:---|
-> | 0 | Bull → Bull | $+2$ | $2 + 0.9 \cdot 0 = 2.000$ | $+2.000$ | $V(\text{Bull}) = 0.200$ |
-> | 1 | Bull → Sideways | $+2$ | $2 + 0.9 \cdot 0 = 2.000$ | $+1.800$ | $V(\text{Bull}) = 0.380$ |
-> | 2 | Sideways → Bear | $0$ | $0 + 0.9 \cdot 0 = 0.000$ | $0.000$ | $V(\text{Sideways}) = 0.000$ |
-> | 3 | Bear → Bear | $-2$ | $-2 + 0.9 \cdot 0 = -2.000$ | $-2.000$ | $V(\text{Bear}) = -0.200$ |
-> | 4 | Bear → Sideways | $-2$ | $-2 + 0.9 \cdot 0 = -2.000$ | $-1.800$ | $V(\text{Bear}) = -0.380$ |
-> | 5 | Sideways → Bull | $0$ | $0 + 0.9 \cdot 0.380 = 0.342$ | $+0.342$ | $V(\text{Sideways}) = 0.034$ |
-> | 6 | Bull → Bull | $+2$ | $2 + 0.9 \cdot 0.380 = 2.342$ | $+1.962$ | $V(\text{Bull}) = 0.576$ |
-> | 7 | Bull → Sideways | $+2$ | $2 + 0.9 \cdot 0.034 = 2.031$ | $+1.455$ | $V(\text{Bull}) = 0.722$ |
-> 
-> **État final** : $V \approx (0.722,\, 0.034,\, -0.380)$. Bull est devenu positif, Bear négatif, Sideways quasi nul — tout bouge dans la bonne direction vers $(4.348, 0, -4.348)$.
-> 
-> **Le bootstrap en action — pas 5.** À ce pas, la transition est Sideways → Bull. La TD target vaut $0 + 0.9 \cdot V(\text{Bull}) = 0.342$, et $V(\text{Sideways})$ se met à jour vers une valeur **positive** alors qu'on n'a observé qu'une récompense nulle ($r_5 = 0$). D'où vient cette positivité ? **De $V(\text{Bull})$ qui était déjà positif.** L'information "Bull rapporte" qu'on avait apprise aux pas 0-1 s'est propagée vers Sideways via la transition. C'est exactement ça, le bootstrap : l'estimation d'un état nourrit l'estimation des autres.
-> 
-> **Ce que MC ne peut pas faire.** Avec MC, $V(\text{Sideways})$ resterait à 0 jusqu'à ce qu'on observe un retour total non-nul depuis Sideways — ce qui demande d'attendre une trajectoire complète. TD propage l'information beaucoup plus vite parce qu'il bootstrap.
-> 
-> **Trois choses à retenir.**
-> 
-> - **Pas d'épisode requis.** Une seule longue trajectoire suffit. C'est *plus* naturel ici que MC.
-> - **Apprentissage en ligne.** À chaque transition, on met à jour. Pas besoin d'attendre.
-> - **Bootstrap = propagation rapide.** L'information se propage entre états voisins via la TD target, sans attendre des récompenses réelles partout.
-
 ### B. TD Control
 
 **L'idée.** En IV.A on faisait de la prédiction TD : politique fixée, on estime $v_\pi$. Maintenant on veut le **contrôle** : trouver $\pi_*$. Comme en III.B (MC Control), on suit le squelette **GPI** — alterner évaluation et amélioration — mais en utilisant TD pour l'évaluation au lieu de MC.
@@ -1190,7 +977,7 @@ Les deux problèmes identifiés en III.B se reposent à l'identique :
 
 Ce qui change par rapport à MC Control : la mise à jour de $Q$ se fait à chaque pas (bootstrap) au lieu d'à la fin de l'épisode. Et il y a deux façons naturelles de bootstrap-er sur $Q$ — d'où deux algorithmes : **SARSA** et **Q-learning**.
 
-#### SARSA(0)
+#### SARSA(0) - On policy
 
 **Le nom.** SARSA vient des cinq objets utilisés dans la mise à jour : **S**tate $s_t$, **A**ction $a_t$, **R**eward $r_t$, next **S**tate $s_{t+1}$, next **A**ction $a_{t+1}$. À chaque pas, on a besoin de ce quintuplet pour mettre à jour.
 
@@ -1209,26 +996,24 @@ Même coup de génie qu'en TD(0) : on remplace la vraie $q_\pi$ par notre estima
 
 > 💡 **SARSA est on-policy.** *On-policy* signifie que la politique évaluée par les mises à jour est la même que celle que l'agent suit pour explorer. SARSA évalue $q_{\pi_\varepsilon}$ où $\pi_\varepsilon$ est la politique $\varepsilon$-greedy courante — il "prend en compte" le coût de l'exploration. Si l'exploration peut faire prendre une mauvaise action $a_{t+1}$, $Q(s_t, a_t)$ baisse en conséquence.
 
-> [!note]- Pseudo-code SARSA(0)
-> ```
-> Entrée : MDP (sans modèle), gamma, alpha, schedule epsilon_k
-> Sortie : politique pi (et Q-fonction associée)
-> 
-> Initialiser Q(s, a) = 0 pour tout (s, a)
-> Pour chaque épisode k = 1, 2, 3, ... :
->     epsilon ← epsilon_k
->     Observer s_0
->     Choisir a_0 ~ politique epsilon-greedy par rapport à Q
->     Boucle (sur les pas t = 0, 1, 2, ...) :
->         Exécuter a_t, observer r_t et s_{t+1}
->         Choisir a_{t+1} ~ politique epsilon-greedy par rapport à Q
->         Q(s_t, a_t) ← Q(s_t, a_t) + alpha * [r_t + gamma * Q(s_{t+1}, a_{t+1}) - Q(s_t, a_t)]
->         s_t ← s_{t+1}, a_t ← a_{t+1}
->         Si s_t terminal : sortir
-> Retourner pi(s) = argmax_a Q(s, a)
-> ```
 
-#### SARSAMAX (ou Q-Learning)
+![[im1 1.png|497]]
+
+**Lecture du schéma.** La ligne du bas est la trajectoire de l'agent, pas après pas : $S_0, A_0, R_1, S_1, A_1 \mid R_2, S_2, A_2 \mid \ldots$. Chaque groupe séparé par une barre correspond à un pas de temps. Dès qu'on a le quintuplet $(S_t, A_t, R_{t+1}, S_{t+1}, A_{t+1})$ — d'où le nom SARSA — on met à jour $Q(S_t, A_t)$ (flèche pointillée)
+
+$$
+Q\left(s_t, a_t\right) \leftarrow Q\left(s_t, a_t\right)+\alpha\left[r_t+\gamma Q\left(s_{t+1}, a_{t+1}\right)-Q\left(s_t, a_t\right)\right]
+$$
+
+puis on rafraîchit $\pi$ en $\varepsilon$-greedy par rapport au $Q$ tout juste mis à jour,
+
+$$
+\pi(a \mid s)= \begin{cases}1-\varepsilon+\frac{\varepsilon}{|A|} & \text { si } a=\arg \max _{a^{\prime}} Q\left(s, a^{\prime}\right), \\ \frac{\varepsilon}{|A|} & \text { sinon. }\end{cases}
+$$
+
+*avant* de repartir sur le pas suivant. C'est cette ré-évaluation continue de $\pi$ à partir d'un $Q$ qui bouge à chaque pas qui rend SARSA on-policy : l'action $A_{t+1}$ utilisée dans la mise à jour est celle que l'agent va réellement jouer ensuite.
+
+#### SARSAMAX (ou Q-Learning) - Off policy
 
 **L'astuce.** SARSA utilise $Q(s_{t+1}, a_{t+1})$ — l'action que l'agent va réellement prendre. Q-learning utilise $\max_{a'} Q(s_{t+1}, a')$ — la **meilleure** action possible en $s_{t+1}$, indépendamment de ce que l'agent va vraiment faire.
 
@@ -1245,25 +1030,13 @@ Le $\max$ remplace l'espérance sur $\pi$. Q-learning échantillonne directement
 
 > 💡 **Q-learning est off-policy.** *Off-policy* signifie que la politique évaluée (la politique gloutonne, via le $\max$) est *différente* de la politique suivie par l'agent (l'$\varepsilon$-greedy, nécessaire pour explorer). Q-learning estime directement $q_*$ — la Q-fonction *optimale* — même si l'agent agit de manière sous-optimale pour explorer. C'est ce qui en fait le premier algorithme RL réellement "en boucle fermée" sur l'optimalité.
 
-> [!note]- Pseudo-code Q-learning
-> ```
-> Entrée : MDP (sans modèle), gamma, alpha, schedule epsilon_k
-> Sortie : politique pi (et Q-fonction associée)
-> 
-> Initialiser Q(s, a) = 0 pour tout (s, a)
-> Pour chaque épisode k = 1, 2, 3, ... :
->     epsilon ← epsilon_k
->     Observer s_0
->     Boucle (sur les pas t = 0, 1, 2, ...) :
->         Choisir a_t ~ politique epsilon-greedy par rapport à Q
->         Exécuter a_t, observer r_t et s_{t+1}
->         Q(s_t, a_t) ← Q(s_t, a_t) + alpha * [r_t + gamma * max_{a'} Q(s_{t+1}, a') - Q(s_t, a_t)]
->         s_t ← s_{t+1}
->         Si s_t terminal : sortir
-> Retourner pi(s) = argmax_a Q(s, a)
-> ```
-> 
-> Note : par rapport à SARSA, on n'a plus besoin de tirer $a_{t+1}$ avant la mise à jour. La cible bootstrap $\max_{a'} Q(s_{t+1}, a')$ est calculée directement à partir de $Q$.
+![[images/3-Apprentissage automatique/07_Reinforcement learning/RL Tabulaire/im3.png]]
+
+**Lecture du schéma.** Même trajectoire que pour SARSA, $S_0, A_0, R_1, S_1 \mid A_1, R_2, S_2 \mid \ldots$, mais les groupes ne se coupent pas au même endroit : ici le pas se referme dès qu'on observe $S_{t+1}$, *avant* même de choisir $A_{t+1}$. C'est la différence visuelle qui traduit l'astuce du $\max$ : pour mettre à jour $Q(S_0, A_0)$, Q-learning n'a besoin ni de connaître ni d'attendre l'action que l'agent va réellement jouer en $S_1$ — il regarde directement la meilleure Q-valeur disponible, $\max_{a} Q(S_1, a)$. La flèche pointillée revient donc de $S_1$ (pas de $A_1$) vers la mise à jour de $Q(S_0, A_0)$, et de même de $S_2$ vers $Q(S_1, A_1)$.
+
+$$Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha\Big(R_{t+1} + \gamma \max_{a \in \mathcal{A}} Q(S_{t+1}, a) - Q(S_t, A_t)\Big).$$
+
+Le $\pi \leftarrow \varepsilon\text{-greedy}(Q)$ est quand même rafraîchi après chaque mise à jour — il faut bien une politique pour que l'agent *agisse* et explore — mais cette politique n'intervient **nulle part** dans la cible de la mise à jour. C'est exactement ce découplage (la politique suivie sert à explorer, la politique évaluée dans la cible est la gloutonne pure via le $\max$) qui rend Q-learning off-policy, contrairement à SARSA où $A_{t+1}$ tiré par $\pi_\varepsilon$ apparaissait directement dans la cible.
 
 #### SARSA vs Q-learning : on-policy vs off-policy
 
@@ -1281,36 +1054,6 @@ La différence entre les deux algorithmes tient à *un seul caractère* dans la 
 > 
 > **En résumé** : Q-learning est plus agressif et apprend l'optimum théorique ; SARSA est plus conservateur et apprend l'optimum *sous l'exploration que l'on impose*. Si $\varepsilon \to 0$, les deux convergent vers la même politique $\pi_*$.
 
-> [!example] Régime de marché — SARSA vs Q-learning, un pas de mise à jour
-> 
-> **Setup.** Politique $\varepsilon$-greedy avec $\varepsilon = 0.2$, $\gamma = 0.9$, $\alpha = 0.1$. On suppose que l'agent a déjà été entraîné et que sa Q-fonction courante en Bear vaut
-> 
-> $Q(\text{Bear}, \text{Long}) = 11,\quad Q(\text{Bear}, \text{Flat}) = 13,\quad Q(\text{Bear}, \text{Short}) = 15.$
-> 
-> L'action gloutonne en Bear est donc Short.
-> 
-> **Transition observée** : l'agent est en $s_t = \text{Sideways}$, prend $a_t = \text{Long}$ (au hasard via exploration), reçoit $r_t = 0$, et arrive en $s_{t+1} = \text{Bear}$. Initialement $Q(\text{Sideways}, \text{Long}) = 12$ (par hypothèse).
-> 
-> **Cas 1 : SARSA.** L'agent tire $a_{t+1}$ selon sa politique $\varepsilon$-greedy en Bear. Avec $\varepsilon = 0.2$ et 3 actions, la probabilité de choisir l'action gloutonne (Short) est $0.8 + 0.2/3 \approx 0.867$. Imaginons qu'**il explore** et tire $a_{t+1} = \text{Long}$ (probabilité $0.2/3 \approx 0.067$).
-> 
-> $Q(\text{Sideways}, \text{Long}) \leftarrow 12 + 0.1 \cdot [0 + 0.9 \cdot Q(\text{Bear}, \text{Long}) - 12]$
-> $= 12 + 0.1 \cdot [0 + 0.9 \cdot 11 - 12] = 12 + 0.1 \cdot (-2.1) = 11.79.$
-> 
-> SARSA "voit" que l'exploration peut amener à prendre Long en Bear (mauvais), et réduit l'estimation en conséquence.
-> 
-> **Cas 2 : Q-learning.** Pas besoin de tirer $a_{t+1}$. On utilise directement $\max_{a'} Q(\text{Bear}, a') = 15$ (Short).
-> 
-> $Q(\text{Sideways}, \text{Long}) \leftarrow 12 + 0.1 \cdot [0 + 0.9 \cdot 15 - 12] = 12 + 0.1 \cdot 1.5 = 12.15.$
-> 
-> Q-learning estime que depuis Bear on prendra la meilleure action (Short), peu importe ce que l'agent fait réellement. La mise à jour est plus optimiste.
-> 
-> **Écart entre les deux** : $11.79$ vs $12.15$, une différence de $0.36$ sur cette seule transition. Sur des milliers de pas, cet écart systématique change la politique apprise : Q-learning apprend $q_*$ pur, SARSA apprend une version "dégradée" qui intègre le bruit d'exploration.
-> 
-> **Trois choses à retenir.**
-> 
-> - **La différence tient à un mot** : $a_{t+1}$ tiré (SARSA) vs $\max_{a'}$ (Q-learning).
-> - **On-policy vs off-policy** : SARSA évalue la politique réellement suivie, Q-learning évalue la politique optimale.
-> - **Convergence** : les deux convergent vers $\pi_*$ si $\varepsilon \to 0$ (GLIE), mais leur comportement *en cours d'apprentissage* diffère — Q-learning plus agressif, SARSA plus conservateur.
 
 > 💡 **Bilan TD Control.** SARSA et Q-learning sont les deux algorithmes fondamentaux du contrôle TD. Q-learning est devenu dominant dans la littérature moderne parce qu'il apprend $q_*$ directement — c'est l'ancêtre de **DQN** (Deep Q-Network), qui remplace la table $Q$ par un réseau de neurones. SARSA reste pertinent quand le coût de l'exploration est réel (robotique, systèmes physiques) : on préfère une politique qui tient compte du fait qu'on explore.
 

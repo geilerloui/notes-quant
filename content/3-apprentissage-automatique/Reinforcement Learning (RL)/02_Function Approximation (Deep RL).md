@@ -775,16 +775,22 @@ Et leurs versions advantage. Choisir $k$ intermédiaire pour le bon trade-off.
 
 ## III. Actor-Critic (Hybride)
 
-> 💡 **Le problème de fond.** En policy-based (II), on sait mettre à jour $\pi_\theta$ (le gradient), mais pour ça il faut d'abord *mesurer* si la politique est bonne — et on le fait avec $G_t$, un retour Monte Carlo bruité et coûteux (attendre la fin de l'épisode). En value-based (I), c'est l'inverse : on sait très bien mesurer une politique ($Q$, $V$), mais on ne sait pas en extraire directement une politique stochastique ou à actions continues. L'Actor-Critic combine les deux : un **acteur** ($\pi_\theta$) qui agit, un **critic** ($\hat q$ ou $\hat v$) qui le mesure en continu, à chaque pas. Cette section dérive l'algo pas à pas (A → D), en partant de REINFORCE.
+> 💡 **Le problème de fond.** En policy-based (II), on sait mettre à jour $\pi_\theta$ (le gradient), mais pour ça il faut d'abord *mesurer* si la politique est bonne — et on le fait avec $G_t$, un retour Monte Carlo bruité et coûteux (attendre la fin de l'épisode). En value-based (I), c'est l'inverse : on sait très bien mesurer une politique ($Q$, $V$), mais on ne sait pas en extraire directement une politique stochastique ou à actions continues. L'Actor-Critic combine les deux : un **acteur** ($\pi_\theta$) qui agit, un **critic** ($\hat q$ ou $\hat v$) qui le mesure en continu, à chaque pas.
+>
+> Cette section a trois parties : **A** dérive l'algo de base pas à pas (A.1 → A.4, en partant de REINFORCE, jusqu'à l'Actor-Critic "vanilla"), **B** montre comment le stabiliser pour pouvoir réutiliser les mêmes données sur plusieurs pas de gradient (**PPO**), **C** montre comment se passer complètement du critic (**GRPO**) — cette dernière étape est directement celle utilisée pour entraîner les LLMs par RLHF (cf. [[07_LLM]]).
 
-### A. Le problème : REINFORCE dépend de $G_t$
+### A. De REINFORCE à l'Actor-Critic
+
+> Les quatre sous-parties suivantes (A.1 → A.4) forment une seule dérivation continue : chaque étape corrige un problème laissé par la précédente, jusqu'à obtenir l'algorithme "one-step Actor-Critic" en A.4.
+
+#### A.1 Le problème : REINFORCE dépend de $G_t$
 
 > [!warning] Rappel — update REINFORCE
 > $$\Delta \theta = \alpha \nabla_\theta\big(\log \pi(S_t, A_t, \theta)\big) \, R(\tau), \qquad R(\tau) = G_t = R_{t+1} + \gamma R_{t+2} + \ldots$$
 
 $G_t$ est le retour Monte Carlo — il faut attendre la **fin de l'épisode** pour le calculer. Deux problèmes : ça ne marche que pour des tâches épisodiques, et ça empêche toute mise à jour en ligne, pas à pas.
 
-### B. Q Actor-Critic — un critic appris en ligne à la place de $G_t$
+#### A.2 Q Actor-Critic — un critic appris en ligne à la place de $G_t$
 
 **L'idée.** Remplacer $G_t$ par $\hat q(S_t, A_t; \mathbf w)$ — une estimation apprise, pas un retour observé :
 
@@ -806,7 +812,7 @@ $\theta$ et $\mathbf w$ sont deux jeux de paramètres différents, mais de même
 
 ![[Pasted image 20260726192520.png|464]]
 
-### C. Réduire la variance — l'Advantage
+#### A.3 Réduire la variance — l'Advantage
 
 **Le problème.** $\hat q(s,a)$ varie beaucoup d'une action à l'autre — le signal utilisé pour l'update est bruité, l'apprentissage est instable.
 
@@ -819,7 +825,7 @@ $\theta$ et $\mathbf w$ sont deux jeux de paramètres différents, mais de même
 
 **Pourquoi c'est le bon signal.** $Q(s,a)$ dit "combien je m'attends à gagner en jouant $a$ en $s$". $A(s,a)$ dit "combien je gagne **en plus**, par rapport à la moyenne des actions possibles en $s$" — exactement l'information utile pour savoir si $a$ vaut le coup d'être renforcée ou non.
 
-### D. Le raccourci pratique — TD Actor-Critic
+#### A.4 Le raccourci pratique — TD Actor-Critic
 
 Utiliser $A(s,a)$ directement demanderait d'apprendre **deux** critics ($\hat q$ et $\hat v$) — cher, et redondant. Astuce : la **TD error**
 
@@ -838,6 +844,49 @@ C'est **l'algorithme final** — souvent appelé *"one-step Actor-Critic"* (Sutt
 > - **TD3** (Twin Delayed DDPG — corrige l'overestimation de DDPG).
 > - **SAC** (Soft Actor-Critic — entropy-regularized, état de l'art en continu).
 
+### B. PPO — stabiliser l'Actor-Critic avec un ratio clippé
+
+**Le problème.** L'Actor-Critic de A.4 suppose implicitement que les données $(S_t, A_t)$ viennent d'être échantillonnées avec la politique **courante** $\pi_\theta$. En pratique, collecter des trajectoires est coûteux (surtout en robotique, en jeu, ou — on le verra en [[07_LLM]] — en génération de texte où produire une séquence complète prend du temps) : on veut pouvoir réutiliser les **mêmes** trajectoires pour plusieurs pas de gradient, pas un seul.
+
+**L'idée — importance sampling.** On note $\pi_{\theta_{old}}$ la politique qui a *généré* les données, et $\pi_\theta$ la politique qu'on est en train de mettre à jour (elles divergent après le premier pas de gradient). Le ratio
+
+$$r(\theta) = \frac{\pi_\theta(A_t \mid S_t)}{\pi_{\theta_{old}}(A_t \mid S_t)}$$
+
+corrige ce décalage : $r(\theta) = 1$ si les deux politiques sont identiques, $r(\theta) > 1$ si $\pi_\theta$ a rendu l'action **plus** probable que $\pi_{\theta_{old}}$, et inversement.
+
+L'objectif naïf $r(\theta) \hat A_t$ (remplacer $\log \pi_\theta$ par $r(\theta)$ dans l'update de A.4) fonctionne, mais est instable : si $r(\theta)$ s'éloigne trop de $1$, une seule mise à jour peut faire s'effondrer la politique (un pas de gradient trop agressif dans une direction où $\hat A_t$ était mal estimé).
+
+**PPO-Clip.** On borne artificiellement $r(\theta)$ dans un intervalle $[1-\epsilon, 1+\epsilon]$ (typiquement $\epsilon = 0.2$), et on prend le pire des deux (clippé vs non-clippé) — ça empêche l'objectif de récompenser une trop grande déviation :
+
+> [!warning] PPO-Clip
+> $$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t\Big[\min\big(r_t(\theta)\, \hat A_t,\ \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\, \hat A_t\big)\Big]$$
+
+**PPO-KL penalty.** Variante alternative : au lieu de clipper, on pénalise directement l'écart (KL-divergence) entre $\pi_\theta$ et $\pi_{\theta_{old}}$ :
+
+> [!warning] PPO-KL penalty
+> $$L^{KLPEN}(\theta) = \hat{\mathbb{E}}_t\Big[r_t(\theta)\, \hat A_t - \beta\, \text{KL}\big[\pi_{\theta_{old}}(\cdot \mid S_t),\ \pi_\theta(\cdot \mid S_t)\big]\Big]$$
+
+> 💡 **Lien avec RLHF ([[07_LLM]]).** Dans le fine-tuning des LLMs par RLHF, $\hat A_t$ vient du reward model plutôt que d'un critic $\hat v$ classique, et le terme de pénalité KL n'est pas contre $\pi_{\theta_{old}}$ (la politique d'il y a un pas) mais contre $\pi_{ref}$, le modèle SFT figé — pour empêcher le policy model de trop s'éloigner d'un comportement "raisonnable" tout en maximisant le reward. C'est exactement la même mécanique PPO-KL penalty, appliquée token par token sur une séquence générée.
+
+### C. GRPO — supprimer le critic
+
+**Le problème avec le critic.** Jusqu'ici, calculer l'avantage $\hat A_t$ demande d'apprendre un critic $\hat v$ (A.3-A.4) — un réseau supplémentaire, coûteux, et instable à entraîner. C'est particulièrement problématique quand chaque "épisode" est très long ou coûteux à générer (typiquement : une séquence de texte complète chez un LLM) — le critic a très peu de signal pour bien apprendre $\hat v$.
+
+**L'idée — la baseline vient du groupe, pas d'un critic appris.** Au lieu d'apprendre $\hat v(s)$, on échantillonne **plusieurs actions/complétions pour le même état/prompt** — un groupe de taille $G$ — puis on utilise la moyenne et l'écart-type du groupe comme baseline :
+
+> [!warning] Avantage GRPO (sans critic)
+> $$\hat A_i = \frac{r_i - \text{mean}(\{r_1, r_2, \ldots, r_G\})}{\text{std}(\{r_1, r_2, \ldots, r_G\})}$$
+>
+> où $r_1, \ldots, r_G$ sont les rewards obtenus pour $G$ complétions différentes générées à partir du **même** prompt/état.
+
+C'est conceptuellement la même idée que l'Advantage de A.3 ($A(s,a) = Q(s,a) - V(s)$, "combien je gagne en plus par rapport à la moyenne") — sauf que la moyenne n'est plus estimée par un critic appris, mais calculée directement sur un échantillon de rewards observés. Ça n'est possible que si on peut se permettre de rejouer/régénérer plusieurs fois le même état — coûteux dans un jeu vidéo (il faut relancer la simulation), mais naturel avec un LLM (générer $G$ complétions pour le même prompt ne coûte qu'un peu plus d'inférence).
+
+**L'objectif final.** GRPO combine cet avantage sans critic avec le même clipping que PPO (B) et une pénalité KL contre un modèle de référence :
+
+$$\mathcal{J}_{GRPO}(\theta) = \mathbb{E}\Big[\tfrac{1}{G}\sum_{i=1}^G \tfrac{1}{|o_i|}\sum_{t=1}^{|o_i|} \Big\{ \min\big[r_{i,t}(\theta)\hat A_{i,t},\ \text{clip}(r_{i,t}(\theta), 1-\epsilon, 1+\epsilon)\hat A_{i,t}\big] - \beta\, \text{KL}[\pi_\theta \| \pi_{ref}]\Big\}\Big]$$
+
+> 💡 **Pourquoi ça compte pour les LLMs ([[07_LLM]]).** GRPO est la méthode utilisée pour entraîner les *reasoning models* type DeepSeek-R1 : pour un même problème (maths, code), on génère $G$ chaînes de raisonnement candidates, on note chacune (bonne/mauvaise réponse), et on renforce celles au-dessus de la moyenne du groupe — sans jamais apprendre de critic séparé. C'est un gain direct en simplicité et en stabilité par rapport à PPO classique dans ce contexte.
+
 ---
 
 ## Annexe — récapitulatif des algorithmes
@@ -851,9 +900,11 @@ C'est **l'algorithme final** — souvent appelé *"one-step Actor-Critic"* (Sutt
 | **Dueling DQN** | Value-based | Discret | Sépare $V$ et $A$ |
 | **REINFORCE** | Policy-based | Tout | MC policy gradient |
 | **Vanilla PG + baseline** | Policy-based | Tout | Réduit la variance via $\hat A$ |
-| **TRPO/PPO** | Policy-based | Tout | Trust region, état de l'art |
+| **TRPO** | Policy-based | Tout | Trust region (contrainte KL dure) |
 | **A2C/A3C** | Actor-Critic | Tout | Bootstrap pour réduire variance |
 | **DDPG/TD3/SAC** | Actor-Critic | Continu | Actions continues |
+| **PPO** | Actor-Critic | Tout | Ratio clippé, réutilise les trajectoires (cf. III.B) |
+| **GRPO** | Actor-Critic | Discret (tokens) | Avantage sans critic, via groupe (cf. III.C) — utilisé en RLHF |
 
 > 💡 **Le résumé en une phrase.** Pour des **actions discrètes avec espace d'états visuel** (jeux Atari, images) → DQN/Double/Dueling. Pour des **actions continues** (robotique) → SAC ou PPO. Pour un **prototype rapide** → REINFORCE avec baseline. Pas de reward function du tout → [[03_Imitation Learning]].
 

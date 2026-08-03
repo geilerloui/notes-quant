@@ -1,7 +1,7 @@
 # Book 1: renaissance periodization - scientific principles of hypertrophy training
 
 
-## Page 1 — Chapitre 1 : Spécificité
+## Chapitre 1 — Spécificité
 
 ### Concept du « stacking »
 
@@ -57,7 +57,9 @@ utilise mvt composé (eg squat) comme base pour construire la masse générale e
 
 ---
 
-## Page 2 — Chapitre 2 : Overload (= surcharge)
+## Chapitre 2 — Overload (= surcharge)
+
+### Acute vs progressive overload
 
 - **Acute overload** (surcharge aiguë) : la charge d'entraînement doit atteindre un seuil qui donne de l'hyper.
 - **Progressive overload** (surcharge progressive) : au fil des mois, les poids paraissent + légers.
@@ -65,8 +67,8 @@ utilise mvt composé (eg squat) comme base pour construire la masse générale e
 - **Après le seuil** : croissance explosive pour chaque effort.
 - **Le plateau** : si trop de stimulus, alors add. de 5 reps n'apportera rien.
 
-> [!note] Schéma — placeholder
-> Courbe « stimulus threshold » : croissance musculaire en fonction de la magnitude du stimulus.
+
+![[Pasted image 20260803143045.png|265]]
 
 ### Hiérarchie des mécanismes
 
@@ -86,11 +88,7 @@ utilise mvt composé (eg squat) comme base pour construire la masse générale e
 
 → **CCL** : Lors de l'entrainement il faut varier les réps
 
----
-
-## Page 3 — Effort relatif, ROM
-
-### 3. Effort relatif (RIR ⇒ reps in reserve)
+#### 3. Effort relatif (RIR ⇒ reps in reserve)
 
 On peut faire grossir un muscle avec beaucoup de reps et un poids léger (max 30 reps) : ça se base sur la **fatigue cumulative**.
 
@@ -101,7 +99,7 @@ On a déjà expliqué que le cours [?] hypertrophie.
 - **RIR 1** : il en reste 1
 - **RIR 3** : seuil minimum si la surcharge — <span style="color:red">si tu es à plus de 3–4 reps, pas assez de fibres rapides recrutées</span>
 
-### 4. Range of motion (amplitude de mouvement)
+#### 4. Range of motion (amplitude de mouvement)
 
 Problème de l'isométrie :
 - recrutement partiel: ≠ unités motrices s'activent en fonction de l'angle, en étant statique on n'active que certaines
@@ -111,7 +109,7 @@ Problème de l'isométrie :
 
 rappel concentrique et excentrique active des mécanorécepteurs que tu n'as pas en isométrie.
 
-### Bonus volume
+#### Bonus volume
 
 RP dit que :
 
@@ -122,43 +120,39 @@ $$\text{volume} = \text{poids} \times \text{amplitude (ROM)} \times \text{rép}$
 
 ⇒ **CCL** : si le ROM est complet + poids qui est 60–85 % du 1RM, tu n'as qu'une variable : bouger le nombre de séries.
 
-### 5. Accumulation de métabolites = gonflement (swelling) = anabolique
+#### 5. Accumulation de métabolites = gonflement (swelling) = anabolique
 
 - On l'a déjà vu rôle stress métabolique
 - Précurseurs de stress mécanique
 - En gros, trop de métabolites
 
-### 6. Cell swelling
+#### 6. Cell swelling
 
 C'est la conséquence de ce gonflement : le corps réagit en renforçant car les murs vont péter.
 = brûlure
 
----
-
-## Page 4 — Mind–muscle, tempo, muscle damage
-
-### 7. Mind muscle connection
+#### 7. Mind muscle connection
 
 Le message varie :
 - **Lourd, 6–10 reps** = tu sens le muscle = tension mécanique
 - **Léger, 15–30 reps** = tu sens la brûlure = stress métabolique
 
 post série: le muscle est gonflée = cell swelling (pump)
-### 8. Muscle velocity (tempo)
+#### 8. Muscle velocity (tempo)
 
 - Rappel des 4 phases du mouvement.
 - Si mouvement explosif, tu recrutes du II.
 - Si lent, tu ↗ le TST et la sensation de MMC.
 
-### 9. Muscle damage
+#### 9. Muscle damage
 
 Muscle courbaturé 24–48 h.
 
 - **A** ne sert à rien
 - **C–D** : tu répares mais tu ne construis pas
 
-> [!note] Schéma — placeholder
-> Courbe en cloche avec points A, B, C, D (dommages vs commande/adaptation).
+
+![[Pasted image 20260803143112.png|436]]
 
 **Le conflit** :
 - **Récupération** : revenir à l'état initial (repair des dégâts)
@@ -166,7 +160,7 @@ Muscle courbaturé 24–48 h.
 
 → Si trop de dégâts,tu satures la récup et tu tues l'adaptation
 
-### DOMS
+#### DOMS
 
 **DOMS** = courbature à déclenchement retardé. Ces courbatures apparaissent 24 h après, alors que la brûlure est directe.
 
@@ -174,16 +168,14 @@ Muscle courbaturé 24–48 h.
 ⇒ **DOMS léger** (1–2 jours) : tu es dans ton MAV
 ⇒ **DOMS extrême** (+ de 3–4 jours) : tu as explosé le MRV
 
-### Conclusion
+#### Conclusion : les synergies
 
 Il y a des synergies :
 - Tension + métabolites
 - Métabolites + swelling
 - ROM + tension
 
----
-
-## Page 5 — Effective stimulus range
+### Effective stimulus range
 
 Il doit y avoir un 5 RIR min  après, il y a un ratio **stimulus / fatigue (SFR)**. Eg :
 
@@ -192,10 +184,9 @@ Il doit y avoir un 5 RIR min  après, il y a un ratio **stimulus / fatigue (SFR)
 
 → Il dit aussi que faire 100 reps pour aller à l'échec : c'est trop de fatigue.
 
-> [!note] Schéma — placeholder
-> Courbe SFR ratio en fonction du RIR ; zones A / B ; « CCL trop de fatigue ».
+![[Pasted image 20260803143200.png|493]]
 
-### La zone magique : [30, 85] % du 1RM
+#### La zone magique : [30, 85] % du 1RM
 
 Problème de la zone magique :
 - **Bas** : 30 % du 1RM = poids léger pour faire 30 reps, avec un RIR 0–5
@@ -210,7 +201,7 @@ Si 1, 2, 3 sont valides, alors **1 série = 1 unité de volume**.
 
 <span style="color:red">**CCL** : plus besoin du tonnage (série × rep × poids) ⇒ ex qui compare les 2 méthodes.</span>
 
-### MEV / MRV
+#### MEV / MAV / MRV
 
 **MEV** = volume minimal pour commencer
 - Il évolue en fonction de ton niveau en muscu
@@ -228,18 +219,15 @@ MRV→ stratégie : c'est ok de l'atteindre avant une phase de **deload**
 | 4 | proche MRV |
 | 5 | Deload |
 
-> [!note] Schéma — placeholder
-> Courbe en cloche du volume avec repères MEV / MAV / MRV.
+![[Pasted image 20260803143217.png|508]]
 
----
-
-## Page 6 — Rotation des exos, tempo, séries classiques
+#### Rotation des exos
 
 Rq : 10–20 reps est le top pour la mind–muscle connection, car sinon tu es plus concentré par la fatigue ou par le trop gros poids.
 
 **Rotation des exos** → il faut que sur un mésocycle tu as balayé l'ensemble de l'amplitude possible d'un muscle il faut donc varier eg squat + leg extension
 
-### Tempo
+#### Tempo
 
 Il dit que chaque phase du mouvement doit être < 3 s. Tempo idéal :
 
@@ -270,14 +258,10 @@ Il dit que chaque phase du mouvement doit être < 3 s. Tempo idéal :
 
 **Conseil** : viser les 90 % de récup.
 
-> [!note] Schéma — placeholder
-> Courbe de récupération avec points A, B, C.
+![[Pasted image 20260803143253.png|363]]
+Capacité à stimuler la croissance après une série de travail : elle s'effondre (A), remonte vers 90 % après une minute de repos (B), puis vers 95 % après plusieurs minutes de plus (C). Récupérer au-delà coûte beaucoup de temps pour un gain quasi nul (D).
 
----
-
-## Page 7 — Down sets et giant sets
-
-### 2. Down sets / Drop sets
+#### 2. Down sets / Drop sets
 
 Eg : tu fais rowing, 5 séries de 10 reps – 20 reps.
 
@@ -293,7 +277,7 @@ Deux choix :
 - **Le gros drop** : tu baisses les poids une fois pour que les séries 4 et 5 restent dans les 10–20 reps.
 - **Le drop progressif** : tu baisses un peu le poids à chaque série pour rester autour de 12–15 reps.
 
-### 3. Giant sets (série marathon)
+#### 3. Giant sets (série marathon)
 
 Intérêts :
 1. Petite salle de muscu : tu ne peux pas changer de mouvement
@@ -306,22 +290,18 @@ Intérêts :
 
 ⇒ **Recommandation** : giant sets seulement 1/4 à 1/3 de la prog, et surtout pour l'isolation à la fin.
 
----
-
-## Page 8 — Supersets et myoreps
-
-### 4. Les supersets
+#### 4. Les supersets
 
 → Utilisés pour corriger un point faible, ou booster le métabolisme local, + gagner du temps.
 
-#### 4.a Supersets antagonistes
+##### 4.a Supersets antagonistes
 
 On enchaîne deux muscles qui n'ont rien à voir (pecs / dos).
 
 - Fatiguer l'antagoniste peut ↗ la force de l'agoniste. Si tes dorsaux sont fatigués, ils offrent de résistance élastique quand tu pousses au DC.
 - Par contre, risque de fatigue si eg squat + rowing.
 
-#### 4.b Supersets de pré-fatigue
+##### 4.b Supersets de pré-fatigue
 
 Tu enchaînes une isolation et un composé pour le même muscle.
 
@@ -331,7 +311,7 @@ Eg : si tes triceps ne grandissent pas au DC, parce que tes triceps ne lâchent 
 
 > ⚠️ À utiliser en fin de séance, ou pour un muscle que tu as toujours du mal à sentir.
 
-### 5. Myoreps (Borge Fagerli)
+#### 5. Myoreps (Borge Fagerli)
 
 **Obj** : on garde que les reps effectives et pas les réps facile
 
@@ -349,11 +329,7 @@ Eg : sur 15 reps, les 10 premières sont faciles et les 5 dernières effectives.
 - b) Trop de métabolites empêche d'utiliser sa force max car les fibres sont fatiguées
 - c) C'est psychologiquement épuisant
 
----
-
-## Page 9 — Drop sets, deloading et comparaison des stimuli
-
-### 6. Drop sets
+#### 6. Drop sets
 
 **Protocole** :
 - **Série d'activation** : 10 à 20 reps (0–3 RIR)
@@ -384,7 +360,7 @@ Eg : sur 15 reps, les 10 premières sont faciles et les 5 dernières effectives.
 - Perte de force immédiate
 - Perte de coordination, eg jambes en coton après un gros squat
 
-### Création de l'indice RSM = Raw Stimulus Magnitude
+#### Création de l'indice RSM = Raw Stimulus Magnitude
 
 | Exo          | Tension / burn | Pump | Disruption | Total RSM       |
 | ------------ | -------------- | ---- | ---------- | --------------- |
@@ -393,11 +369,7 @@ Eg : sur 15 reps, les 10 premières sont faciles et les 5 dernières effectives.
 
 → Pas à prendre au pied de la lettre pour certains sentent rien au quads mais ils ont énormes
 
----
-
-## Page 10 — Score RSM et progression
-
-### Score RSM
+#### Score RSM
 
 - **Score 0–3** : « junk volume », mauvais
 - **Score 4–6** : efficace, bon exo de base
@@ -415,7 +387,7 @@ leg extension de 7/9
 
 <span style="color:red">**CCL** : il faut regarder le ratio **stimulus / fatigue**.</span>
 
-### The progression compare et of overload
+### Progression et progressive overload
 
 si tu fais toujours les mêmes séances chaque semaine ton corps s'adapte et tu tombes sous ton MEV pour éviter ça il propose d'évoluer au cours de mésocycles.
 
@@ -436,11 +408,7 @@ si tu fais toujours les mêmes séances chaque semaine ton corps s'adapte et tu 
 - **Week 4** : tu finis proche du MRV (eg 4 ou 5 séries)
 
 
----
-
-## Page 11 — Application pratique
-
-### Eg de mésocycle
+#### Exemple de mésocycle
 
 | Week | Séries | Poids | Reps | RIR | Intensité perçue |
 |---|---|---|---|---|---|
@@ -450,7 +418,7 @@ si tu fais toujours les mêmes séances chaque semaine ton corps s'adapte et tu 
 | S4 | 5 | 65 kg | 9 | 0–1 | Overload total (gros dégâts) |
 | S5 | Deload | 60 kg | 6 | 8 | récup active |
 
-### Practical application of progressive overload
+#### Application pratique de la progressive overload
 
 Algo de progression des séries : **score de perf**
 
@@ -461,41 +429,37 @@ Algo de progression des séries : **score de perf**
 | **2**           | Do not add   | Do not add   | Do not add | —                |
 | **3**           | Do not add   | Do not add   | Do not add | —                |
 
-### Soreness (douleur)
+##### Soreness (douleur)
 
 - **0** : aucune douleur
 - **1** : raideur passagère, résolue bien avant la prochaine séance
 - **2** : courbature (DOMS) résolue juste à temps pour la prochaine séance
 - **3** : encore courbaturé à la prochaine séance
 
-### La perf
+##### La perf
 
 - **0–1** : tu as dépassé les objectifs de reps, ou tu étais loin de l'échec prévu
 - **2** : tu as atteint exactement les répétitions cibles au bon RIR
 - **3** : tu as fait < reps par rapport à la semaine précédente
 
-### Progression par méthode d'entraînement
+#### Progression par méthode d'entraînement
 
-#### a) Séries classiques
+##### a) Séries classiques
 
 - Charge globale du poids à chaque semaine pour maintenir le RIR cible (eg passer de 4 à 1RIR sur le mois)
 - rép augmente si ta pas le choix de faire des squat de poid énorme eg 15-20kg aux haltere
 
-#### b) Giant sets
+##### b) Giant sets
 
 Commence avec un nombre de reps total bas, eg 40 reps au total, puis ajoute eg + 5 reps/week que si les perfs sur série classique restent stables.
 
----
-
-## Page 12 — Supersets, myoreps, under-application
-
-### c) Supersets et pré-fatigue
+##### c) Supersets et pré-fatigue
 
 - **Isolation** : vise 10–30 reps
 - **Composé** : vise 5–20 reps
 - **Progression** : si tu dépasses 20 reps sur un mouvement composé ↗ la charge ou réduire le temps de repos entre les 2 exercices
 
-### d) Myoreps et drop sets
+##### d) Myoreps et drop sets
 
 - **Suivi** : tu dois noter le nombre total de reps, ne cherche pas la brûlure, de façon aléatoire
 - Si tu as du mal à égaler les reps entre 2 semaines avec le même RIR ne rajoute pas de volume
@@ -503,7 +467,7 @@ Commence avec un nombre de reps total bas, eg 40 reps au total, puis ajoute eg +
 
 <span style="color:red">⇒ Dans le livre « sample progression » = table.</span>
 
-### Under-application et overload
+### Under-application of overload
 
 Cas où on pense appliquer la surcharge progressive alors qu'« on ne l'applique » : le stimulus est minimal.
 
@@ -523,22 +487,20 @@ Volume d'entraînement qui génère pour les muscles la fatigue mais ne contribu
 - règle des 8 séries: après approx 8 séries ta capacité à pousser les muscles déclinent
 - les limites du ROM: il déconseilles les rép partielle 
 
----
+### Over-application of overload
 
-## Page 13 — Over application of overload
-
-### a) Faire au 85 % du 1RM svt a des drawbacks
+#### a) Faire au 85 % du 1RM svt a des drawbacks
 
 - On ne fait pas travailler les fibres lentes quasi que rapide 
 - Risque de blessure
 - **Amplitude réduite** : bcp de mecs finissent en 1/2 squat -> c pas ouf
 
-### b) Trop faire sur un seul facateur de prog
+#### b) Trop faire sur un seul facteur de prog
 
 - **Trop de séries, pas assez de poids (reps)** : si tu fais ça vos première séeries finiront par tomber en dessous de la zone d'efficacité (plus de 5 RIR) car votre corps s'adapte à la charge.
 - **Trop de poids, pas assez de reps** : si trop de poids chaque semaine on peut pas augmenter les volumes / séries, alors que le voluem est le facteur n°1
 
-### c) L'entraînement negative failure
+#### c) L'entraînement negative failure
 
 - Il faut un partenaire pour forcer des reps concentriques ou excentriques
 - **Problème** : fatigue massive, problème de fragilité athlète
@@ -546,11 +508,11 @@ Volume d'entraînement qui génère pour les muscles la fatigue mais ne contribu
 <span style="color:red">**CCL — application pratique** : le score de performance. Si le nombre est de 3 (incapacité à égaler les reps de la semaine dernière), cela signifie que la fatigue a déjà pris le dessus sur le stimulus.</span>
 
 
-## Page 14 — Chapitre 3 : Gestion de la fatigue
+## Chapitre 3 — Gestion de la fatigue
 
-Trois types de fatigues :
+### Les trois types de fatigue
 
-### 1. Fatigue locale
+#### 1. Fatigue locale
 
 C'est la fatigue spécifique au muscle entraîné.
 
@@ -560,7 +522,7 @@ C'est la fatigue spécifique au muscle entraîné.
 
 Si tu as mal aux genoux afin d'avoir mal aux quads  c'est que la fatigue est mal gérée.
 
-### 2. La fatigue systémique
+#### 2. La fatigue systémique
 
 ⇒ Celle qui affecte l'hypertrophie ; elle est cumulative (muscu + crossfit + boulot ...).
 
@@ -569,7 +531,7 @@ Si tu as mal aux genoux afin d'avoir mal aux quads  c'est que la fatigue est mal
 
 → On peut utiliser la VFC.
 
-### 3. La fatigue axiale (cage particuliers du dos)
+#### 3. La fatigue axiale (muscles du dos)
 
 C'est une fatigue locale (muscles érecteurs du rachis) qui se comporte comme une fatigue « systémique ».
 
@@ -590,18 +552,14 @@ C'est une fatigue locale (muscles érecteurs du rachis) qui se comporte comme un
 - **AMPK vs mTOR** : quand la fatigue systémique est ↗↗, ton corps active AMPK mais il éteint mTOR.
 - **Hormones** : la fatigue fait ↗ le cortisol et ↘ la testostérone.
 
----
-
-## Page 15 — Performance, deload, SFR
-
-### 2. L'impact sur la performance
+#### 2. L'impact sur la performance
 
 **Déf. récupération** : le retour du système à son niveau de performance de base.
 
 - Tu peux être fatigué (avec DOMS, VFC baisse …) **MAIS** si tu bats tes PR de la semaine précédente, alors tu as récupéré au sens fonctionnel.
 - Si tu n'arrives pas à égaler la semaine dernière , c'est la fatigue.
 
-### 3. « Le deload par blessure »
+#### 3. « Le deload par blessure »
 
 Il appelle ça la « gestion automatique de la blessure » : quand tu n'as pas écouté la fatigue et que tu as des tendinites.
 
@@ -619,29 +577,25 @@ $$\text{SFR} = \frac{\text{Stimulus (RSM)}}{\text{Fatigue}}$$
 - Fatigue : 4/10
 - SFR = 8/4 = 2.0 ⇒ meilleur car permet d'accumuler + de volume total avant d'exploser le MRV
 
-### Comment le SFR gère l'interférence (muscu vs crossfit) ?
+#### Comment le SFR gère l'interférence (muscu vs crossfit) ?
 
 - Budget de fatigue déjà entamé par les WOD  (fatigue systémique)
 - Si tu choisis des exos de muscu à bas SFR (eg DL) tu vas saturer le budget
 - Si tu choisis haut SFR c'est OK (isolation…)
 
-### Comment évaluer le SFR de ton programme ?
+#### Comment évaluer le SFR de ton programme ?
 
 Il faut se poser 3 questions après les exos :
 1. **Le stimulus** : est-ce que j'ai senti le muscle travailler (MMC) ? Est-ce qu'il est gonflé (pump) ?
 2. **Fatigue locale** : est-ce que l'articulation ou tendon font mal  (Si oui, fatigue trop haute.)
 3. **Fatigue systémique** : est-ce que cet exo m'a épuisé au point que la suite va être dure ?
 
-### Determining SFR
+#### Determining SFR
 
 **RSM** : additionne les 3 notes (de 0 à 3) :
 - **MMC** : à quel point tu sens le muscle ?
 - **Pump / congestion** : à quel point le muscle est gonflé ?
 - **Courbatures** : à quel point le muscle est devenu faible ou douloureux ?
-
----
-
-## Page 16 — Améliorer le SFR
 
 **La fatigue** : additionne les 3 notes (de 0 à 3) :
 - **Articulation** : tendons / articulations piquent ?
@@ -676,10 +630,14 @@ Eg : squat profond > 1/4 de squat, car SFR ↗↗ à 180 kg.
 
 Au début de ton bloc (volume bas, proche du MEV), chaque série ajoutée donne énormément de résultat pour presque zéro fatigue. C'est là que ton SFR est au max.
 
-> [!note] Schéma — placeholder
-> Courbe fatigue en fonction du training volume (décroissance des rendements).
+![[Pasted image 20260803143549.png|291]]
+Relation entre volume et fatigue : la fatigue croît exponentiellement avec le volume d'entraînement.
 
 **CCL** : plus tu ajoutes de séries pour aller vers une croissance max (MAV), plus la croissance explose de manière exponentielle, alors que la fatigue explose aussi et ralentit le gain musculaire.
+
+
+![[Pasted image 20260803143623.png|208]]
+Relation entre volume et SFR (représentation simplifiée) : le SFR est maximal à bas volume (A). Au MAV, la croissance absolue est la plus forte mais la fatigue commence à grimper, donc le SFR baisse (B). Au-delà, la croissance ralentit et la fatigue explose : le SFR s'effondre (C). Meilleur SFR ≠ meilleure croissance — la meilleure progression vient de partir des bas volumes (A) puis de monter vers B et C.
 
 #### 2. Dilemme du plafonnement
 
@@ -689,18 +647,6 @@ Au début de ton bloc (volume bas, proche du MEV), chaque série ajoutée donne 
 #### 3. SFR vs croissance totale
 
 → Le but n'est pas de rester là où le SFR est le plus haut.
-
----
-
-## Page 17 — SFR et RIR
-
-- Si tu restes sur un volume bas (**A**), ton SFR est good mais tu gagnes 200 g de muscle / mois.
-- Si tu vas à **B** (le MAV), ton SFR ↘ (fatigue) mais tu gagnes 500 g de muscle.
-
-> [!note] Schéma — placeholder
-> Courbe SFR en fonction du volume, avec points A, B, C.
-
-**La limite : le point C.** Si tu dépasses le volume, ton SFR s'effondre : la fatigue est totale et la croissance s'arrête ou devient négative.
 
 ### SFR et RIR
 
@@ -729,18 +675,16 @@ Plus tu progresses (au fil des années ou des semaines), plus ton meilleur SFR s
 
 **CCL** : ton SFR absolu diminue avec le temps. Tu dois travailler beaucoup plus dur pour gagner beaucoup moins.
 
----
-
-## Page 18 — Planning future stimuli
+### Planning future stimuli
 
 → Il faut voir l'entraînement comme un marathon annuel plutôt qu'un sprint hebdomadaire.
 → Il propose 2 questions à se poser avant chaque séance.
 
-### 1. La gestion du stimulus : « Est-ce que j'en fais assez ? »
+#### 1. La gestion du stimulus : « Est-ce que j'en fais assez ? »
 
 → Pour que la séance compte, elle doit être au-dessus du MEV. Mais ⚠️ le seuil monte au fil des semaines : si week 1 et week 3 sont pareilles, tu recules en termes de stimulus.
 
-### 2. « Est-ce que je vais saturer ma progression ? »
+#### 2. « Est-ce que je vais saturer ma progression ? »
 
 → C'est ici que trop est élevé : si tu fais une séance « héroïque » (0 RIR, volume max) en week 2, tu gagnes du muscle mais la fatigue sera telle que tu devras deload en avance.
 
@@ -767,25 +711,21 @@ Plus tu progresses (au fil des années ou des semaines), plus ton meilleur SFR s
 - **Pulsabilité du mésocycle** : c'est d'alterner l'intensité au sein de la semaine.
   Eg : si tu fais pecs 2×/semaine, fais une séance lourde (5–10 reps) et une light (10–20 reps). Les tissus conjonctifs et les fibres rapides récupèrent pendant une séance légère, mais tu continues à stimuler la croissance.
 
----
-
-## Page 19 — Soulager la fatigue, deload, repos actif
-
-### 2. Soulager
+#### 2. Soulager
 
 Quand la fatigue est là, il faut des stratégies pour la descendre.
 
-#### 1. Jours de repos (c'est doux)
+##### 1. Jours de repos (c'est doux)
 
 Reco : 1 à 2 jours de full repos.
 
-#### 2. Séance de récup
+##### 2. Séance de récup
 
 Si tu sens que tu tapes le MRV trop vite :
 - Tu fais la séance de prfévue, mais tu divises par deux les séries **ET** les reps
 - Afin de maintenir le MEV sans ajouter de la fatigue
 
-#### 3. Le deload
+##### 3. Le deload
 
 - 1ère moitié séance: Même poids que la semaine précédente (mais 50 % des séries et 50 % des reps)
 - 2e moitié de séance - on réduit aussi les poids de 50 %
@@ -795,7 +735,7 @@ Si tu sens que tu tapes le MRV trop vite :
 → Les perfs chutent.
 → Sinon, pour l'athlète avancé : Mike propose de changer d'exo pour le deload, pour réduire la fatigue axiale.
 
-### 4. La période de repos actif
+##### 4. La période de repos actif
 
 Dure entre 1 à 4 semaines et peut impliquer un arrêt total de la muscu.
 
@@ -805,14 +745,12 @@ Dure entre 1 à 4 semaines et peut impliquer un arrêt total de la muscu.
 → En 2 weeks de pause, la perte musculaire est minimale : ce que tu perds c'est du glycogène et de l'eau.
 → Permet de ↘ cortisol et ↗ testo.
 
-### Employing pre-planned and autoregulated fatigue management
+#### Employing pre-planned and autoregulated fatigue management
 
 - **Séance de récup « surprise »** : tu as éclaté, mal dormi → tu transformes la séance en session de récup (50 % du volume).
 - **Ajustement du MRV** : si tu dois deload la week 6 mais qu'en semaine 4 tu valides les reps ⇒ tu déclenches le deload tout de suite.
 
----
-
-## Page 20 — Chapitre 4 : le SRA
+## Chapitre 4 — Le SRA
 
 « **Stimulus, récupération, adaptation** » : c'est le pont entre l'entraînement (surcharge) et le repos (gestion de la fatigue).
 
@@ -824,8 +762,9 @@ Chaque séance de muscu fait une cascade d'événements en trois temps :
 2. **Récup** : ton corps répare les dégâts. Il revient au niveau initial.
 3. **Adaptation (surcompensation)** : ton corps ne veut plus subir ce stress. Il reconstruit en un peu plus solide, le muscle se construit.
 
-> [!note] Schéma — placeholder
-> Courbe SRA : increased / decreased, points A, B, C, en fonction du temps.
+![[Pasted image 20260803143819.png|283]]
+La courbe SRA représente le stimulus (A) puis la phase de récupération et d'adaptation (B). Juste après un stimulus efficace, la fatigue masque temporairement le niveau de forme ; une fois récupéré, ce niveau est supérieur (C) au niveau de départ.
+
 
 ### 1) La courbe : FSR vs récup
 
@@ -834,8 +773,10 @@ Chaque séance de muscu fait une cascade d'événements en trois temps :
 - **La courbe FSR** (fractional synthetic rate) : c'est la durée pendant laquelle ton muscle construit (cellulaire du tissu) → la fenêtre de croissance.
 - **La courbe de récup** : le temps nécessaire pour que la fatigue disparaisse et que la perf revienne à la normale.
 
-> [!note] Schéma — placeholder
-> Starting fitness / FSR / recovery en fonction du temps.
+![[Pasted image 20260803143847.png|259]]
+On peut séparer la courbe SRA de l'hypertrophie en deux composantes : la courbe FSR (fractional synthetic rate, en vert au-dessus) et la courbe de récupération (en bleu en dessous). Les deux ne se superposent pas parfaitement — l'une peut se terminer avant l'autre.
+
+
 
 > <span style="color:red">**Pb** : svt la récup est plus longue que le FSR.</span>
 
@@ -851,12 +792,10 @@ Chaque séance de muscu fait une cascade d'événements en trois temps :
 - **Pas assez fréquent (1×/week)** : eg 18 séries d'un coup c'est trop fort tu es épuisé
 - **Compromis (2–4×)** : zone où tu optimises le SFR.
 
-> [!note] Schéma — placeholder
-> Trois courbes : idéal / réaliste / inefficient (6 jours à récupérer → inefficient).
+![[Pasted image 20260803143920.png|465]]
+Dans un monde idéal, la croissance durerait aussi longtemps que la récupération et on ne serait jamais limité par cette dernière (A). En réalité, les courbes SRA sont plus souvent limitées par la récupération que par la croissance : on passe du temps sans construire, en attendant de pouvoir réentraîner (B). Trop de volume par séance (souvent dû à une fréquence trop basse) rend la récupération bien plus longue que la croissance et réduit les gains totaux (C).
 
----
 
-## Page 21 — Functional overreaching, fréquences extrêmes
 
 ### Le concept du « functional overreaching »
 
@@ -906,22 +845,13 @@ La 2ᵉ ou 3ᵉ série est souvent la best.
 - **Groove technique** : il faut avoir 2 ou 3 séries pour trouver le bon angle, la MMC parfaite.
 - pb de fréquence: si tu fais que 1 série par muscle eg squat every day tu vas pas 2 et 3 comme expliqué en haut 
 
-#### 2. Le paradoxe de la fréquence
-
-Si tu ne fais qu'1 série par muscle, eg squat…
-→ ⚠️ Paradoxe : sur la fréquence il y a 5 variables à expliquer.
-
----
-
-## Page 22 — Répétitions effectives, pump, variables intrinsèques
-
-### 2. Le paradoxe des « répétitions effectives »
+#### 2. Le paradoxe des « répétitions effectives »
 
 La fatigue locale modérée rend les séries suivantes plus rentables.
 
 - Faire 3 à 5 séries à la suite permet d'accumuler plus de répétitions effectives (// au temps passé) que de faire 1 seule série isolée.
 
-### 3. Le pump et les métabolites
+#### 3. Le pump et les métabolites
 
 Pour déclencher l'hypertrophie via le gonflement cellulaire (le « pump »), il faut un certain volume de sang et de métabolites accumulés dans le sang.
 
@@ -960,20 +890,25 @@ La femme récupère + vite ⇒ elles peuvent avoir une séance de plus.
 - **Multi-faisceaux** (eg deltoïdes) : on utilise jamais l'antérieur, le latéral, le postérieur en même temps → fréquence élevée.
 - **Élongation sous tension** (ischios, RDL) : donne étirement max donne stimulus ++ le dommage --
 
----
+### Remarques complémentaires
 
-## Page 23 — (page très peu remplie)
-
-### rq de gemini
+#### Rq de Gemini
 
 - Ischios : prennent cher au crossfit DL, snatches, kettlebell, swing bcp d'étirement sous tension => fréquence basse pour eux
 - deltoire antérieurs = supporte = élévation latérale à ajouter
 
-### The current research on hypertrophy frequency
+#### The current research on hypertrophy frequency
 
 *(section vide dans les notes)*
 
 
+## Chapitre 5 — Variations
+
+## Chapitre 6 — Phase potentiation
+
+## Chapitre 7 — Individualization
+
+## Chapitre 8 — Summary and special cases
 
 # Book 3: Scientific principles of strength training with applications to powerlifting 
 

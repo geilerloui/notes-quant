@@ -448,3 +448,28 @@ comment est actié ce réflexe, contraction msuculaire étire le tendon, ça dé
 en conséquence tout muscle possède ces deux récepteurs; une voie adressé au SN centrale des info en continu sur longueur du muscle, vitesse d'alongement et force qu'il produit, la tension généré par la contrcation musculaire va etre codé électriquement par des potentiel d'action porté par les fibres Ia, et fibres Ib pr réfleion myotatique inverse et réflexion de tension. en cas d'actité musculaire d'intsntéi élevé et ou vitesse allongement musculaire importante ces réflxe protege le programme moteur pour limiter l aforce produit ou allongement du muscle 
 
 ![[Pasted image 20260729105913.png]]
+
+
+### fatigue mentale
+
+on voit des athlete épuis éà la fin de l'épreuve la fatigue explique en partie qu'on va expliqeur dans cete vidéo; fatigue phénoemen cpmpelxe multi facotirlle qui est la dimunution de nos perf musculaire ou cognitive; niveau musculaire = diminution de la force ou puissance max apres un exo eg si je mesure force max avant et apres d'une course de 10km on voit une baisse de 20%. La fa=tigue est aussi mentale 
+
+la mentale = diminution de nos performances cognitives eg calcul mentaux ou tâche sde é moire; ça augmente temps de réaction et ommetre plus d'erreurs eg ce qu'on ressent apres une longue journée de taff, nuit sans sommeil, conduite très longue. 
+
+# semaine 4
+
+La semaine 3 était dédiée à la présentation de certaines **structures impliquées** dans la production et la régulation du mouvement. Il s'agit maintenant de comprendre la manière dont le système nerveux central **contrôle les différents degrés de liberté**, notamment les muscles, pour produire le mouvement.
+
+Dans la **partie "théorique"**, nous présenterons dans un premier temps certaines des **théories** qui visent à expliquer le **contrôle des coordinations musculaires**. Nous présenterons ensuite la notion de **variabilité du mouvement**, à l'échelle d'un individu et d'un groupe d'individus. Nous introduirons ainsi la notion de **signature individuelle du mouvement**. Nous finirons par aborder le **couplage** qui existe entre l'**activation** que reçoit un muscle et ses **capacités de production de force**. Il s'agira notamment de comprendre si la manière dont on active nos muscles tient compte de leurs caractéristiques biomécaniques.
+
+Dans la **partie "illustrations pratiques"**, nous aborderons la question de l'**adaptation du mouvement à la douleur**. Bien qu'il semble évident que nous adaptons nos mouvements en présence d'une douleur d'origine musculaire, articulaire ou tendineuse, l'origine et l'impact de ces adaptations sont encore mal connus . Nous présenterons ensuite la manière dont les coordinations musculaires des **sportifs de haut niveau** sont décortiquées au sein de l'Institut Nationale du Sport, de l'Expertise et de la Performance (INSEP). Nous verrons notamment en quoi une meilleure connaissance de ces coordinations permet d'améliorer la performance des sportifs. Nous finirons par présenter une application de l'étude des coordinations à l'**analyse et l'optimisation du geste de pédalage**.
+
+Au cours de cette semaine, nous vous recommandons de revenir sur l'**animation 3D interactive** de la semaine 3, notamment sur l’animation des coordinations musculaires au cours de la marche et de la course.
+
+## théorie - controle du mvt
+
+L’apparente facilité avec laquelle nous réalisons un vaste répertoire de mouvements cache en réalité une grande complexité des processus impliqués. On dispose de nombreux degrés de liberté (unités motrices, muscles, articulations), et donc de nombreuses combinaisons possibles entre ces degrés de liberté pour réaliser la plupart de nos mouvements. Par exemple, pour réaliser une simple flexion du coude, nous pouvons théoriquement n'utiliser que le biceps brachial, que le brachialis ou n'importe quelle combinaison entre ces deux muscles. Cette vidéo présente deux des principales théories du contrôle du mouvement.
+
+----- 
+
+maniere dont le mvt est controlé; c'est un challenge il suffit de prendre l'eg du jeu d'échec complexité du mvt est due à la redondance du musculo squletique qui a +350 articulations et + de 600 muscles et plus de 700 UM/muscle. même si la redondance du systeme musculo squletique dit q'on a une infinité de solution en coordination musculaire mais c pas le cas y'a des limites mécaniques. eg pr produire une force dez l'index seul contrainte la force doti etre produite sur ce plan, on se rend compte que chacun des muscles peut etre activé en 0 et 100% 

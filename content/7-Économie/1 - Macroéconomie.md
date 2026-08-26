@@ -847,12 +847,12 @@ Augmentation trimestrielle
 
 Augmentation mensuelle
 
-![[33_image.png|273]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/33_image.png|273]]
 
 
 Augmentation trimestrielle
 
-![[34_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/34_image.png]]
 
 
 **Disparités entre acteurs (perdants/gagnants)**
@@ -935,11 +935,11 @@ Un même individu peut appartenir aux deux groupes (salarié et épargnant/actio
 - **Exemple historique** : années 1960–70 en Europe/USA → forte syndicalisation + plein emploi ⇒ salaires tirés vers le haut, donc inflation élevée.
 
 
-![[35_image.png|274]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/35_image.png|274]]
 État initial avant commencement de la boucle
 
 
-![[36_image.png|319]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/36_image.png|319]]
 Le cercle vicieux prix ↑ → salaires ↑ → prix ↑
 
 **Situation contemporaine** :
@@ -973,9 +973,9 @@ Typologie des pays face à la boucle prix-salaire (2016-2021):
 - 🔹 Allemagne : salaires réels ↑ depuis 2017, mais en 2021 l’inflation reprend le dessus → prix dominants.
 - 👉 Dans ces pays, l’inflation est **importée ou conjoncturelle**, pas tirée par les salaires.
 
-![[37_image.png|292]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/37_image.png|292]]
 
-![[38_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/38_image.png]]
 
 **📌 Conclusion – Inflation et boucle prix-salaires**
 
@@ -1004,7 +1004,7 @@ Typologie des pays face à la boucle prix-salaire (2016-2021):
     - Les consommateurs sont prêts à payer (effet d’habitude ou de mode)
 
 
-![[39_image.png|350]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/39_image.png|350]]
 
 État initial avant commencement de la boucle
 
@@ -1037,7 +1037,7 @@ Typologie des pays face à la boucle prix-salaire (2016-2021):
 
 - La plupart des prêts sont conclus à **taux fixe**.
 
-![[40_image.png|339]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/40_image.png|339]]
 
 La plupart des prêts en France sont à taux fixes
 
@@ -1057,10 +1057,10 @@ La plupart des prêts en France sont à taux fixes
 👉 Le partage des gains/pertes entre prêteurs et emprunteurs varie donc selon les systèmes financiers nationaux
 
 
-![[41_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/41_image.png]]
 
 L’inflation augmente de +1% chaque année
-![[42_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/42_image.png]]
 
 L’inflation cumulé augmente de +1% par an
 
@@ -1074,7 +1074,7 @@ L’inflation cumulé augmente de +1% par an
     - Solution : le prêteur aurait dû fixer un taux **plus élevé** (ex. 12,3% au lieu de 10%) pour se protéger.
     - 👉 C’est ce qu’on appelle **le taux d’intérêt nominal = taux réel + inflation anticipée** (formule de Fisher).
 
-![[43_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/43_image.png]]
 
 **(ii) Comportement des prêteurs**
 
@@ -1083,7 +1083,7 @@ L’inflation cumulé augmente de +1% par an
     - Risque difficile à prévoir.
     - Par prudence, les prêteurs exigent encore plus → surprime de risque.
 
-![[44_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/44_image.png]]
 
 
 **(iii) Exemple concret (États)**
@@ -1095,7 +1095,7 @@ L’inflation cumulé augmente de +1% par an
 - 👉 Les prêteurs veulent compenser la perte de pouvoir d’achat **et** le risque d’instabilité.
     
 
-![[45_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/45_image.png]]
 
 
 
@@ -1122,9 +1122,9 @@ L’inflation cumulé augmente de +1% par an
 - L’avantage pour l’emprunteur existe **seulement si les salaires suivent l’inflation**.
 - Si les salaires stagnent (inflation non compensée), l’effet est inversé → remboursement devient plus lourd en termes réels.
 
-![[46_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/46_image.png]]
 
-![[47_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/47_image.png]]
 
 
 Avantage et inconvénient de l'inflation ? mauvais pr épargnant mais bien pour emprunteur:
@@ -1171,7 +1171,7 @@ $\text{Valeur réelle de l’épargne} = \frac{\text{Épargne nominale}}{1 + \te
 - **Taux d’intérêt** : si l’inflation est trop forte, les banques centrales remontent les taux → crédit plus cher → frein sur l’économie.
 - **Risque de spirale prix-salaires** : prix ↑ → salariés demandent salaires ↑ → entreprises augmentent encore les prix → etc.
 
-![[48_image.png|261]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/48_image.png|261]]
 
 Qu’est ce qu’il se passe si l’épargne augment tout le temps mais ne revient pas dans l’économie réelle ? **Épargne accumulée et immobilisée** (argent stocké sans être réinjecté) → réduit la **vitesse de circulation de la monnaie (V)**
 
@@ -1206,17 +1206,17 @@ Notion d’hyper inflation: peur de l'hyper inflation eg 1920 entre 1922 et 1923
 
 Mais pk y’a inflation actuellement alors ? (i) l’énergie prix pétrole & gaz est très élevé on voit nb de puis de pétrole et le prix de pétrole ralentissement du COVID a provoqué une baisse du prix du pétrole à droite et bcp de puis de pétrole ont été fermé on voit que les US sont n1 de producteurs de pétroles ⇒ donc tant que US ouvre pas les puits ben S/D déséquilibrés
 
-![[49_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/49_image.png]]
 
-![[50_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/50_image.png]]
 
 
 ⇒ pays européen premier consomateur de pétrole russe et le gaz aussi à droite
 
-![[51_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/51_image.png]]
 
 
-![[52_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/52_image.png]]
 
 
 
@@ -1228,14 +1228,14 @@ Mais pk y’a inflation actuellement alors ? (i) l’énergie prix pétrole & ga
 On compare inection de la BC on voit des flèches qui monte de fou c’est les injections: début 2020 premier injection sans réaction du pétrole et début 2020 2e injection via shadow banking société de gestion qui vend actif sans risque la fed achète plutot que les banques privés et déborder par les montant donc 100% un pb technique puis corrélation en 2021 car COVID
 
 
-![[53_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/53_image.png]]
 
 
 (ii) puis chaine production la majorité vient d’asie or il ‘ya eu beaucoup de confinements qui restaient en asie genre en chine très présent donc chaine de production ralentit. En covid les gens ont commencé à acheter beaucoup de équipement de maison plutot que les dépenses habituel or les chaines de logistique fonctionnent en flux tendus eg puce électronique (grille pain, PC..) . Puis la nouriture Ukraine 3e plus gros exportateurs mondiales de céréales qui peut plus exporter à cause du conflit et la russie est juste derrière en production de céréales.
 
-![[54_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/54_image.png]]
 
-![[55_image.png]]
+![[images/6-Économie/01_Macroéconomie/03_inflation/55_image.png]]
 
 (iii) facteur climatique: Inde + pakistan 20% de la pop mondiale énorme sécheresse en printemps dernier donc D produit agricole va être plus forte que d’habitude
 
